@@ -15,7 +15,7 @@ let child = null, crashCount = 0, lastStart = 0, shuttingDown = false;
 const log = (...a) => console.log(`[boot ${new Date().toISOString()}]`, ...a);
 const computeBackoff = () => Math.min(opts.maxBackoffMs, opts.baseBackoffMs * 2 ** Math.max(0, crashCount - 1));
 
-const spawnChild = () => {
+const launchChild = () => {
   if (shuttingDown) return;
   lastStart = Date.now();
   child = spawn(opts.command, opts.args, { stdio: "inherit", cwd: process.cwd(), env: process.env });
@@ -29,12 +29,12 @@ const spawnChild = () => {
     if (!shuttingDown) {
       const delay = Math.max(opts.restartDelayMs, computeBackoff());
       log(`restarting in ${delay}ms`);
-      setTimeout(() => { if (!shuttingDown) spawnChild(); }, delay);
+      setTimeout(() => { if (!shuttingDown) launchChild(); }, delay);
     }
   });
 };
 
-const setupSignals = () => {
+const Signals = () => {
   const forward = sig => process.on(sig, () => {
     shuttingDown = true;
     if (child && !child.killed) {
@@ -46,15 +46,15 @@ const setupSignals = () => {
   ["SIGINT", "SIGTERM", "SIGQUIT"].forEach(forward);
 };
 
-const setupGuards = () => {
+const Guards = () => {
   process.on("uncaughtException", err => log("supervisor uncaughtException:", err));
   process.on("unhandledRejection", r => log("supervisor unhandledRejection:", r));
   process.on("disconnect", () => log("supervisor disconnected"));
 };
 
 (() => {
-  setupGuards();
-  setupSignals();
-  spawnChild();
+  Guards();
+  Signals();
+  launchChild();
   if (process.stdin && !process.stdin.readableEnded) process.stdin.resume();
 })();

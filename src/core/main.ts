@@ -1,5 +1,17 @@
-import { AstroBridgeError } from "../client/errors.js";
+import { fetchLatestWaWebVersion, makeWASocket, useMultiFileAuthState } from "../../lib/index.js";
 
-console.log("client running test", process.pid);
+async function startSock() {
+    const { state, saveCreds } = await useMultiFileAuthState("./auth_info");
+    const { version } = await fetchLatestWaWebVersion();
+    const sock = makeWASocket({
+        auth: state,
+        version
+    });
 
-throw new AstroBridgeError("Test error from client")
+    await new Promise((resolve) => sock.ws.on("close", resolve));
+}
+
+startSock().catch(err => {
+    console.error(err);
+    process.exit(1);
+});
