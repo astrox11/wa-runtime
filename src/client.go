@@ -1,6 +1,7 @@
 package main
 
 import (
+	"astrobridge/src/utils"
 	"context"
 	"fmt"
 	"os"
@@ -25,6 +26,12 @@ func eventHandler(evt any) {
 
 func main() {
 	ctx := context.Background()
+	cfg, err := utils.LoadConfig()
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println("Loaded config:", cfg)
 	fmt.Println("Starting Client...")
 
 	dbLog := waLog.Stdout("Database", "DEBUG", true)
@@ -64,11 +71,11 @@ func main() {
 	}
 
 	if !client.IsLoggedIn() {
-		code, err := client.PairPhone(ctx, "2348062795602", true, whatsmeow.PairClientChrome, "Chrome (Linux)")
+		code, err := client.PairPhone(ctx, cfg["NUMBER"], true, whatsmeow.PairClientChrome, "Chrome (Linux)")
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "PairPhone error:", err)
 			client.Disconnect()
-			os.Exit(1)
+			os.Exit(99)
 		}
 		fmt.Println("Connection Code:", code)
 	}
