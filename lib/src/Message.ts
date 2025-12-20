@@ -11,7 +11,6 @@ import type {
   WAMessageContent,
   WAMessageKey,
 } from "baileys";
-import { store } from "../sql";
 import { fileTypeFromBuffer } from "file-type";
 
 export class Message {
@@ -75,7 +74,6 @@ export class Message {
         configurable: true,
       },
     });
-    store.save_wa_message(message);
   }
 
   async reply(text: string) {

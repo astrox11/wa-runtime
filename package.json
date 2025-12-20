@@ -1,39 +1,24 @@
 {
-  "name": "astrobridge",
+  "name": "bridge",
   "module": "index.ts",
   "type": "module",
-  "private": false,
-  "version": "0.0.1",
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
+    "@eslint/js": "^9.39.2",
     "@types/bun": "latest",
-    "eslint": "^9.39.1",
+    "eslint": "^9.39.2",
     "globals": "^16.5.0",
     "jiti": "^2.6.1",
-    "prettier": "3.6.2",
-    "typescript-eslint": "^8.48.0"
+    "prettier": "3.7.4",
+    "typescript-eslint": "^8.50.0"
   },
   "peerDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "latest"
   },
   "scripts": {
     "start": "bun hook.js && bun run ./index.ts"
   },
   "dependencies": {
-    "@google-cloud/translate": "^9.3.0",
-    "@types/ws": "^8.18.1",
-    "baileys": "^7.0.0-rc.9",
-    "undici": "^7.16.0",
-    "ws": "^8.18.3"
-  },
-  "homepage": "https://github.com/astrox11/astrobridge",
-  "author": {
-    "name": "astrox11",
-    "email": "danielpeter0081@gmail.com",
-    "url": "https://github.com/astrox11"
-  },
-  "maintainers": [
-    "astrox11",
-    "danielpeter0081@gmail.com"
-  ]
+    "@realastrox11/bunql": "^0.0.6",
+    "baileys": "https://github.com/WhiskeySockets/Baileys"
+  }
 }

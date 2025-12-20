@@ -1,9 +1,9 @@
 import { readdirSync } from "fs";
 import { join, resolve } from "path";
-import { log } from "../debug";
 import { pathToFileURL } from "url";
-import type { WASocket } from "baileys";
+import { jidNormalizedUser, type WASocket } from "baileys";
 import type { Message } from "./Message";
+import { isSudo, log } from "../";
 
 export class Plugins {
   message: Message;
@@ -21,6 +21,27 @@ export class Plugins {
       const text = this.message.text.replace(/^\s+|\s+$/g, "");
       const cmd = this.find(text);
       const args = text.slice(cmd?.pattern?.length);
+      const owner = [this.client.user.phoneNumber, this.client.user.lid].map(
+        (p) => jidNormalizedUser(p),
+      );
+
+      if (
+        cmd?.isSudo &&
+        !(
+          isSudo(this.message.sender) ||
+          isSudo(this.message.sender_alt) ||
+          owner.includes(this.message.sender)
+        )
+      ) {
+        return;
+      }
+
+      if (cmd?.isGroup && !this.message.isGroup) {
+        return await this.message.reply(
+          "```this command is for groups only!```",
+        );
+      }
+
       if (cmd) {
         try {
           await cmd.exec(this.message, this.client, args);
@@ -119,6 +140,9 @@ export interface CommandProperty {
   category: CommandCategories;
   event?: boolean;
   dontAddToCommandList?: boolean;
+  isGroup?: boolean;
+  isAdmin?: boolean;
+  isSudo?: boolean;
   exec: (msg: Message, sock?: WASocket, args?: string) => Promise<any>;
 }
 

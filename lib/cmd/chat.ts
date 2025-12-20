@@ -12,7 +12,6 @@ export default [
       }
 
       msg.quoted.message[msg.quoted.type].viewOnce = false;
-
       await sock.relayMessage(msg.chat, msg.quoted.message, {
         messageId: generateMessageID(),
       });

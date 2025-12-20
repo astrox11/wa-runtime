@@ -1,27 +1,31 @@
 import fs from "fs";
 import path from "path";
+import { execSync } from "child_process";
 
-function clean() {
+try {
+  execSync("npm run build", {
+    cwd: path.join("node_modules", "baileys"),
+    stdio: "ignore",
+  });
+} catch {
+  /* */
+}
+try {
   const target = path.join(
     "node_modules",
     "libsignal",
     "src",
-    "session_record.js"
+    "session_record.js",
   );
-
-  if (!fs.existsSync(target)) {
-    console.error("Target file not found:", target);
-    return;
-  }
-
   const content = fs.readFileSync(target, "utf8");
-  const lines = content.split("\n");
-
-  const filtered = lines.filter(
-    line => !line.includes('console.info("Closing session:", session)')
+  fs.writeFileSync(
+    target,
+    content
+      .split("\n")
+      .filter(
+        (line) => !line.includes('console.info("Closing session:", session)'),
+      )
+      .join("\n"),
+    "utf8",
   );
-
-  fs.writeFileSync(target, filtered.join("\n"), "utf8");
-}
-
-clean();
+} catch {}
