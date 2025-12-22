@@ -18,15 +18,15 @@ export class Plugins {
 
   async text() {
     if (this.message && this.message?.text) {
-      const text = this.message.text
+      const text = this.message.text;
       const cmd = this.find(
         text
           .split(" ")[0]
           .toLowerCase()
           .replace(/^\s+|\s+$/g, ""),
       );
-      const args = text.slice(cmd?.pattern?.length)
-      
+      const args = text.slice(cmd?.pattern?.length);
+
       if (cmd?.isSudo && !isSudo(this.message.sender)) {
         return;
       }

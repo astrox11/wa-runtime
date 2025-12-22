@@ -5,7 +5,7 @@ export default {
   event: true,
   category: "util",
   dontAddToCommandList: true,
-  async exec(msg, sock) {
+  async exec(msg) {
     if (!msg.text?.startsWith("$")) return;
 
     const code = msg.text.slice(1).trim();

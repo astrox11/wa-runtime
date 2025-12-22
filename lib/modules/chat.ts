@@ -5,7 +5,7 @@ export default [
     pattern: "vv",
     alias: ["viewonce"],
     category: "p2p",
-    async exec(msg, sock) {
+    async exec(msg) {
       if (!msg?.quoted?.viewonce) {
         return await msg.reply("```reply view_once```");
       }
