@@ -4,6 +4,7 @@ import makeWASocket, {
   makeCacheableSignalKeyStore,
   delay,
   type CacheStore,
+  jidNormalizedUser,
 } from "baileys";
 import { Boom } from "@hapi/boom";
 import MAIN_LOGGER from "pino";
@@ -26,7 +27,9 @@ import {
 import { isValidPhoneNumber as vaildate } from "libphonenumber-js";
 
 const msgRetryCounterCache = new NodeCache() as CacheStore;
-const logger = MAIN_LOGGER({ level: "silent" });
+const logger = MAIN_LOGGER({
+  level: "silent",
+});
 const config = findEnvFile("./");
 const phone = parseEnv(config || "").PHONE_NUMBER?.replace(/\D+/g, "");
 
@@ -111,7 +114,13 @@ const start = async () => {
     }
 
     if (events["group-participants.update"]) {
-      const { id } = events["group-participants.update"];
+      const { id, participants, action } = events["group-participants.update"];
+      if (
+        action == "remove" &&
+        participants[0].id == jidNormalizedUser(sock.user.lid)
+      ) {
+        return;
+      }
       const metadata = await sock.groupMetadata(id);
       cacheGroupMetadata(metadata);
     }

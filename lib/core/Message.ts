@@ -164,6 +164,26 @@ export class Message {
     return new Message(this.client, msg!);
   }
 
+  async Block(user: string) {
+    const blocked = await this.client.fetchBlocklist();
+
+    if (!blocked.includes(user)) {
+      await this.client.updateBlockStatus(user, "block");
+      return true;
+    }
+    return null;
+  }
+
+  async Unblock(user: string) {
+    const blocked = await this.client.fetchBlocklist();
+
+    if (blocked.includes(user)) {
+      await this.client.updateBlockStatus(user, "unblock");
+      return true;
+    }
+    return null;
+  }
+
   async forward(
     jid: string,
     msg: WAMessage,
@@ -231,6 +251,7 @@ class Quoted {
   video: boolean;
   audio: boolean;
   sticker: boolean;
+  text: string | undefined;
   client: WASocket;
   media: boolean;
   viewonce: boolean;
@@ -252,6 +273,7 @@ class Quoted {
     this.sticker =
       this.type === "stickerMessage" || this.type === "lottieStickerMessage";
 
+    this.text = extract_text(this.message);
     this.client = client;
     this.media = [this.image, this.video, this.audio, this.sticker].includes(
       true,
