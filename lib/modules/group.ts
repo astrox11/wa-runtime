@@ -1,4 +1,4 @@
-import { Group, type CommandProperty } from "../.";
+import { Group, type CommandProperty } from "..";
 
 export default [
   {

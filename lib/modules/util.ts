@@ -1,4 +1,4 @@
-import { formatRuntime, type CommandProperty } from "../";
+import { formatRuntime, type CommandProperty } from "..";
 
 export default [
   {

@@ -1,4 +1,4 @@
-import type { CommandProperty } from "../";
+import type { CommandProperty } from "..";
 import { inspect } from "util";
 
 export default {
