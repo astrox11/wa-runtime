@@ -14,7 +14,7 @@
     "typescript": "latest"
   },
   "scripts": {
-    "start": "bun hook.ts && bun run ./index.ts",
+    "start": "bun run hook.ts && bun run ./index.ts",
     "lint": "eslint . --ext .ts --fix",
     "format": "prettier --write ."
   },
