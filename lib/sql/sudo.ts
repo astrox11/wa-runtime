@@ -30,3 +30,7 @@ export const removeSudo = (id: string) => {
   }
   return false;
 };
+
+export const getSudos = () => {
+  return Sudo.all();
+};

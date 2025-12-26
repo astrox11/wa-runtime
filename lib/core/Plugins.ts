@@ -138,4 +138,5 @@ type CommandCategories =
   | "status"
   | "util"
   | "games"
-  | "system";
+  | "system"
+  | "settings";
