@@ -260,6 +260,7 @@ class Quoted {
   video: boolean;
   audio: boolean;
   sticker: boolean;
+  sudo: boolean;
   text: string | undefined;
   client: WASocket;
   media: boolean;
@@ -281,6 +282,7 @@ class Quoted {
     this.audio = this.type === "audioMessage";
     this.sticker =
       this.type === "stickerMessage" || this.type === "lottieStickerMessage";
+    this.sudo = isSudo(this.sender);
 
     this.text = extract_text(this.message);
     this.client = client;
