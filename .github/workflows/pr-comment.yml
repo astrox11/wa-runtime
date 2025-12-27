@@ -1,0 +1,60 @@
+name: PR Comment
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    
+    steps:
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const author = context.payload.pull_request.user.login;
+            const prNumber = context.payload.pull_request.number;
+            
+            const comment = `**Title:** Thank you for your Pull Request
+
+Hi @${author}, thanks for contributing to **AstroBridge**. Your pull request has been received and will be reviewed by the maintainers.
+
+A few reminders while your PR is under review:
+
+* Make sure your changes follow the [Contributing Guidelines](CONTRIBUTING.md).
+* Ensure code is secure, tested, and free of any backdoors or malicious behavior.
+* Provide sufficient context, logs, or screenshots if your PR fixes a bug.
+* If this PR involves a security concern, do **not** disclose it publicly. Report it through [SECURITY.md](SECURITY.md).
+
+We aim to review PRs promptly, but maintainers may request changes or clarifications before merging.
+
+Thank you for helping make **AstroBridge** safe, stable, and reliable.
+
+> Note: PRs that do not meet project standards may be closed without merging. Following the guidelines helps your contribution get merged faster.
+
+# How to Test
+
+**Linux/macOS:**
+\`\`\`bash
+git clone https://github.com/${{ github.repository }}.git && cd wa-bridge && git fetch origin pull/${prNumber}/head:pr-${prNumber} && git checkout pr-${prNumber} && bun i && bun start
+\`\`\`
+
+**Windows (PowerShell):**
+\`\`\`powershell
+git clone https://github.com/${{ github.repository }}.git; cd wa-bridge; git fetch origin pull/${prNumber}/head:pr-${prNumber}; git checkout pr-${prNumber}; bun i; bun start
+\`\`\`
+
+**Windows (CMD):**
+\`\`\`cmd
+git clone https://github.com/${{ github.repository }}.git && cd wa-bridge && git fetch origin pull/${prNumber}/head:pr-${prNumber} && git checkout pr-${prNumber} && bun i && bun start
+\`\`\``;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: comment
+            });
