@@ -95,7 +95,7 @@ export default [
       }
 
       const urlRegex =
-        /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/i;
+        /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})[/\w .-]*\/?$/i;
 
       const match = args.trim().match(urlRegex);
       if (!match) {
