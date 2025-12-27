@@ -22,4 +22,4 @@ jobs:
         run: bun install
       
       - name: Run ESLint
-        run: bunx eslint . --ext .ts
+        run: bunx eslint .
