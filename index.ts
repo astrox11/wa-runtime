@@ -25,6 +25,7 @@ import {
   isSessionCommand,
   getSessionArgs,
   handleSessionCommand,
+  SESSION_COMMANDS,
 } from "./cli";
 import { rm } from "fs/promises";
 import { Boom } from "@hapi/boom";
@@ -178,7 +179,7 @@ const main = async () => {
     }
 
     // For create command, keep process running to complete pairing
-    if (sessionArgs[0]?.toLowerCase() === "create" && result.success) {
+    if (sessionArgs[0]?.toLowerCase() === SESSION_COMMANDS.CREATE && result.success) {
       log.info("Waiting for pairing to complete...");
       // Process stays alive for pairing
       return;

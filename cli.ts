@@ -7,6 +7,13 @@ export interface CommandResult {
   data?: any;
 }
 
+/** Session subcommand constants */
+export const SESSION_COMMANDS = {
+  CREATE: "create",
+  DELETE: "delete",
+  LIST: "list",
+} as const;
+
 /**
  * Parse and execute session commands
  * Usage:
@@ -20,7 +27,7 @@ export async function handleSessionCommand(
   const subcommand = args[0]?.toLowerCase();
 
   switch (subcommand) {
-    case "create": {
+    case SESSION_COMMANDS.CREATE: {
       const phoneNumber = args[1];
       if (!phoneNumber) {
         return {
@@ -50,7 +57,7 @@ export async function handleSessionCommand(
       }
     }
 
-    case "delete": {
+    case SESSION_COMMANDS.DELETE: {
       const idOrPhone = args[1];
       if (!idOrPhone) {
         return {
@@ -75,7 +82,7 @@ export async function handleSessionCommand(
       }
     }
 
-    case "list": {
+    case SESSION_COMMANDS.LIST: {
       const sessions = sessionManager.list();
 
       if (sessions.length === 0) {
