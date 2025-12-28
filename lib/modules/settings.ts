@@ -16,7 +16,7 @@ export default [
     alias: ["addsudo"],
     isSudo: true,
     category: "settings",
-    async exec(msg, _, args) {
+    async exec(msg, sock, args) {
       args = msg?.quoted?.sender || args?.replace(/[^a-zA-Z0-9]/g, "");
       if (!msg.isGroup && !args) args = msg.chat;
       const user = parseId(msg?.quoted?.sender ?? args);
@@ -28,10 +28,10 @@ export default [
         return await msg.reply("```User is already Sudo.```");
 
       addSudo(pn, lid);
-      return await msg.send(
-        `\`\`\`@${pn.split("@")[0]} is now sudo user.\`\`\``,
-        { mentions: [pn, lid] },
-      );
+      return await sock.sendMessage(msg.chat, {
+        text: `\`\`\`@${pn.split("@")[0]} is now sudo user.\`\`\``,
+        mentions: [pn, lid],
+      });
     },
   },
   {
@@ -39,7 +39,7 @@ export default [
     alias: ["removesudo"],
     isSudo: true,
     category: "settings",
-    async exec(msg, _, args) {
+    async exec(msg, sock, args) {
       args = msg?.quoted?.sender || args?.replace(/[^a-zA-Z0-9]/g, "");
       if (!msg.isGroup && !args) args = msg.chat;
       const user = parseId(msg?.quoted?.sender ?? args);
@@ -51,10 +51,10 @@ export default [
         return await msg.reply("```User is not a Sudo user.```");
 
       removeSudo(pn);
-      return await msg.send(
-        `\`\`\`@${pn.split("@")[0]} is no longer sudo user.\`\`\``,
-        { mentions: [pn, lid] },
-      );
+      return await sock.sendMessage(msg.chat, {
+        text: `\`\`\`@${pn.split("@")[0]} is no longer a sudo user.\`\`\``,
+        mentions: [pn, lid],
+      });
     },
   },
   {
@@ -62,7 +62,7 @@ export default [
     alias: ["listsudo", "sudos"],
     isSudo: true,
     category: "settings",
-    async exec(msg) {
+    async exec(msg, sock) {
       const sudos = getSudos(); // Assuming this returns an array of { pn, lid }
       if (!sudos.length) return await msg.reply("```No sudo users found.```");
 
@@ -74,7 +74,7 @@ export default [
         mentions.push(sudo.pn, sudo.lid);
       });
 
-      return await msg.send(text.trim(), { mentions });
+      return await sock.sendMessage(msg.chat, { text: text.trim(), mentions });
     },
   },
   {

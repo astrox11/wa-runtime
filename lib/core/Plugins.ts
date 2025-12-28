@@ -141,4 +141,5 @@ type CommandCategories =
   | "util"
   | "games"
   | "system"
-  | "settings";
+  | "settings"
+  | "media";

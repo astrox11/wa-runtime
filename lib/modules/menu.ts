@@ -58,22 +58,29 @@ export default [
         reply += `╰─────────────\n`;
       }
 
-      const m = await msg.send(
-        {
-          text: reply.trim(),
+      const m = await msg.send_interactive({
+        header: {
           title: "╭━━━〔 αѕтяσχ вσт 〕━━━",
+        },
+        body: {
+          text: reply.trim(),
+        },
+        footer: {
+          text: "αѕтяσχ 2026",
+        },
+        nativeFlowMessage: {
           buttons: [
             {
-              buttonId: "0",
-              type: 1,
-              buttonText: {
-                displayText: "αѕтяσχ ѕυρρσят",
-              },
+              name: "cta_url",
+              buttonParamsJson: JSON.stringify({
+                display_text: "αѕтяσχ ѕυρρσят",
+                url: "mailto:astrodevwork@gmail.com",
+                merchant_url: "mailto:astrodevwork@gmail.com",
+              }),
             },
           ],
         },
-        { type: "buttons" },
-      );
+      });
 
       Reply.set(msg.chat, m.key.id);
     },
@@ -97,21 +104,18 @@ export default [
         reply += `alias : ${cmd.alias && cmd.alias.length > 0 ? cmd.alias.join(", ") : "-"}\n\n`;
       }
 
-      await msg.send(
-        {
-          text: reply.trim(),
-          buttons: [
-            {
-              buttonId: "0",
-              type: 1,
-              buttonText: {
-                displayText: "αѕтяσχ ѕυρρσят",
-              },
+      await msg.send_btn({
+        text: reply.trim(),
+        buttons: [
+          {
+            buttonId: "0",
+            type: 1,
+            buttonText: {
+              displayText: "αѕтяσχ ѕυρρσят",
             },
-          ],
-        },
-        { type: "buttons" },
-      );
+          },
+        ],
+      });
     },
   },
   {

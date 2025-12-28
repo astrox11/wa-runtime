@@ -30,7 +30,7 @@ export default [
       const jid = parseId(args);
       if (!jid) return await msg.reply("Invalid number!");
       await msg.reply("ᴅᴏɴᴇ");
-      return await msg.Block(jid);
+      return await msg.block(jid);
     },
   },
   {
@@ -47,7 +47,7 @@ export default [
         );
       const jid = parseId(args);
       if (!jid) return await msg.reply("Invalid number!");
-      await msg.Unblock(jid);
+      await msg.unblock(jid);
       return await msg.reply("ᴅᴏɴᴇ");
     },
   },

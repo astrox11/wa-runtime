@@ -2,10 +2,9 @@ import {
   getDevice,
   isJidGroup,
   getContentType,
-  downloadMediaMessage,
   normalizeMessageContent,
   jidNormalizedUser,
-  generateMessageID,
+  generateMessageIDV2,
 } from "baileys";
 import type {
   proto,
@@ -13,46 +12,19 @@ import type {
   WAMessage,
   WAMessageKey,
   WAMessageContent,
-  AnyMediaMessageContent,
 } from "baileys";
-import { fileTypeFromBuffer } from "file-type";
-import { getAlternateId, getMode, isSudo } from "../sql";
-
-type SendType =
-  | "video"
-  | "audio"
-  | "document"
-  | "sticker"
-  | "buttons"
-  | "text"
-  | "image";
-
-type ButtonParams = {
-  text: string;
-  title?: string;
-  buttons: proto.IMessage["buttonsMessage"]["buttons"];
-};
-
-type SendOptions = {
-  type?: SendType;
-  caption?: string;
-  mimetype?: string;
-  filename?: string;
-  gifPlayback?: boolean;
-  mentions?: string[];
-};
-
-type MediaMessage = {
-  text?: string;
-  video?: Buffer | { url: string };
-  audio?: Buffer | { url: string };
-  document?: Buffer | { url: string };
-  sticker?: Buffer | { url: string };
-  caption?: string;
-  mimetype?: string;
-  fileName?: string;
-  gifPlayback?: boolean;
-};
+import { Quoted } from "./Quoted";
+import {
+  isSudo,
+  getMode,
+  getAlternateId,
+  additionalNodes,
+  ExtractTextFromMessage,
+  isUrl,
+  isPath,
+  writeExifWebp,
+} from "..";
+import { readFile } from "fs/promises";
 
 export class Message {
   client: WASocket;
@@ -61,19 +33,19 @@ export class Message {
   message: WAMessageContent;
   isGroup: boolean;
   sender: string;
-  sender_alt: string | undefined;
-  type: string | undefined;
+  pushName: string;
   image: boolean;
   video: boolean;
   audio: boolean;
+  sudo: boolean;
   sticker: boolean;
   device: "web" | "unknown" | "android" | "ios" | "desktop";
   mode: "private" | "public";
-  sudo: boolean;
-  contextInfo: proto.IContextInfo | undefined;
   quoted: Quoted | undefined;
   text: string | undefined;
-  pushName: string;
+  type: string | undefined;
+  sender_alt: string | undefined;
+  contextInfo: proto.IContextInfo | undefined;
 
   constructor(client: WASocket, message: WAMessage) {
     this.client = client;
@@ -109,7 +81,7 @@ export class Message {
         ? new Quoted(this.contextInfo, client)
         : undefined;
 
-    this.text = this.message ? extract_text(this.message) : undefined;
+    this.text = this.message ? ExtractTextFromMessage(this.message) : undefined;
 
     Object.defineProperties(this, {
       contextInfo: {
@@ -126,6 +98,68 @@ export class Message {
       },
     });
   }
+
+  async send_sticker(
+    sticker: Buffer | URL | string,
+    { author, packname }: { author?: string; packname?: string },
+  ) {
+    let data: any;
+
+    if (Buffer.isBuffer(sticker)) {
+      data = sticker;
+    } else if (sticker instanceof URL) {
+      const res = await fetch(sticker);
+      data = Buffer.from(await res.arrayBuffer());
+    } else if (typeof sticker === "string") {
+      if (isPath(sticker)) {
+        data = await readFile(sticker);
+      } else if (isUrl(sticker)) {
+        const res = await fetch(sticker);
+        data = Buffer.from(await res.arrayBuffer());
+      } else {
+        throw new TypeError("Invalid sticker input");
+      }
+    } else {
+      throw new TypeError("Unsupported sticker type");
+    }
+
+    data = await writeExifWebp(data, { author, packname });
+    await this.client.sendMessage(this.chat, {
+      sticker: { url: data },
+    });
+  }
+
+  async send_btn(message: proto.IMessage["buttonsMessage"]) {
+    const m = await this.client.relayMessage(
+      this.chat,
+      {
+        documentWithCaptionMessage: { message: { ...message } },
+      },
+      {
+        messageId: generateMessageIDV2(this.client.user.id),
+        additionalNodes,
+      },
+    );
+    return new Message(this.client, { key: { id: m } });
+  }
+
+  async send_interactive(message: proto.IMessage["interactiveMessage"]) {
+    const m = await this.client.relayMessage(
+      this.chat,
+      {
+        documentWithCaptionMessage: {
+          message: { interactiveMessage: { ...message } },
+        },
+      },
+      {
+        messageId: generateMessageIDV2(this.client.user.id),
+        additionalNodes,
+      },
+    );
+    return new Message(this.client, { key: { id: m } });
+  }
+
+  async sendFile(sticker: Buffer | URL | string) {}
 
   async reply(text: string) {
     const msg = await this.client.sendMessage(
@@ -154,116 +188,7 @@ export class Message {
     }
   }
 
-  async send(
-    content: string | Buffer | ButtonParams,
-    options: SendOptions = {},
-  ) {
-    if (options.type === "buttons") {
-      const payload = content as ButtonParams;
-      const msg = await this.client.relayMessage(
-        this.chat,
-        {
-          documentWithCaptionMessage: {
-            message: {
-              buttonsMessage: {
-                headerType: 2,
-                text: payload.title ? payload.title : "αѕтяσχ вσт",
-                contentText: payload.text,
-                footerText: "αѕтяσχ 2026",
-                buttons: payload.buttons,
-              },
-            },
-          },
-        },
-        {
-          messageId: generateMessageID(),
-          additionalNodes: [
-            {
-              tag: "biz",
-              attrs: {},
-              content: [
-                {
-                  tag: "interactive",
-                  attrs: {
-                    type: "native_flow",
-                    v: "1",
-                  },
-                  content: [
-                    {
-                      tag: "native_flow",
-                      attrs: {
-                        v: "9",
-                        name: "mixed",
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      );
-      return new Message(this.client, { key: { id: msg } });
-    }
-
-    const isBuffer = Buffer.isBuffer(content);
-    const isUrl =
-      typeof content === "string" && /^\s*https?:\/\/\S+/i.test(content);
-    const isText = typeof content === "string" && !isUrl;
-
-    if (options.type === "text" || (isText && !options.type)) {
-      const msg = await this.client.sendMessage(
-        this.chat,
-        { text: String(content) },
-        { quoted: this },
-      );
-      return new Message(this.client, msg!);
-    }
-
-    let mediaType: Exclude<SendType, "text" | "buttons">;
-    let detectedMimetype = options.mimetype;
-
-    if (options.type) {
-      mediaType = options.type;
-    } else if (isBuffer) {
-      const fileType = await fileTypeFromBuffer(content);
-      if (fileType) {
-        detectedMimetype ??= fileType.mime;
-        mediaType = this.mimetypeToMediaType(fileType.mime);
-      } else {
-        mediaType = "document";
-        detectedMimetype ??= "application/octet-stream";
-      }
-    } else {
-      const detection = this.detectFromUrl(content as string, options.mimetype);
-      mediaType = detection.type;
-      detectedMimetype ??= detection.mimetype;
-    }
-
-    const mediaContent = isUrl
-      ? { url: content as string }
-      : (content as Buffer);
-
-    const messageData: MediaMessage = {
-      [mediaType]: mediaContent,
-      caption: options.caption,
-      mimetype: detectedMimetype,
-      fileName: mediaType === "document" ? options.filename : undefined,
-      gifPlayback: mediaType === "video" ? options.gifPlayback : undefined,
-    };
-
-    const msg = await this.client.sendMessage(
-      this.chat,
-      messageData as unknown as AnyMediaMessageContent,
-      {
-        quoted: this,
-      },
-    );
-
-    return new Message(this.client, msg!);
-  }
-
-  async Block(user: string) {
+  async block(user: string) {
     const blocked = await this.client.fetchBlocklist();
 
     if (!blocked.includes(user)) {
@@ -273,7 +198,7 @@ export class Message {
     return null;
   }
 
-  async Unblock(user: string) {
+  async unblock(user: string) {
     const blocked = await this.client.fetchBlocklist();
 
     if (blocked.includes(user)) {
@@ -300,113 +225,4 @@ export class Message {
       { quoted: this },
     );
   }
-
-  private mimetypeToMediaType(
-    mimetype: string,
-  ): Exclude<SendType, "text" | "buttons"> {
-    if (mimetype.startsWith("image/")) return "image";
-    if (mimetype.startsWith("video/")) return "video";
-    if (mimetype.startsWith("audio/")) return "audio";
-    return "document";
-  }
-
-  private detectFromUrl(
-    url: string,
-    mimetype?: string,
-  ): { type: Exclude<SendType, "text" | "buttons">; mimetype?: string } {
-    if (mimetype) {
-      return { type: this.mimetypeToMediaType(mimetype), mimetype };
-    }
-
-    const ext = url.split("?")[0].split(".").pop()?.toLowerCase();
-    const extMap: Record<string, { type: string; mimetype: string }> = {
-      jpg: { type: "image", mimetype: "image/jpeg" },
-      jpeg: { type: "image", mimetype: "image/jpeg" },
-      png: { type: "image", mimetype: "image/png" },
-      gif: { type: "image", mimetype: "image/gif" },
-      webp: { type: "image", mimetype: "image/webp" },
-      mp4: { type: "video", mimetype: "video/mp4" },
-      webm: { type: "video", mimetype: "video/webm" },
-      mkv: { type: "video", mimetype: "video/x-matroska" },
-      mp3: { type: "audio", mimetype: "audio/mpeg" },
-      ogg: { type: "audio", mimetype: "audio/ogg" },
-      wav: { type: "audio", mimetype: "audio/wav" },
-      m4a: { type: "audio", mimetype: "audio/mp4" },
-      pdf: { type: "document", mimetype: "application/pdf" },
-    };
-
-    return (
-      extMap[ext!] || {
-        type: "document",
-        mimetype: "application/octet-stream",
-      }
-    );
-  }
-}
-
-class Quoted {
-  key: WAMessageKey;
-  sender: string;
-  sender_alt: string;
-  message: WAMessageContent;
-  type: string | undefined;
-  image: boolean;
-  video: boolean;
-  audio: boolean;
-  sticker: boolean;
-  sudo: boolean;
-  text: string | undefined;
-  client: WASocket;
-  media: boolean;
-  viewonce: boolean;
-
-  constructor(quoted: proto.IContextInfo, client: WASocket) {
-    this.key = {
-      remoteJid: quoted.remoteJid,
-      id: quoted.stanzaId,
-      participant: quoted.participant,
-      participantAlt: getAlternateId(quoted.participant),
-    };
-    this.sender = quoted.participant!;
-    this.sender_alt = this.key.participantAlt;
-    this.message = normalizeMessageContent(quoted.quotedMessage!);
-    this.type = getContentType(this.message);
-    this.image = this.type === "imageMessage";
-    this.video = this.type === "videoMessage";
-    this.audio = this.type === "audioMessage";
-    this.sticker =
-      this.type === "stickerMessage" || this.type === "lottieStickerMessage";
-    this.sudo = isSudo(this.sender);
-
-    this.text = extract_text(this.message);
-    this.client = client;
-    this.media = [this.image, this.video, this.audio, this.sticker].includes(
-      true,
-    );
-    this.viewonce = this.media && this.message?.[this.type!]?.viewOnce === true;
-
-    Object.defineProperty(this, "client", { value: client, enumerable: false });
-  }
-  async download() {
-    return await downloadMediaMessage(this, "buffer", {});
-  }
-}
-
-function extract_text(message: WAMessageContent): string | undefined {
-  if (message?.extendedTextMessage?.text)
-    return message.extendedTextMessage.text;
-  if (message?.conversation) return message.conversation;
-  if (message?.imageMessage?.caption) return message.imageMessage.caption;
-  if (message?.videoMessage?.caption) return message.videoMessage.caption;
-  if (message?.documentMessage?.caption) return message.documentMessage.caption;
-  if (message?.buttonsMessage?.contentText)
-    return message.buttonsMessage.contentText;
-  if (message?.templateMessage?.hydratedTemplate?.hydratedContentText)
-    return message.templateMessage.hydratedTemplate.hydratedContentText;
-  if (message?.listMessage?.description) return message.listMessage.description;
-  if (message?.protocolMessage?.editedMessage) {
-    const text = extract_text(message.protocolMessage.editedMessage);
-    if (text) return text;
-  }
-  return undefined;
 }

@@ -11,10 +11,7 @@ export default {
 
     const code = msg.text.slice(1).trim();
 
-    if (!code) {
-      await msg.reply("No code provided");
-      return;
-    }
+    if (!code) return await msg.reply("No code provided");
 
     try {
       const asyncEval = async () => {
@@ -28,9 +25,9 @@ export default {
 
       await msg.reply(`\`\`\`js\n${output}\n\`\`\``);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
+      const e = error instanceof Error ? error.message : String(error);
 
-      await msg.reply(`\`\`\`Error:\n${errorMsg}\n\`\`\``);
+      await msg.reply(`\`\`\`Error:\n${e}\n\`\`\``);
     }
   },
 } satisfies CommandProperty;
