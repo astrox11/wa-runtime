@@ -367,7 +367,7 @@ class SessionManager {
    * Get active session count
    */
   getActiveCount(): number {
-    return Array.from(this.sessions.values()).filter(
+    return [...this.sessions.values()].filter(
       (s) => s.status === "connected",
     ).length;
   }

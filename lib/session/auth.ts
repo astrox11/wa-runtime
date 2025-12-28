@@ -128,14 +128,14 @@ function handleLidMapping(key: string, value: string) {
   const isPn = !key.includes("reverse");
 
   if (isPn) {
-    key = key.split("-")[2];
-    value = value.replace(/^"|"$/g, "");
+    const pnKey = key.split("-")[2];
+    const cleanedValue = value.replace(/^"|"$/g, "");
 
-    addContact(key, value);
+    addContact(pnKey, cleanedValue);
   } else {
-    key = key.split("-")[2].split("_")[0];
-    value = value.replace(/^"|"$/g, "");
+    const lidKey = key.split("-")[2].split("_")[0];
+    const cleanedValue = value.replace(/^"|"$/g, "");
 
-    addContact(value, key);
+    addContact(cleanedValue, lidKey);
   }
 }
