@@ -75,53 +75,45 @@ export function parseId(input: string): string | null;
 export function parseId(input: string[]): string[];
 export function parseId(input: string | string[]): string | string[] | null {
   if (Array.isArray(input)) {
-    const results = input.map((id) => parseId(id)).filter(Boolean) as string[];
-    return results;
+    return input
+      .map((v) => parseId(v))
+      .filter((v): v is string => typeof v === "string");
   }
 
-  if (!input || typeof input !== "string") return null;
+  if (!input) return null;
 
-  const cleanInput = input.includes(":") ? input.split(":")[1] : input;
+  const clean = input.includes(":") ? input.split(":")[1] : input;
+  const [rawBase, suffix] = clean.split("@");
+  const base = rawBase.replace(/^@+/, "");
 
-  const parts = cleanInput.split("@");
-  const baseId = parts[0];
-  const suffix = parts[1];
+  if (suffix === "s.whatsapp.net") return `${base}@s.whatsapp.net`;
+  if (suffix === "lid") return `${base}@lid`;
 
-  const sanitizedBaseId = baseId.replace(/^@+/, "");
+  const resolve = (pn?: string, lid?: string) => {
+    if (pn === base || pn?.startsWith(base)) return `${pn}@s.whatsapp.net`;
+    if (lid === base || lid?.startsWith(base)) return `${lid}@lid`;
+    return null;
+  };
 
-  if (suffix === "s.whatsapp.net") {
-    return `${sanitizedBaseId}@s.whatsapp.net`;
-  }
-  if (suffix === "lid") {
-    return `${sanitizedBaseId}@lid`;
-  }
-
-  let contact = Contact.query()
-    .where("pn", "=", sanitizedBaseId)
-    .orWhere("lid", "=", sanitizedBaseId)
+  const contact = Contact.query()
+    .where("pn", "=", base)
+    .orWhere("lid", "=", base)
     .first();
 
   if (contact) {
-    return contact.pn === sanitizedBaseId
-      ? `${sanitizedBaseId}@s.whatsapp.net`
-      : `${sanitizedBaseId}@lid`;
+    const resolved = resolve(contact.pn, contact.lid);
+    if (resolved) return resolved;
   }
 
-  const fuzzyMatches = Contact.query()
-    .where("pn", "LIKE", `${sanitizedBaseId}%`)
-    .orWhere("lid", "LIKE", `${sanitizedBaseId}%`)
+  const fuzzy = Contact.query()
+    .where("pn", "LIKE", `${base}%`)
+    .orWhere("lid", "LIKE", `${base}%`)
     .limit(1)
-    .get();
+    .get()[0];
 
-  if (fuzzyMatches.length > 0) {
-    contact = fuzzyMatches[0];
-
-    if (contact.pn?.startsWith(sanitizedBaseId)) {
-      return `${contact.pn}@s.whatsapp.net`;
-    }
-    if (contact.lid?.startsWith(sanitizedBaseId)) {
-      return `${contact.lid}@lid`;
-    }
+  if (fuzzy) {
+    const resolved = resolve(fuzzy.pn, fuzzy.lid);
+    if (resolved) return resolved;
   }
 
   return null;

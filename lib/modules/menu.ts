@@ -6,6 +6,7 @@ import {
   type CommandProperty,
 } from "..";
 import os from "os";
+import config from "../../config";
 
 const Reply = new Map<string, string>();
 
@@ -41,6 +42,7 @@ export default [
 ┃│ Mode : ${msg.mode}
 ┃│ Platform : ${os.platform()}
 ┃│ Ram : ${formatp(os.totalmem() - os.freemem())} / ${formatp(os.totalmem())}
+┃│ Version: ${config.VERSION}
 ┃╰──────────────
 ╰━━━━━━━━━━━━━━━
 \`\`\``;

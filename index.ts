@@ -1,62 +1,57 @@
 import makeWASocket, {
+  delay,
+  jidNormalizedUser,
   DisconnectReason,
   fetchLatestBaileysVersion,
   makeCacheableSignalKeyStore,
-  delay,
   type CacheStore,
-  jidNormalizedUser,
 } from "baileys";
 import {
   log,
-  parseEnv,
-  getMessage,
-  findEnvFile,
+  addSudo,
   Message,
   Plugins,
-  useBunqlAuth,
-  cachedGroupMetadata,
-  saveMessage,
+  getMessage,
   addContact,
+  saveMessage,
+  useBunqlAuth,
   cacheGroupMetadata,
+  cachedGroupMetadata,
   syncGroupMetadata,
-  addSudo,
+  verify_user_phone_number,
 } from "./lib";
 import { rm } from "fs/promises";
 import { Boom } from "@hapi/boom";
 import MAIN_LOGGER from "pino";
 import NodeCache from "@cacheable/node-cache";
-import { isValidPhoneNumber as vaildate } from "libphonenumber-js";
 
 const msgRetryCounterCache = new NodeCache() as CacheStore;
 const logger = MAIN_LOGGER({
   level: "silent",
 });
-const config = findEnvFile("./");
-const phone = parseEnv(config || "").PHONE_NUMBER?.replace(/\D+/g, "");
+
+const phone = verify_user_phone_number();
 
 const start = async () => {
-  if (!vaildate(`+${phone}`)) {
-    return log.error("Invalid PHONE_NUMBER in .env file");
-  }
   const { state, saveCreds } = await useBunqlAuth();
   const { version } = await fetchLatestBaileysVersion();
 
   const sock = makeWASocket({
-    version,
-    logger,
     auth: {
       creds: state.creds,
       keys: makeCacheableSignalKeyStore(state.keys, logger),
     },
-    msgRetryCounterCache,
+    logger,
+    version,
     getMessage,
     cachedGroupMetadata,
+    msgRetryCounterCache,
     generateHighQualityLinkPreview: true,
   });
 
   if (!sock.authState.creds.registered) {
     await delay(10000);
-    const code = await sock.requestPairingCode(phone);
+    const code = await sock.requestPairingCode(phone?.replace(/\D+/g, ""));
     log.info(`Code: ${code.slice(0, 4)}-${code.slice(4)}`);
   }
 
@@ -100,7 +95,7 @@ const start = async () => {
       await Promise.all(
         messages.map(async (message) => {
           try {
-            log.debug(message)
+            log.debug(message);
             saveMessage(message.key, message);
             const msg = new Message(sock, message);
             if (msg?.message?.protocolMessage?.type === 0) {
@@ -111,7 +106,7 @@ const start = async () => {
             await cmd.load("./lib/modules");
             await Promise.allSettled([cmd.text(), cmd.eventUser(type)]);
           } catch (error) {
-            log.error(`Message ${message.key?.id} failed:`, error);
+            log.error(`failed to handle_message:`, error);
             // Continue processing other messages
           }
         }),

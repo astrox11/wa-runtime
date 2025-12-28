@@ -1,81 +1,30 @@
 import type { WAMessageContent } from "baileys";
-import { existsSync, readdirSync, readFileSync, statSync } from "fs";
-import { join, resolve } from "path";
+import config from "../../config";
+import { parseEnv } from "util";
+import { readFileSync } from "fs";
+import { isValidPhoneNumber } from "libphonenumber-js";
+import { log } from "./logger";
 
-export function parseEnv(file: string): Record<string, string> {
-  const result: Record<string, string> = {};
-  let fullPath = resolve(file);
+export function verify_user_phone_number(): string | undefined {
+  const initial = config?.PHONE_NUMBER
+    ? `+${config.PHONE_NUMBER.replace(/\D+/g, "")}`
+    : undefined;
 
-  if (!existsSync(fullPath)) return result;
+  const fallbackEnv = parseEnv(readFileSync(".env").toString())?.PHONE_NUMBER;
+  const fallback = fallbackEnv
+    ? `+${fallbackEnv.replace(/\D+/g, "")}`
+    : undefined;
 
-  try {
-    if (statSync(fullPath).isDirectory()) {
-      const candidate = join(fullPath, ".env");
-      if (!existsSync(candidate) || !statSync(candidate).isFile()) {
-        return result;
-      }
-      fullPath = candidate;
-    }
-  } catch {
-    return result;
+  if (initial && isValidPhoneNumber(initial)) {
+    return initial;
   }
 
-  if (!existsSync(fullPath) || !statSync(fullPath).isFile()) return result;
-
-  const content = readFileSync(fullPath, "utf8");
-  const lines = content.split(/\r\n|\n|\r/);
-
-  for (const raw of lines) {
-    let line = raw.trim();
-    if (!line || line.startsWith("#")) continue;
-
-    if (line.startsWith("export ")) line = line.replace(/^export\s+/, "");
-
-    const eqIndex = line.indexOf("=");
-    if (eqIndex === -1) continue;
-
-    const key = line.slice(0, eqIndex).trim();
-    let val = line.slice(eqIndex + 1).trim();
-
-    if (
-      (val.startsWith('"') && val.endsWith('"')) ||
-      (val.startsWith("'") && val.endsWith("'"))
-    ) {
-      val = val.slice(1, -1);
-      val = val
-        .replace(/\\n/g, "\n")
-        .replace(/\\r/g, "\r")
-        .replace(/\\t/g, "\t")
-        .replace(/\\"/g, '"')
-        .replace(/\\'/g, "'")
-        .replace(/\\\\/g, "\\");
-    } else {
-      const hashIndex = val.indexOf("#");
-      if (hashIndex !== -1) {
-        val = val.slice(0, hashIndex).trim();
-      }
-    }
-
-    if (key) result[key] = val;
+  if (fallback && isValidPhoneNumber(fallback)) {
+    return fallback;
   }
 
-  return result;
-}
-
-export function findEnvFile(dir: string): string | null {
-  try {
-    const files: string[] = readdirSync(dir);
-    for (const f of files) {
-      if (f.startsWith(".env")) {
-        const p = resolve(dir, f);
-        if (existsSync(p)) return p;
-      }
-    }
-  } catch {
-    // ignore errors (e.g. missing directory / permissions)
-  }
-
-  return null;
+  log.error("Invalid PHONE_NUMBER variable.");
+  return process.exit(1);
 }
 
 export function formatRuntime(uptimeSeconds: number) {
@@ -231,10 +180,10 @@ export function isPath(input: string | URL): boolean {
 
     // Must look like a path
     return (
-      input.startsWith("/") ||          // absolute POSIX path
+      input.startsWith("/") || // absolute POSIX path
       input.startsWith("./") ||
       input.startsWith("../") ||
-      !input.includes(":")              // relative path without scheme or drive
+      !input.includes(":") // relative path without scheme or drive
     );
   } catch {
     return false;

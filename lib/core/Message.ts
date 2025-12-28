@@ -159,8 +159,6 @@ export class Message {
     return new Message(this.client, { key: { id: m } });
   }
 
-  async sendFile(sticker: Buffer | URL | string) {}
-
   async reply(text: string) {
     const msg = await this.client.sendMessage(
       this.chat,
