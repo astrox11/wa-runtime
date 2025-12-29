@@ -1,22 +1,12 @@
 /**
  * Shared Types and Interfaces for the Middleware Layer
  *
- * This module defines domain-friendly structures used across the middleware
- * to normalize and standardize WhatsApp events and messages. These types
- * provide a consistent interface between the WhatsApp integration (Baileys)
- * and downstream application services.
- *
- * Data Flow:
- * 1. Raw WhatsApp events/messages come from Baileys socket
- * 2. Middleware normalizes them into these domain types
- * 3. Downstream services consume the normalized structures
+ * Provides domain-friendly structures for normalizing WhatsApp events.
  */
 
 import type { WASocket, WAMessage, proto } from "baileys";
 
-/**
- * Represents the type of incoming WhatsApp event that the middleware can process.
- */
+/** Type of incoming WhatsApp event */
 export type EventType =
   | "message"
   | "connection"
@@ -26,9 +16,7 @@ export type EventType =
   | "lid_mapping"
   | "message_delete";
 
-/**
- * Message content classification for routing and handling.
- */
+/** Message content classification */
 export type MessageClassification =
   | "text"
   | "command"
@@ -38,159 +26,110 @@ export type MessageClassification =
   | "protocol"
   | "unknown";
 
-/**
- * Represents the type of media content in a message.
- */
+/** Media content type */
 export type MediaType = "image" | "video" | "audio" | "document" | "sticker";
 
-/**
- * Command metadata extracted from a message for routing.
- */
+/** Command metadata extracted from a message */
 export interface CommandInfo {
-  /** The command name (without prefix) */
   name: string;
-  /** Arguments passed to the command */
   args: string;
-  /** Original text that triggered the command */
   rawText: string;
 }
 
-/**
- * Normalized message structure for internal use.
- * Abstracts away Baileys-specific details into a domain-friendly format.
- */
+/** Normalized message structure */
 export interface NormalizedMessage {
-  /** Unique message identifier */
   id: string;
-  /** Chat/conversation JID */
+  sessionId: string;
   chatId: string;
-  /** Sender JID */
   senderId: string;
-  /** Alternative sender ID (if available) */
   senderAltId?: string;
-  /** Sender's display name */
   senderName: string;
-  /** Whether this message is from a group chat */
   isGroup: boolean;
-  /** Whether the sender is the bot itself */
   isFromSelf: boolean;
-  /** Whether the sender has sudo privileges */
   isSudo: boolean;
-  /** Message classification for routing */
   classification: MessageClassification;
-  /** Extracted text content (if any) */
   text?: string;
-  /** Command information (if message is a command) */
   command?: CommandInfo;
-  /** Media type (if message contains media) */
   mediaType?: MediaType;
-  /** Whether the message has quoted content */
   hasQuoted: boolean;
-  /** Timestamp of the message */
   timestamp: number;
-  /** Device type that sent the message */
   device: "web" | "unknown" | "android" | "ios" | "desktop";
-  /** Original raw message for cases where full access is needed */
   raw: WAMessage;
 }
 
-/**
- * Normalized event structure for internal processing.
- * Provides a unified interface for all WhatsApp events.
- */
+/** Normalized event structure */
 export interface NormalizedEvent<T = unknown> {
-  /** Type of the event */
   type: EventType;
-  /** Event payload data */
+  sessionId: string;
   payload: T;
-  /** Timestamp when the event was received */
   receivedAt: number;
 }
 
-/**
- * Connection update event payload.
- */
+/** Connection update event payload */
 export interface ConnectionPayload {
-  /** Connection state */
   state: "open" | "close" | "connecting";
-  /** Whether the user was logged out (on close) */
   isLoggedOut?: boolean;
 }
 
-/**
- * Group participants update payload.
- */
+/** Group participants update payload */
 export interface GroupParticipantsPayload {
-  /** Group JID */
   groupId: string;
-  /** Affected participant JIDs */
   participants: string[];
-  /** Action that occurred */
   action: "add" | "remove" | "promote" | "demote";
 }
 
-/**
- * Group metadata update payload.
- */
+/** Group metadata update payload */
 export interface GroupUpdatePayload {
-  /** Group JID */
   groupId: string;
-  /** Updated group metadata (partial) */
   metadata: Record<string, unknown>;
 }
 
-/**
- * LID mapping update payload.
- */
+/** LID mapping update payload */
 export interface LidMappingPayload {
-  /** Phone number */
   phoneNumber: string;
-  /** LID identifier */
   lid: string;
 }
 
-/**
- * Message delete event payload.
- */
+/** Message delete event payload */
 export interface MessageDeletePayload {
-  /** Keys of deleted messages */
   keys: proto.IMessageKey[];
 }
 
-/**
- * Result of command dispatch operation.
- */
+/** Result of command dispatch operation */
 export interface DispatchResult {
-  /** Whether a handler was found and executed */
   handled: boolean;
-  /** Name of the handler that processed the command (if any) */
   handlerName?: string;
-  /** Error that occurred during dispatch (if any) */
   error?: Error;
 }
 
-/**
- * Handler function signature for processing normalized messages.
- */
+/** Handler function for processing normalized messages */
 export type MessageHandler = (
   message: NormalizedMessage,
   client: WASocket,
 ) => Promise<void>;
 
-/**
- * Handler function signature for processing events.
- */
+/** Handler function for processing events */
 export type EventHandler<T = unknown> = (
   event: NormalizedEvent<T>,
   client: WASocket,
 ) => Promise<void>;
 
-/**
- * Options for middleware processing.
- */
+/** Options for middleware processing */
 export interface MiddlewareOptions {
-  /** Skip processing for self-sent messages */
+  sessionId?: string;
   ignoreSelf?: boolean;
-  /** Enable debug logging */
   debug?: boolean;
+}
+
+/** Events emitted by the middleware */
+export interface MiddlewareEvents {
+  message: (message: NormalizedMessage, client: WASocket) => void;
+  command: (message: NormalizedMessage, client: WASocket) => void;
+  connection: (event: NormalizedEvent<ConnectionPayload>) => void;
+  group_participants: (event: NormalizedEvent<GroupParticipantsPayload>) => void;
+  group_update: (event: NormalizedEvent<GroupUpdatePayload>) => void;
+  lid_mapping: (event: NormalizedEvent<LidMappingPayload>) => void;
+  message_delete: (event: NormalizedEvent<MessageDeletePayload>) => void;
+  credentials: (event: NormalizedEvent<void>) => void;
+  error: (error: Error, context: string) => void;
 }
