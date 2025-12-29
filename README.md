@@ -10,10 +10,10 @@ Before running AstroBridge, make sure the following tools are installed on your 
 
 Required dependencies:
 
-* [**Node.js**](https://nodejs.org/)
-* [**Bun.js**](https://bun.com/)
-* [**ffmpeg**](https://www.ffmpeg.org/)
-* [**libwebp**](https://developers.google.com/speed/webp/download)
+- [**Node.js**](https://nodejs.org/)
+- [**Bun.js**](https://bun.com/)
+- [**ffmpeg**](https://www.ffmpeg.org/)
+- [**libwebp**](https://developers.google.com/speed/webp/download)
 
 These are required for media handling and WhatsApp message processing. If any of these are missing, things will break quietly and then loudly.
 
@@ -21,14 +21,14 @@ These are required for media handling and WhatsApp message processing. If any of
 
 AstroBridge currently supports:
 
-* [Windows](https://www.microsoft.com/en-us/windows?r=1)
-* [Linux](https://www.fedoraproject.org/)
-* [macOS](https://www.apple.com/os/macos/)
-* [Docker](https://www.docker.com/)
+- [Windows](https://www.microsoft.com/en-us/windows?r=1)
+- [Linux](https://www.fedoraproject.org/)
+- [macOS](https://www.apple.com/os/macos/)
+- [Docker](https://www.docker.com/)
 
 Not supported:
 
-* [Android](https://www.android.com/)
+- [Android](https://www.android.com/)
   Bun does not support Android for now.
 
 ## How to Use
@@ -36,9 +36,11 @@ Not supported:
 ### Using AstroBridge as a CLI Tool
 
 1. Clone the repository.
- ```
+
+```
 git clone https://github.com/astrox11/wa-bridge
-```  
+```
+
 2. From the root of the project, install dependencies:
 
 ```
@@ -73,9 +75,9 @@ PHONE_NUMBER=2348012345678
 
 Important rules for the phone number:
 
-* Do **not** include the `+` symbol
-* Include your country code
-* No spaces or separators
+- Do **not** include the `+` symbol
+- Include your country code
+- No spaces or separators
 
 Correct example:
 
@@ -102,9 +104,9 @@ To see a real-world example of this, check out the merged middleware pull reques
 
 That PR includes inline comments demonstrating:
 
-* How to register middleware
-* How to intercept and extend message handling
-* How to expose AstroBridge logic to frontend services
+- How to register middleware
+- How to intercept and extend message handling
+- How to expose AstroBridge logic to frontend services
 
 This approach allows AstroBridge to act as a backend bridge rather than just a CLI-driven bot.
 
