@@ -160,8 +160,14 @@ export default [
         );
       }
 
-      const result = await sessionManager.delete(args.trim());
+      const trimmedArgs = args.trim();
+      if (!trimmedArgs) {
+        return await msg.reply(
+          "```Usage: deletesession <session_id | phone_number>```",
+        );
+      }
 
+      const result = await sessionManager.delete(trimmedArgs);
       if (result.success) {
         return await msg.reply("```✓ Session deleted successfully```");
       } else {
