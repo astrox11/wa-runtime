@@ -6,12 +6,12 @@ The middleware layer provides an abstraction between WhatsApp (Baileys) and the 
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                 WhatsApp Integration (Baileys)               │
+│                 WhatsApp Integration (Baileys)              │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                    MIDDLEWARE LAYER                          │
+│                    MIDDLEWARE LAYER                         │
 │  ┌─────────────────┐  ┌──────────────┐  ┌───────────────┐   │
 │  │ Message Handler │→ │  Dispatcher  │→ │ EventEmitter  │   │
 │  │  (Normalize)    │  │   (Route)    │  │   (Emit)      │   │
@@ -20,8 +20,8 @@ The middleware layer provides an abstraction between WhatsApp (Baileys) and the 
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                   Application Services                       │
-│            (Commands, Persistence, Business Logic)           │
+│                   Application Services                      │
+│            (Commands, Persistence, Business Logic)          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
