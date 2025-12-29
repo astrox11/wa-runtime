@@ -95,13 +95,12 @@ class SessionManager {
     // Check if session already exists
     if (sessionExists(sanitized) || this.sessions.has(sanitized)) {
       return {
-        success: false,
-        error: "Session already exists for this number",
-      };
-    }
-
     const sessionId = this.generateSessionId(sanitized);
 
+    // Check if session already exists
+    if (sessionExists(sessionId) || this.sessions.has(sessionId)) {
+      return { success: false, error: "Session already exists for this number" };
+    }
     // Create session record in database
     createSession(sessionId, sanitized);
 
