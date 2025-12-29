@@ -9,6 +9,7 @@ import {
 } from "baileys";
 import { Mutex } from "async-mutex";
 import { addContact } from "../sql/contact";
+import { log } from "../util/logger";
 
 const mutex = new Mutex();
 
@@ -24,8 +25,11 @@ try {
   bunql.exec(
     "CREATE UNIQUE INDEX IF NOT EXISTS idx_session_auth_composite ON session_auth(session_id, name)",
   );
-} catch {
-  // Index may already exist
+} catch (error) {
+  log.error(
+    "Failed to create index 'idx_session_auth_composite' on 'session_auth':",
+    error,
+  );
 }
 
 export const useSessionAuth = async (sessionId: string) => {

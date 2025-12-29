@@ -57,10 +57,16 @@ export const getAllSessions = (): SessionRecord[] => {
   }));
 };
 
+const VALID_STATUSES: SessionRecord["status"][] = ["active", "inactive", "pairing"];
+
 export const updateSessionStatus = (
   id: string,
   status: SessionRecord["status"],
 ): boolean => {
+  // Validate status parameter
+  if (!VALID_STATUSES.includes(status)) {
+    return false;
+  }
   const exists = Session.find({ id }).run()[0];
   if (exists) {
     Session.update({ status }).where("id", "=", id).run();

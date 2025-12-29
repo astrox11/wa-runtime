@@ -344,11 +344,17 @@ class SessionManager {
   async restoreAllSessions(): Promise<void> {
     const sessions = getAllSessions();
 
-    for (const sessionRecord of sessions) {
-      if (sessionRecord.status === "inactive") {
-        continue;
-      }
+    // Filter out inactive sessions and prepare active sessions for concurrent restoration
+    const sessionsToRestore = sessions.filter(
+      (sessionRecord) => sessionRecord.status !== "inactive",
+    );
 
+    if (sessionsToRestore.length === 0) {
+      return;
+    }
+
+    // Restore sessions concurrently for faster startup
+    const restorationPromises = sessionsToRestore.map(async (sessionRecord) => {
       log.info(`Restoring session ${sessionRecord.id}...`);
 
       const activeSession: ActiveSession = {
@@ -367,7 +373,9 @@ class SessionManager {
         log.error(`Failed to restore session ${sessionRecord.id}:`, error);
         activeSession.status = "disconnected";
       }
-    }
+    });
+
+    await Promise.allSettled(restorationPromises);
   }
 
   /**

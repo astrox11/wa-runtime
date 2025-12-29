@@ -124,7 +124,8 @@ export default [
     isSudo: true,
     category: "system",
     async exec(msg, _, args) {
-      if (!args) {
+      const phoneNumber = args?.trim();
+      if (!phoneNumber) {
         return await msg.reply(
           "```Usage: createsession <phone_number>\nPhone number should include country code without + symbol\nExample: createsession 14155551234```",
         );
@@ -132,7 +133,7 @@ export default [
 
       await msg.reply("```Creating session, please wait...```");
 
-      const result = await sessionManager.create(args.trim());
+      const result = await sessionManager.create(phoneNumber);
 
       if (result.success) {
         const formattedCode = result.code
