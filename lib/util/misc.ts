@@ -1,4 +1,9 @@
 import type { WAMessageContent } from "baileys";
+import { writeFileSync } from "fs";
+import { tmpdir } from "os";
+import { join } from "path";
+import { randomBytes } from "crypto";
+import { execSync } from "child_process";
 
 export function formatRuntime(uptimeSeconds: number) {
   let seconds = Math.floor(uptimeSeconds);
@@ -160,5 +165,88 @@ export function isPath(input: string | URL): boolean {
     );
   } catch {
     return false;
+  }
+}
+
+export function bufferToPath(buffer: Buffer, extension = "tmp"): string {
+  const fileName = `tmp-${randomBytes(6).toString("hex")}.${extension}`;
+  const filePath = join(tmpdir(), fileName);
+  writeFileSync(filePath, buffer);
+  return filePath;
+}
+
+export function ToMp3(inputPath: string): string {
+  const outputPath = join(
+    tmpdir(),
+    `audio-${randomBytes(6).toString("hex")}.mp3`,
+  );
+  try {
+    execSync(
+      `ffmpeg -y -i "${inputPath}" -vn -ar 44100 -ac 2 -b:a 192k "${outputPath}"`,
+      {
+        stdio: "ignore",
+      },
+    );
+    return outputPath;
+  } catch (err: any) {
+    throw new Error(err.stderr?.toString() || err.message);
+  }
+}
+
+export function ToMp4(inputPath: string): string {
+  const outputPath = join(
+    tmpdir(),
+    `video-${randomBytes(6).toString("hex")}.mp4`,
+  );
+  try {
+    execSync(
+      `ffmpeg -y -i "${inputPath}" -c:v libx264 -crf 23 -preset medium -c:a aac -b:a 128k -movflags +faststart "${outputPath}"`,
+      {
+        stdio: "ignore",
+      },
+    );
+    return outputPath;
+  } catch (err: any) {
+    throw new Error(err.stderr?.toString() || err.message);
+  }
+}
+
+export function TrimVideo(
+  inputPath: string,
+  start: string,
+  end: string,
+): string {
+  const outputPath = join(
+    tmpdir(),
+    `trimmed-${randomBytes(6).toString("hex")}.mp4`,
+  );
+  try {
+    execSync(
+      `ffmpeg -y -ss ${start} -i "${inputPath}" -to ${end} -c copy "${outputPath}"`,
+      {
+        stdio: "ignore",
+      },
+    );
+    return outputPath;
+  } catch (err: any) {
+    throw new Error(err.stderr?.toString() || err.message);
+  }
+}
+
+export function ToPTT(inputPath: string): string {
+  const outputPath = join(
+    tmpdir(),
+    `ptt-${randomBytes(6).toString("hex")}.ogg`,
+  );
+  try {
+    execSync(
+      `ffmpeg -y -i "${inputPath}" -avoid_negative_ts make_zero -ac 1 "${outputPath}"`,
+      {
+        stdio: "ignore",
+      },
+    );
+    return outputPath;
+  } catch (err: any) {
+    throw new Error(err.stderr?.toString() || err.message);
   }
 }

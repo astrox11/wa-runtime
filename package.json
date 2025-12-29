@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@realastrox11/bunql": "^1.2.0",
+    "audio-decode": "^2.2.3",
     "baileys": "https://github.com/WhiskeySockets/Baileys",
     "libphonenumber-js": "^1.12.33",
     "pino-pretty": "^13.1.3"
