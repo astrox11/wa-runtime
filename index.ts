@@ -20,6 +20,8 @@ import {
   handleSessionCommand,
   SESSION_COMMANDS,
 } from "./cli";
+import { isValidPhoneNumber } from "libphonenumber-js";
+import config from "./config";
 
 /**
  * Main entry point
@@ -53,8 +55,51 @@ const main = async () => {
 
   if (sessions.length === 0) {
     log.info("No sessions found in database.");
-    log.info("Use 'session create <phone_number>' to create a new session.");
-    log.info("Example: bun start session create 14155551234");
+    
+    // Check if PHONE_NUMBER is configured
+    if (config.PHONE_NUMBER) {
+      // Format phone number with + for validation
+      const phoneToValidate = config.PHONE_NUMBER.startsWith("+") 
+        ? config.PHONE_NUMBER 
+        : `+${config.PHONE_NUMBER}`;
+      
+      if (isValidPhoneNumber(phoneToValidate)) {
+        log.info(`Valid phone number found in config: ${config.PHONE_NUMBER}`);
+        log.info("Creating session automatically...");
+        
+        try {
+          const result = await sessionManager.create(config.PHONE_NUMBER);
+          
+          if (result.success) {
+            const formattedCode = result.code
+              ? `${result.code.slice(0, 4)}-${result.code.slice(4)}`
+              : "N/A";
+            log.info(`Session created successfully!`);
+            log.info(`Session ID: ${result.id}`);
+            log.info(`Pairing Code: ${formattedCode}`);
+            log.info(`\nEnter this code in WhatsApp > Linked Devices > Link a Device`);
+            log.info("Waiting for pairing to complete...");
+            return;
+          } else {
+            log.error(`Failed to create session: ${result.error}`);
+            log.info("Use 'session create <phone_number>' to create a new session manually.");
+            log.info("Example: bun start session create 14155551234");
+          }
+        } catch (error) {
+          log.error("Error creating session:", error);
+          log.info("Use 'session create <phone_number>' to create a new session manually.");
+          log.info("Example: bun start session create 14155551234");
+        }
+      } else {
+        log.error(`Invalid phone number in config: ${config.PHONE_NUMBER}`);
+        log.info("Please ensure PHONE_NUMBER includes country code without + symbol.");
+        log.info("Use 'session create <phone_number>' to create a new session.");
+        log.info("Example: bun start session create 14155551234");
+      }
+    } else {
+      log.info("Use 'session create <phone_number>' to create a new session.");
+      log.info("Example: bun start session create 14155551234");
+    }
     return;
   }
 
