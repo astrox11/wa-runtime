@@ -3,6 +3,7 @@ export * from "./alive";
 export * from "./antidelete";
 export * from "./auth";
 export * from "./ban";
+export * from "./bgm";
 export * from "./contact";
 export * from "./filter";
 export * from "./group";

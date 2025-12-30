@@ -22,6 +22,7 @@ const ALLOWED_TABLE_SUFFIXES = [
   "afk",
   "group_event",
   "sticker",
+  "bgm",
 ] as const;
 
 type TableSuffix = (typeof ALLOWED_TABLE_SUFFIXES)[number];
@@ -419,6 +420,29 @@ export function createUserStickerTable(phoneNumber: string): string {
 }
 
 /**
+ * Create bgm table for a specific user session
+ */
+export function createUserBgmTable(phoneNumber: string): string {
+  const tableName = getUserTableName(phoneNumber, "bgm");
+  
+  if (!createdTables.has(tableName)) {
+    try {
+      bunql.exec(`
+        CREATE TABLE IF NOT EXISTS "${tableName}" (
+          trigger TEXT PRIMARY KEY,
+          audioData TEXT
+        )
+      `);
+      createdTables.add(tableName);
+    } catch (error) {
+      log.error(`Failed to create table ${tableName}:`, error);
+    }
+  }
+  
+  return tableName;
+}
+
+/**
  * Initialize all tables for a user session
  */
 export function initializeUserTables(phoneNumber: string): void {
@@ -437,6 +461,7 @@ export function initializeUserTables(phoneNumber: string): void {
   createUserAfkTable(phoneNumber);
   createUserGroupEventTable(phoneNumber);
   createUserStickerTable(phoneNumber);
+  createUserBgmTable(phoneNumber);
   log.debug(`Initialized tables for user ${phoneNumber}`);
 }
 
