@@ -31,7 +31,12 @@ export default [
           setAfk(msg.sessionId, false);
           return await msg.reply("```AFK mode disabled```");
         } else {
-          setAfk(msg.sessionId, true, "I'm currently AFK", timestamp);
+          setAfk(
+            msg.sessionId,
+            true,
+            "I'm currently AFK\n\n> This is an automated message, no need to reply again.",
+            timestamp,
+          );
           return await msg.reply("```AFK mode enabled```");
         }
       } else {
@@ -64,7 +69,9 @@ export default [
 
       if (afkStatus && afkStatus.status === 1) {
         const botJid = jidNormalizedUser(sock.user.id).split("@")[0];
-        const afkMessage = afkStatus.message || "I'm currently AFK";
+        const afkMessage =
+          afkStatus.message ||
+          "I'm currently AFK\n\n> This is an automated message, no need to reply again.";
         const timeAway = afkStatus.time
           ? formatDuration(Date.now() - afkStatus.time)
           : "";
