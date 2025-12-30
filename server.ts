@@ -52,7 +52,11 @@ const MIME_TYPES: Record<string, string> = {
  * Get MIME type from file extension
  */
 function getMimeType(filePath: string): string {
-  const ext = filePath.substring(filePath.lastIndexOf(".")).toLowerCase();
+  const dotIndex = filePath.lastIndexOf(".");
+  if (dotIndex === -1) {
+    return "application/octet-stream";
+  }
+  const ext = filePath.substring(dotIndex).toLowerCase();
   return MIME_TYPES[ext] || "application/octet-stream";
 }
 
