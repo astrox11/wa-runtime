@@ -3,7 +3,7 @@
  *
  * Exposes HTTP APIs for session management, authentication, messaging, and statistics.
  * Supports multiple isolated sessions consumable by external clients.
- * Serves static frontend files from the same host.
+ * Proxies page requests to Astro SSR server.
  * Includes WebSocket support for real-time stats streaming and bidirectional communication.
  */
 
@@ -68,7 +68,8 @@ function broadcastStats() {
 const BROADCAST_INTERVAL_MS = 500;
 setInterval(broadcastStats, BROADCAST_INTERVAL_MS);
 
-const STATIC_DIR = join(import.meta.dir, "astro-web-runtime", "dist");
+const STATIC_DIR = join(import.meta.dir, "astro-web-runtime", "dist", "client");
+const ASTRO_SERVER_URL = "http://localhost:4321";
 
 /**
  * MIME types for static files
@@ -147,6 +148,31 @@ async function serveStaticFile(filePath: string): Promise<Response | null> {
 }
 
 /**
+ * Proxy request to Astro SSR server
+ */
+async function proxyToAstro(req: Request): Promise<Response> {
+  try {
+    const url = new URL(req.url);
+    const astroUrl = new URL(url.pathname + url.search, ASTRO_SERVER_URL);
+    
+    const proxyReq = new Request(astroUrl.toString(), {
+      method: req.method,
+      headers: req.headers,
+      body: req.body,
+    });
+    
+    const response = await fetch(proxyReq);
+    return response;
+  } catch (error) {
+    log.error("Failed to proxy to Astro server:", error);
+    return new Response("Frontend server unavailable. Make sure to run both servers in production mode: bun run start:all", { 
+      status: 503,
+      headers: { "Content-Type": "text/plain" },
+    });
+  }
+}
+
+/**
  * Main server handler
  */
 const server = Bun.serve({
@@ -182,35 +208,21 @@ const server = Bun.serve({
       return createResponse(result);
     }
 
-    // Serve static files
-    // Try exact path first
-    let filePath = join(STATIC_DIR, path);
-    let response = await serveStaticFile(filePath);
-    if (response) return response;
-
-    // Try with .html extension
-    if (!path.endsWith(".html") && !path.includes(".")) {
-      response = await serveStaticFile(filePath + ".html");
+    // Serve static files from client folder (_astro assets)
+    if (path.startsWith("/_astro/")) {
+      const clientPath = join(STATIC_DIR, path);
+      const response = await serveStaticFile(clientPath);
       if (response) return response;
     }
 
-    // Try index.html for directory paths
-    if (path.endsWith("/")) {
-      response = await serveStaticFile(join(filePath, "index.html"));
+    // Serve favicon
+    if (path === "/favicon.svg") {
+      const response = await serveStaticFile(join(STATIC_DIR, "favicon.svg"));
       if (response) return response;
     }
 
-    // Try 404 page first
-    const notFoundPage = await serveStaticFile(join(STATIC_DIR, "404.html"));
-    if (notFoundPage) {
-      return new Response(notFoundPage.body, {
-        status: 404,
-        headers: notFoundPage.headers,
-      });
-    }
-
-    // Fallback to plain 404
-    return new Response("Not Found", { status: 404 });
+    // Proxy all other requests to Astro SSR server for dynamic page rendering
+    return proxyToAstro(req);
   },
   websocket: {
     open(ws) {

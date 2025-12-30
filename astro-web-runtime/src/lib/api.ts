@@ -138,7 +138,18 @@ class WsApiClient {
 
     this.connectionPromise = new Promise((resolve, reject) => {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}/ws/stats`;
+      
+      // In production, when served by Astro SSR server (port 4321), connect to backend (port 3000)
+      // In development, Vite proxies /ws to backend so use same host
+      let wsHost = window.location.host;
+      
+      // If we're on the Astro SSR port (4321), redirect WebSocket to backend port (3000)
+      // This handles the case where users access the Astro server directly
+      if (window.location.port === '4321') {
+        wsHost = `${window.location.hostname}:3000`;
+      }
+      
+      const wsUrl = `${protocol}//${wsHost}/ws/stats`;
       console.log('[wa-runtime] Connecting to WebSocket:', wsUrl);
       this.ws = new WebSocket(wsUrl);
 

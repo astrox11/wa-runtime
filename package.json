@@ -18,12 +18,11 @@
     "typescript": "latest"
   },
   "scripts": {
-    "start": "bun run ./index.ts",
+    "start": "concurrently --kill-others \"bun run server\" \"bun run web\"",
     "server": "bun run ./server.ts",
     "web": "cd astro-web-runtime && node ./dist/server/entry.mjs",
     "web:dev": "cd astro-web-runtime && npx astro dev",
     "web:build": "cd astro-web-runtime && npx astro build",
-    "start:all": "concurrently --kill-others \"bun run server\" \"bun run web\"",
     "dev": "concurrently --kill-others \"bun run server\" \"bun run web:dev\"",
     "postinstall": "bun run hook.ts",
     "lint": "eslint . --ext .ts --fix",

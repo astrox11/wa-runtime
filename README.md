@@ -5,27 +5,33 @@ wa-runtime is a full WhatsApp runtime that provides a backend service for sessio
 ## Features
 
 - **Multi-session support**: Manage multiple isolated WhatsApp sessions
+- **WebSocket API**: Real-time bidirectional communication
 - **REST API**: Backend service exposing APIs for external clients
 - **Web Dashboard**: Built with Astro.js for session management and monitoring
 - **WhatsApp Pairing**: Uses pairing code authentication (no QR code scanning)
 - **Real-time Statistics**: Track messages, uptime, and session health
+- **Network Monitoring**: Automatic pause/resume on network issues
 - **Extensible Middleware**: Add custom behavior and business logic
 
 ## Architecture
 
 ```
 wa-runtime/
-├── Backend Service (Bun.js)
-│   ├── Session Management API
-│   ├── Authentication API
-│   ├── Statistics API
+├── Backend Server (Bun.js) - Port 3000
+│   ├── HTTP API
+│   ├── WebSocket API (/ws/stats)
+│   ├── Proxy to Astro SSR
+│   ├── Session Management
+│   ├── Authentication
 │   └── WhatsApp Core (Baileys)
 │
-└── Frontend (astro-web-runtime)
+└── Frontend (Astro.js SSR) - Port 4321
     ├── Session Creation
     ├── Pairing Flow
     └── Dashboard
 ```
+
+**Unified Access**: Users access port 3000 which handles API requests directly and proxies page requests to the Astro SSR server.
 
 ## Requirements
 
@@ -36,62 +42,43 @@ wa-runtime/
 
 ## Installation
 
-### 1. Clone the repository
-
 ```bash
+# Clone the repository
 git clone https://github.com/astrox11/wa-runtime
 cd wa-runtime
-```
 
-### 2. Install backend dependencies
-
-```bash
+# Install all dependencies (backend + frontend)
 bun install
-```
-
-### 3. Install frontend dependencies
-
-```bash
-cd astro-web-runtime
-npm install
-cd ..
 ```
 
 ## Running the Application
 
-### Option 1: Run backend and frontend separately (Development)
+### Production Mode
 
-**Terminal 1 - Backend:**
+For production, start both the backend and Astro SSR server:
+
 ```bash
-bun run server
+bun run start
 ```
 
-**Terminal 2 - Frontend:**
+Access the dashboard at `http://localhost:3000`
+
+### Development Mode
+
+For development with hot-reload on frontend changes:
+
 ```bash
-cd astro-web-runtime
-npm run dev
+bun run dev
 ```
 
-The backend will be available at `http://localhost:3000` and the frontend at `http://localhost:4321`.
+Access the dashboard at `http://localhost:4321` during development (with Vite proxy).
 
-### Option 2: Run using CLI (Session management only)
+### Building the Frontend
 
-```bash
-# Create a session
-bun start session create 14155551234
-
-# List all sessions
-bun start session list
-
-# Delete a session
-bun start session delete <session_id>
-```
-
-### Option 3: Docker
+If you need to rebuild the frontend after changes:
 
 ```bash
-docker build -t wa-runtime .
-docker run -p 3000:3000 -p 4321:4321 wa-runtime
+bun run web:build
 ```
 
 ## Configuration
@@ -115,7 +102,42 @@ API_PORT=3000
 
 ## API Reference
 
-### Sessions
+### WebSocket API
+
+Connect to `/ws/stats` for real-time bidirectional communication:
+
+```javascript
+const ws = new WebSocket('ws://localhost:3000/ws/stats');
+
+// Receive stats broadcasts
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  if (data.type === 'stats') {
+    console.log('Sessions:', data.data.sessions);
+    console.log('Network:', data.data.network);
+  }
+};
+
+// Send requests
+ws.send(JSON.stringify({
+  action: 'createSession',
+  requestId: 'req_1',
+  params: { phoneNumber: '14155551234' }
+}));
+```
+
+**WebSocket Actions:**
+- `getSessions` - List all sessions
+- `createSession` - Create a new session
+- `deleteSession` - Delete a session
+- `getAuthStatus` - Get authentication status
+- `getStats` - Get overall statistics
+- `getSessionStats` - Get session statistics
+- `getMessages` - Get session messages
+- `getConfig` - Get runtime configuration
+- `getNetworkState` - Get network health state
+
+### REST API
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -123,25 +145,12 @@ API_PORT=3000
 | POST | `/api/sessions` | Create a new session |
 | GET | `/api/sessions/:id` | Get session details |
 | DELETE | `/api/sessions/:id` | Delete a session |
-
-### Authentication
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
 | GET | `/api/auth/status/:sessionId` | Get authentication status |
-
-### Statistics
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
 | GET | `/api/stats` | Get overall runtime statistics |
 | GET | `/api/stats/:sessionId` | Get session-specific statistics |
-
-### Configuration
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
 | GET | `/api/config` | Get runtime configuration |
+| GET | `/api/network` | Get network state |
+| GET | `/api/messages/:sessionId` | Get session messages |
 
 ### Example: Create a Session
 
@@ -169,8 +178,9 @@ The web dashboard provides a visual interface for managing sessions:
 
 ### Home Page
 - Create new sessions by entering phone number and bot name
-- View existing sessions with status indicators
-- Quick access to dashboard or pairing flow
+- View existing sessions with real-time status
+- Quick stats: total sessions, active sessions, messages
+- Network health indicator
 
 ### Pairing Page
 - Displays the 8-digit pairing code
@@ -181,7 +191,27 @@ The web dashboard provides a visual interface for managing sessions:
 - Session statistics (messages, uptime, health)
 - Activity graphs showing messages per hour
 - Runtime statistics (total sessions, server uptime)
-- Session management actions (refresh, disconnect)
+- Session management actions
+
+## CLI Usage
+
+```bash
+# Create a session
+bun start session create 14155551234
+
+# List all sessions
+bun start session list
+
+# Delete a session
+bun start session delete <session_id>
+```
+
+## Docker
+
+```bash
+docker build -t wa-runtime .
+docker run -p 3000:3000 wa-runtime
+```
 
 ## Supported Platforms
 
@@ -193,59 +223,9 @@ The web dashboard provides a visual interface for managing sessions:
 **Not supported:**
 - Android (Bun.js limitation)
 
-## Middleware Extension
-
-wa-runtime can be extended using the middleware layer:
-
-```typescript
-import { MiddlewareService, createRegistry } from './middleware';
-
-const middleware = new MiddlewareService({
-  sessionId: 'my-session',
-  debug: true,
-});
-
-middleware.on('message', (message, client) => {
-  console.log('Received:', message.text);
-});
-
-middleware.on('command', (message, client) => {
-  console.log('Command:', message.command?.name);
-});
-```
-
-## Project Structure
-
-```
-wa-runtime/
-├── index.ts          # CLI entry point
-├── server.ts         # Backend HTTP server
-├── api.ts            # API route handlers
-├── config.ts         # Configuration
-├── lib/              # Core library
-│   ├── core/         # Message, Group, Community handlers
-│   ├── session/      # Session management
-│   ├── sql/          # Database operations
-│   └── util/         # Utilities
-├── middleware/       # Middleware layer
-└── astro-web-runtime/  # Frontend dashboard
-    ├── src/
-    │   ├── layouts/  # Astro layouts
-    │   ├── pages/    # Page components
-    │   ├── lib/      # API client
-    │   └── components/
-    └── public/       # Static assets
-```
-
 ## Contributing
 
 Contributions are welcome! wa-runtime is evolving and community input directly influences its direction.
-
-Areas for contribution:
-- Bug fixes
-- Documentation improvements
-- New features
-- Middleware extensions
 
 ## License
 
