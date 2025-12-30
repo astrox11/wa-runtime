@@ -1,34 +1,69 @@
 import type { CommandProperty } from "..";
-import { saveBgm } from "../sql";
+import { saveBgm, deleteBgm, getAllBgms } from "../sql";
 
-export default {
-  pattern: "bgm",
-  category: "media",
-  async exec(msg, _, args) {
-    if (!msg?.quoted?.audio) {
-      return await msg.reply("```Reply to an audio message```");
-    }
+export default [
+  {
+    pattern: "bgm",
+    category: "media",
+    async exec(msg, _, args) {
+      if (!msg?.quoted?.audio) {
+        return await msg.reply("```Reply to an audio message```");
+      }
 
-    if (!args) {
-      return await msg.reply("```Usage: bgm <trigger>```");
-    }
+      if (!args) {
+        return await msg.reply("```Usage: bgm <trigger>```");
+      }
 
-    try {
-      // Download the quoted audio
-      const audioBuffer = await msg.quoted.download();
-      
-      // Convert buffer to base64 for storage
-      // Note: Base64 encoding adds ~33% storage overhead but simplifies handling
-      // For production with many BGMs, consider storing files on disk instead
-      const audioData = audioBuffer.toString("base64");
-
-      // Save trigger and audio data to BGM table
-      saveBgm(msg.sessionId, args.trim(), audioData);
-
-      await msg.reply(`\`\`\`BGM saved with trigger: ${args.trim()}\`\`\``);
-    } catch (error) {
-      const e = error instanceof Error ? error.message : String(error);
-      await msg.reply(`\`\`\`Error: ${e}\n\`\`\``);
-    }
+      try {
+        const audioBuffer = await msg.quoted.download();
+        const audioData = audioBuffer.toString("base64");
+        saveBgm(msg.sessionId, args.trim(), audioData);
+        await msg.reply(`\`\`\`BGM saved with trigger: ${args.trim()}\`\`\``);
+      } catch (error) {
+        const e = error instanceof Error ? error.message : String(error);
+        await msg.reply(`\`\`\`Error: ${e}\n\`\`\``);
+      }
+    },
   },
-} satisfies CommandProperty;
+  {
+    pattern: "delbgm",
+    category: "media",
+    async exec(msg, _, args) {
+      if (!args) {
+        return await msg.reply("```Usage: delbgm <trigger>```");
+      }
+
+      try {
+        deleteBgm(msg.sessionId, args.trim());
+        await msg.reply(`\`\`\`BGM deleted: ${args.trim()}\`\`\``);
+      } catch (error) {
+        const e = error instanceof Error ? error.message : String(error);
+        await msg.reply(`\`\`\`Error: ${e}\n\`\`\``);
+      }
+    },
+  },
+  {
+    pattern: "getbgm",
+    category: "media",
+    async exec(msg) {
+      try {
+        const bgms = getAllBgms(msg.sessionId);
+
+        if (bgms.length === 0) {
+          return await msg.reply("```No BGMs found```");
+        }
+
+        let reply = "```Saved BGMs:\n";
+        for (const bgm of bgms) {
+          reply += `- ${bgm.trigger}\n`;
+        }
+        reply += "```";
+
+        await msg.reply(reply);
+      } catch (error) {
+        const e = error instanceof Error ? error.message : String(error);
+        await msg.reply(`\`\`\`Error: ${e}\n\`\`\``);
+      }
+    },
+  },
+] satisfies CommandProperty[];

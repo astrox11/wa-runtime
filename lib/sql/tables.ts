@@ -335,9 +335,9 @@ export function createUserFilterTable(phoneNumber: string): string {
     try {
       bunql.exec(`
         CREATE TABLE IF NOT EXISTS "${tableName}" (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          status INTEGER,
-          message TEXT
+          trigger TEXT PRIMARY KEY,
+          reply TEXT,
+          status INTEGER
         )
       `);
       createdTables.add(tableName);

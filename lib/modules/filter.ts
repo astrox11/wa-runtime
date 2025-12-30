@@ -1,26 +1,69 @@
 import type { CommandProperty } from "..";
 import {
-  addFilter,
+  setFilter,
   getAllFilters,
-  getFilterById,
+  getFilterByTrigger,
   deleteFilter,
-  updateFilter,
 } from "../sql";
 import config from "../../config";
 
-/**
- * Replace placeholders in message
- */
-function replacePlaceholders(
+async function fetchFact(): Promise<string> {
+  try {
+    const res = await fetch("https://uselessfacts.jsph.pl/random.json?language=en");
+    const data = await res.json();
+    return data.text || "Did you know facts are fun?";
+  } catch {
+    return "Did you know facts are fun?";
+  }
+}
+
+async function fetchQuote(): Promise<string> {
+  try {
+    const res = await fetch("https://api.quotable.io/random");
+    const data = await res.json();
+    return `${data.content} - ${data.author}` || "Stay positive!";
+  } catch {
+    return "Stay positive!";
+  }
+}
+
+async function fetchJoke(): Promise<string> {
+  try {
+    const res = await fetch("https://official-joke-api.appspot.com/random_joke");
+    const data = await res.json();
+    return `${data.setup} ${data.punchline}` || "Why don't scientists trust atoms? Because they make up everything!";
+  } catch {
+    return "Why don't scientists trust atoms? Because they make up everything!";
+  }
+}
+
+async function replacePlaceholders(
   message: string,
   sender: string,
   ownerId: string,
   botName: string,
-): string {
-  return message
+): Promise<string> {
+  let result = message
     .replace(/@user/g, sender.split("@")[0])
     .replace(/@owner/g, ownerId.split("@")[0])
     .replace(/@botname/g, botName);
+
+  if (result.includes("@facts")) {
+    const fact = await fetchFact();
+    result = result.replace(/@facts/g, fact);
+  }
+
+  if (result.includes("@quotes")) {
+    const quote = await fetchQuote();
+    result = result.replace(/@quotes/g, quote);
+  }
+
+  if (result.includes("@jokes")) {
+    const joke = await fetchJoke();
+    result = result.replace(/@jokes/g, joke);
+  }
+
+  return result;
 }
 
 export default [
@@ -29,32 +72,20 @@ export default [
     category: "util",
     async exec(msg, sock, args) {
       if (!args) {
-        return await msg.reply("```Usage: filter <trigger>```");
+        return await msg.reply("```Usage: filter on|off```");
       }
 
-      const filterId = parseInt(args);
-
-      if (isNaN(filterId)) {
-        return await msg.reply("```Invalid filter ID```");
+      const command = args.toLowerCase().trim();
+      
+      if (command === "on") {
+        setFilter(msg.sessionId, "_status", "", 1);
+        return await msg.reply("```Filter enabled```");
+      } else if (command === "off") {
+        setFilter(msg.sessionId, "_status", "", 0);
+        return await msg.reply("```Filter disabled```");
+      } else {
+        return await msg.reply("```Usage: filter on|off```");
       }
-
-      const filter = getFilterById(msg.sessionId, filterId);
-
-      if (!filter) {
-        return await msg.reply("```Filter not found```");
-      }
-
-      const processedMessage = replacePlaceholders(
-        filter.message,
-        msg.sender,
-        sock.user.id,
-        config.BOT_NAME,
-      );
-
-      await sock.sendMessage(msg.chat, {
-        text: processedMessage,
-        mentions: [msg.sender],
-      });
     },
   },
   {
@@ -62,26 +93,30 @@ export default [
     category: "util",
     async exec(msg, _, args) {
       if (!args) {
-        return await msg.reply("```Usage: setfilter <status> <message>```");
+        return await msg.reply("```Usage: setfilter <trigger> | <reply>```");
       }
 
-      const parts = args.split(" ");
-      const status = parseInt(parts[0]);
-      const message = parts.slice(1).join(" ");
-
-      if (isNaN(status) || !message) {
-        return await msg.reply("```Usage: setfilter <status> <message>```");
+      const parts = args.split("|");
+      if (parts.length !== 2) {
+        return await msg.reply("```Usage: setfilter <trigger> | <reply>```");
       }
 
-      addFilter(msg.sessionId, status, message);
-      await msg.reply("```Filter added successfully```");
+      const trigger = parts[0].trim();
+      const reply = parts[1].trim();
+
+      if (!trigger || !reply) {
+        return await msg.reply("```Usage: setfilter <trigger> | <reply>```");
+      }
+
+      setFilter(msg.sessionId, trigger, reply, 1);
+      await msg.reply(`\`\`\`Filter set: ${trigger}\`\`\``);
     },
   },
   {
     pattern: "getfilter",
     category: "util",
-    async exec(msg, _, args) {
-      const filters = getAllFilters(msg.sessionId);
+    async exec(msg) {
+      const filters = getAllFilters(msg.sessionId).filter(f => f.trigger !== "_status");
 
       if (filters.length === 0) {
         return await msg.reply("```No filters found```");
@@ -89,8 +124,9 @@ export default [
 
       let reply = "```Filters:\n";
       for (const filter of filters) {
-        reply += `ID: ${filter.id}, Status: ${filter.status}\n`;
-        reply += `Message: ${filter.message}\n\n`;
+        reply += `Trigger: ${filter.trigger}\n`;
+        reply += `Reply: ${filter.reply}\n`;
+        reply += `Status: ${filter.status ? "Active" : "Inactive"}\n\n`;
       }
       reply += "```";
 
@@ -102,17 +138,37 @@ export default [
     category: "util",
     async exec(msg, _, args) {
       if (!args) {
-        return await msg.reply("```Usage: delfilter <id>```");
+        return await msg.reply("```Usage: delfilter <trigger>```");
       }
 
-      const filterId = parseInt(args);
+      const trigger = args.trim();
+      deleteFilter(msg.sessionId, trigger);
+      await msg.reply(`\`\`\`Filter deleted: ${trigger}\`\`\``);
+    },
+  },
+  {
+    event: true,
+    dontAddToCommandList: true,
+    async exec(msg, sock) {
+      if (!msg.text) return;
 
-      if (isNaN(filterId)) {
-        return await msg.reply("```Invalid filter ID```");
-      }
+      const statusFilter = getFilterByTrigger(msg.sessionId, "_status");
+      if (!statusFilter || statusFilter.status === 0) return;
 
-      deleteFilter(msg.sessionId, filterId);
-      await msg.reply("```Filter deleted successfully```");
+      const filter = getFilterByTrigger(msg.sessionId, msg.text.trim());
+      if (!filter || filter.status === 0) return;
+
+      const processedMessage = await replacePlaceholders(
+        filter.reply,
+        msg.sender,
+        sock.user.id,
+        config.BOT_NAME,
+      );
+
+      await sock.sendMessage(msg.chat, {
+        text: processedMessage,
+        mentions: [msg.sender],
+      });
     },
   },
 ] satisfies CommandProperty[];
