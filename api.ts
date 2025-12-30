@@ -76,12 +76,13 @@ class RuntimeStats {
   }
 
   getStats(sessionId: string) {
-    const messages = this.messageCount.get(sessionId) || 0;
+    const messages = getMessagesCount(sessionId);
     const startTime = this.sessionStartTimes.get(sessionId) || Date.now();
     const uptime = Date.now() - startTime;
 
     const hourlyKey = `${sessionId}_${new Date().toDateString()}`;
-    const hourlyData = this.hourlyActivity.get(hourlyKey) || new Array(24).fill(0);
+    const hourlyData =
+      this.hourlyActivity.get(hourlyKey) || new Array(24).fill(0);
 
     return {
       messages,
@@ -93,15 +94,10 @@ class RuntimeStats {
   }
 
   getOverallStats() {
-    let totalMessages = 0;
-    this.messageCount.forEach((count) => {
-      totalMessages += count;
-    });
-
     return {
       totalSessions: sessionManager.list().length,
       activeSessions: sessionManager.getActiveCount(),
-      totalMessages,
+      totalMessages: getMessagesCount(sessionManager.list()?.[0]?.id),
       version: config.VERSION,
       serverUptime: process.uptime(),
       serverUptimeFormatted: formatUptime(process.uptime() * 1000),
@@ -140,7 +136,7 @@ const runtimeStats = new RuntimeStats();
  */
 async function parseBody<T>(req: Request): Promise<T | null> {
   try {
-    return await req.json() as T;
+    return (await req.json()) as T;
   } catch {
     return null;
   }
@@ -164,7 +160,7 @@ export async function handleWsAction(request: WsRequest): Promise<WsResponse> {
         if (!params.id) {
           result = { success: false, error: "Session ID is required" };
         } else {
-          const session = sessionManager.get(params.id);
+          const session = sessionManager.get(params?.id as string);
           if (!session) {
             result = { success: false, error: "Session not found" };
           } else {
@@ -177,7 +173,9 @@ export async function handleWsAction(request: WsRequest): Promise<WsResponse> {
         if (!params.phoneNumber) {
           result = { success: false, error: "Phone number is required" };
         } else {
-          const createResult = await sessionManager.create(params.phoneNumber);
+          const createResult = await sessionManager.create(
+            params.phoneNumber as string,
+          );
           if (createResult.success) {
             runtimeStats.recordSessionStart(createResult.id!);
             result = {
@@ -200,7 +198,7 @@ export async function handleWsAction(request: WsRequest): Promise<WsResponse> {
         if (!params.id) {
           result = { success: false, error: "Session ID is required" };
         } else {
-          const deleteResult = await sessionManager.delete(params.id);
+          const deleteResult = await sessionManager.delete(params.id as string);
           if (deleteResult.success) {
             result = { success: true, data: { message: "Session deleted" } };
           } else {
@@ -213,7 +211,7 @@ export async function handleWsAction(request: WsRequest): Promise<WsResponse> {
         if (!params.sessionId) {
           result = { success: false, error: "Session ID is required" };
         } else {
-          const session = sessionManager.get(params.sessionId);
+          const session = sessionManager.get(params.sessionId as string);
           if (!session) {
             result = { success: false, error: "Session not found" };
           } else {
@@ -239,11 +237,11 @@ export async function handleWsAction(request: WsRequest): Promise<WsResponse> {
         if (!params.sessionId) {
           result = { success: false, error: "Session ID is required" };
         } else {
-          const session = sessionManager.get(params.sessionId);
+          const session = sessionManager.get(params.sessionId as string);
           if (!session) {
             result = { success: false, error: "Session not found" };
           } else {
-            const stats = runtimeStats.getStats(params.sessionId);
+            const stats = runtimeStats.getStats(params.sessionId as string);
             result = {
               success: true,
               data: {
@@ -267,8 +265,12 @@ export async function handleWsAction(request: WsRequest): Promise<WsResponse> {
         } else {
           const limit = params.limit || 100;
           const offset = params.offset || 0;
-          const messages = getAllMessages(params.sessionId, limit, offset);
-          const total = getMessagesCount(params.sessionId);
+          const messages = getAllMessages(
+            params.sessionId as string,
+            limit as number,
+            offset as number,
+          );
+          const total = getMessagesCount(params.sessionId as string);
           result = {
             success: true,
             data: {
@@ -323,7 +325,10 @@ export async function handleWsAction(request: WsRequest): Promise<WsResponse> {
 /**
  * Route handlers (HTTP fallback)
  */
-const routes: Record<string, (req: Request, params?: Record<string, string>) => Promise<ApiResponse>> = {
+const routes: Record<
+  string,
+  (req: Request, params?: Record<string, string>) => Promise<ApiResponse>
+> = {
   // Session management
   "GET /api/sessions": async () => {
     const sessions = sessionManager.listExtended();
@@ -484,7 +489,13 @@ const routes: Record<string, (req: Request, params?: Record<string, string>) => 
 function matchRoute(
   method: string,
   path: string,
-): { handler: (req: Request, params?: Record<string, string>) => Promise<ApiResponse>; params: Record<string, string> } | null {
+): {
+  handler: (
+    req: Request,
+    params?: Record<string, string>,
+  ) => Promise<ApiResponse>;
+  params: Record<string, string>;
+} | null {
   const routeKey = `${method} ${path}`;
 
   // Exact match
