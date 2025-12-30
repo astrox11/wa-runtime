@@ -5,16 +5,14 @@
   "description": "Web dashboard for wa-runtime",
   "scripts": {
     "dev": "astro dev",
-    "start": "node ./dist/server/entry.mjs",
     "build": "astro build",
+    "start": "node ./dist/server/entry.mjs",
     "preview": "astro preview"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.1",
     "@astrojs/tailwind": "^6.0.2",
-    "@iconify-json/material-symbols": "^1.2.17",
     "astro": "^5.2.4",
-    "astro-icon": "^1.1.5",
     "tailwindcss": "^3.4.17"
   },
   "devDependencies": {

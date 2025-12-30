@@ -13,163 +13,20 @@ const { title } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="wa-runtime Web Dashboard" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <title>{title} | wa-runtime</title>
-    <script is:inline>
-      // Theme initialization - runs before page renders to prevent flash
-      (function() {
-        const theme = localStorage.getItem('theme') || 'dark';
-        if (theme === 'dark') {
-          document.documentElement.classList.add('dark');
-        }
-      })();
-    </script>
   </head>
-  <body class="bg-surface dark:bg-surface-dark font-sans text-surface-on-surface dark:text-surface-dark-on-surface min-h-screen antialiased">
+  <body class="bg-gh-bg font-sans text-gh-text min-h-screen antialiased">
     <slot />
-    <script is:inline>
-      window.toggleTheme = function() {
-        const isDark = document.documentElement.classList.toggle('dark');
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-      };
-    </script>
   </body>
 </html>
 
 <style is:global>
-  /* Material Design 3 Base Styles */
   * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
   }
 
-  /* Ripple effect base */
-  .ripple {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .ripple::after {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-    background-image: radial-gradient(circle, currentColor 10%, transparent 10.01%);
-    background-repeat: no-repeat;
-    background-position: 50%;
-    transform: scale(10);
-    opacity: 0;
-    transition: transform 0.5s, opacity 0.5s;
-  }
-
-  .ripple:active::after {
-    transform: scale(0);
-    opacity: 0.2;
-    transition: 0s;
-  }
-
-  /* Material Design 3 Typography */
-  .display-large {
-    font-size: 3.5625rem;
-    line-height: 4rem;
-    font-weight: 400;
-  }
-
-  .display-medium {
-    font-size: 2.8125rem;
-    line-height: 3.25rem;
-    font-weight: 400;
-  }
-
-  .display-small {
-    font-size: 2.25rem;
-    line-height: 2.75rem;
-    font-weight: 400;
-  }
-
-  .headline-large {
-    font-size: 2rem;
-    line-height: 2.5rem;
-    font-weight: 400;
-  }
-
-  .headline-medium {
-    font-size: 1.75rem;
-    line-height: 2.25rem;
-    font-weight: 400;
-  }
-
-  .headline-small {
-    font-size: 1.5rem;
-    line-height: 2rem;
-    font-weight: 400;
-  }
-
-  .title-large {
-    font-size: 1.375rem;
-    line-height: 1.75rem;
-    font-weight: 400;
-  }
-
-  .title-medium {
-    font-size: 1rem;
-    line-height: 1.5rem;
-    font-weight: 500;
-  }
-
-  .title-small {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    font-weight: 500;
-    letter-spacing: 0.1px;
-  }
-
-  .body-large {
-    font-size: 1rem;
-    line-height: 1.5rem;
-    font-weight: 400;
-  }
-
-  .body-medium {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    font-weight: 400;
-  }
-
-  .body-small {
-    font-size: 0.75rem;
-    line-height: 1rem;
-    font-weight: 400;
-  }
-
-  .label-large {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    font-weight: 500;
-    letter-spacing: 0.1px;
-  }
-
-  .label-medium {
-    font-size: 0.75rem;
-    line-height: 1rem;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-  }
-
-  .label-small {
-    font-size: 0.6875rem;
-    line-height: 1rem;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-  }
-
-  /* Scrollbar styling */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -180,11 +37,11 @@ const { title } = Astro.props;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--outline-variant, #CAC4D0);
+    background: #d0d7de;
     border-radius: 4px;
   }
 
-  .dark ::-webkit-scrollbar-thumb {
-    background: #49454F;
+  ::-webkit-scrollbar-thumb:hover {
+    background: #8c959f;
   }
 </style>

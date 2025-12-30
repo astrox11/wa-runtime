@@ -1,7 +1,6 @@
 import { defineConfig } from 'astro/config';
-import node from '@astrojs/node';
 import tailwind from '@astrojs/tailwind';
-import icon from 'astro-icon';
+import node from '@astrojs/node';
 
 export default defineConfig({
   output: 'server',
@@ -10,11 +9,6 @@ export default defineConfig({
   }),
   integrations: [
     tailwind(),
-    icon({
-      include: {
-        'material-symbols': ['*'],
-      },
-    }),
   ],
   server: {
     port: 4321,
@@ -24,6 +18,10 @@ export default defineConfig({
     server: {
       proxy: {
         '/api': {
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+        },
+        '/health': {
           target: 'http://localhost:3000',
           changeOrigin: true,
         },

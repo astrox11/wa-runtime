@@ -13,13 +13,6 @@ export interface ApiResponse {
   error?: string;
 }
 
-export interface CorsOptions {
-  allowedOrigins: string[];
-  allowedMethods: string[];
-  allowedHeaders: string[];
-  allowCredentials: boolean;
-}
-
 interface SessionCreateRequest {
   phoneNumber: string;
   botName?: string;

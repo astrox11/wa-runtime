@@ -1,126 +1,99 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import AppBar from '../../components/AppBar.astro';
-import Card from '../../components/Card.astro';
 
 const { id } = Astro.params;
 ---
 
 <Layout title="Dashboard">
-  <AppBar title="Dashboard" showSearch={true}>
-    <span slot="actions" id="session-status" class="flex items-center gap-2 px-4 py-2 rounded-3xl bg-surface-container-highest dark:bg-surface-dark-container-highest">
-      <span class="w-2 h-2 rounded-full bg-gray-400"></span>
-      <span class="label-medium text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">Loading...</span>
+  <AppBar title="Dashboard">
+    <span slot="actions" id="session-status" class="flex items-center gap-2 px-3 py-1 rounded-gh bg-gh-bg-secondary border border-gh-border text-xs">
+      <span class="w-2 h-2 rounded-full bg-gh-text-muted"></span>
+      <span class="text-gh-text-secondary">Loading...</span>
     </span>
   </AppBar>
   
-  <main class="p-4 md:p-8 max-w-7xl mx-auto">
+  <main class="max-w-5xl mx-auto px-4 py-6">
+    <div class="mb-4">
+      <a href="/" class="inline-flex items-center gap-1 text-sm text-gh-link hover:underline">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        </svg>
+        Back to Sessions
+      </a>
+    </div>
+
     <!-- Stats Overview -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      <Card variant="elevated">
-        <div class="flex items-center gap-4">
-          <div class="w-14 h-14 rounded-2xl bg-primary-container dark:bg-primary-dark-container flex items-center justify-center">
-            <svg class="w-7 h-7 text-primary-on-container dark:text-primary-dark-on-container" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/>
-            </svg>
-          </div>
-          <div>
-            <p id="phone-number" class="title-large text-surface-on-surface dark:text-surface-dark-on-surface">---</p>
-            <p class="body-small text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">Phone Number</p>
-          </div>
-        </div>
-      </Card>
-
-      <Card variant="elevated">
-        <div class="flex items-center gap-4">
-          <div class="w-14 h-14 rounded-2xl bg-secondary-container flex items-center justify-center">
-            <svg class="w-7 h-7 text-secondary-on-container" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/>
-            </svg>
-          </div>
-          <div>
-            <p id="messages-count" class="title-large text-surface-on-surface dark:text-surface-dark-on-surface">0</p>
-            <p class="body-small text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">Messages Processed</p>
-          </div>
-        </div>
-      </Card>
-
-      <Card variant="elevated">
-        <div class="flex items-center gap-4">
-          <div class="w-14 h-14 rounded-2xl bg-tertiary-container flex items-center justify-center">
-            <svg class="w-7 h-7 text-tertiary-on-container" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
-            </svg>
-          </div>
-          <div>
-            <p id="uptime" class="title-large text-surface-on-surface dark:text-surface-dark-on-surface">0m</p>
-            <p class="body-small text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">Session Uptime</p>
-          </div>
-        </div>
-      </Card>
-
-      <Card variant="elevated">
-        <div class="flex items-center gap-4">
-          <div class="w-14 h-14 rounded-2xl bg-surface-container-highest dark:bg-surface-dark-container-highest flex items-center justify-center">
-            <svg class="w-7 h-7 text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
-            </svg>
-          </div>
-          <div>
-            <p id="avg-messages" class="title-large text-surface-on-surface dark:text-surface-dark-on-surface">0</p>
-            <p class="body-small text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">Avg Messages/Hour</p>
-          </div>
-        </div>
-      </Card>
-    </section>
-
-    <!-- Main Activity Chart -->
-    <Card variant="elevated" class="mb-8">
-      <div class="mb-4">
-        <h2 class="title-large text-surface-on-surface dark:text-surface-dark-on-surface">Activity Overview</h2>
-        <p class="body-medium text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">Messages per hour (today)</p>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="bg-gh-bg border border-gh-border rounded-gh p-4">
+        <p class="text-xs text-gh-text-secondary mb-1">Phone Number</p>
+        <p id="phone-number" class="text-lg font-semibold text-gh-text">---</p>
       </div>
-      <div id="activity-chart" class="h-64 flex items-end justify-between gap-1">
+      <div class="bg-gh-bg border border-gh-border rounded-gh p-4">
+        <p class="text-xs text-gh-text-secondary mb-1">Messages</p>
+        <p id="messages-count" class="text-lg font-semibold text-gh-text">0</p>
+      </div>
+      <div class="bg-gh-bg border border-gh-border rounded-gh p-4">
+        <p class="text-xs text-gh-text-secondary mb-1">Uptime</p>
+        <p id="uptime" class="text-lg font-semibold text-gh-text">0m</p>
+      </div>
+      <div class="bg-gh-bg border border-gh-border rounded-gh p-4">
+        <p class="text-xs text-gh-text-secondary mb-1">Avg/Hour</p>
+        <p id="avg-messages" class="text-lg font-semibold text-gh-text">0</p>
+      </div>
+    </div>
+
+    <!-- Activity Chart -->
+    <div class="bg-gh-bg border border-gh-border rounded-gh mb-6">
+      <div class="p-4 border-b border-gh-border">
+        <h2 class="text-sm font-semibold text-gh-text">Activity</h2>
+        <p class="text-xs text-gh-text-secondary">Messages per hour (today)</p>
+      </div>
+      <div id="activity-chart" class="p-4 h-40 flex items-end justify-between gap-0.5">
         <div class="flex-1 flex items-center justify-center">
-          <div class="w-8 h-8 border-2 border-primary dark:border-primary-dark border-t-transparent rounded-full animate-spin"></div>
+          <div class="w-5 h-5 border-2 border-gh-accent border-t-transparent rounded-full animate-spin"></div>
         </div>
       </div>
-    </Card>
+    </div>
 
-    <!-- Secondary Charts -->
-    <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-      <Card variant="elevated">
-        <h3 class="title-medium text-surface-on-surface dark:text-surface-dark-on-surface mb-4">Runtime Statistics</h3>
-        <div class="space-y-3">
-          <div class="flex justify-between items-center py-2 border-b border-outline-variant dark:border-outline-dark-variant">
-            <span class="body-medium text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">Total Sessions</span>
-            <span id="total-sessions" class="label-large text-surface-on-surface dark:text-surface-dark-on-surface">0</span>
+    <!-- Info Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="bg-gh-bg border border-gh-border rounded-gh">
+        <div class="p-4 border-b border-gh-border">
+          <h3 class="text-sm font-semibold text-gh-text">Runtime Stats</h3>
+        </div>
+        <div class="p-4 space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-gh-text-secondary">Total Sessions</span>
+            <span id="total-sessions" class="text-gh-text font-medium">0</span>
           </div>
-          <div class="flex justify-between items-center py-2 border-b border-outline-variant dark:border-outline-dark-variant">
-            <span class="body-medium text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">Active Sessions</span>
-            <span id="active-sessions" class="label-large text-surface-on-surface dark:text-surface-dark-on-surface">0</span>
+          <div class="flex justify-between">
+            <span class="text-gh-text-secondary">Active Sessions</span>
+            <span id="active-sessions" class="text-gh-text font-medium">0</span>
           </div>
-          <div class="flex justify-between items-center py-2 border-b border-outline-variant dark:border-outline-dark-variant">
-            <span class="body-medium text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">Total Messages</span>
-            <span id="total-messages" class="label-large text-surface-on-surface dark:text-surface-dark-on-surface">0</span>
+          <div class="flex justify-between">
+            <span class="text-gh-text-secondary">Total Messages</span>
+            <span id="total-messages" class="text-gh-text font-medium">0</span>
           </div>
-          <div class="flex justify-between items-center py-2">
-            <span class="body-medium text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">Server Uptime</span>
-            <span id="server-uptime" class="label-large text-surface-on-surface dark:text-surface-dark-on-surface">0m</span>
+          <div class="flex justify-between">
+            <span class="text-gh-text-secondary">Server Uptime</span>
+            <span id="server-uptime" class="text-gh-text font-medium">0m</span>
           </div>
         </div>
-      </Card>
+      </div>
 
-      <Card variant="elevated">
-        <h3 class="title-medium text-surface-on-surface dark:text-surface-dark-on-surface mb-4">Session Health</h3>
-        <div class="flex flex-col items-center">
-          <div id="health-ring" class="relative w-32 h-32 mb-4">
+      <div class="bg-gh-bg border border-gh-border rounded-gh">
+        <div class="p-4 border-b border-gh-border">
+          <h3 class="text-sm font-semibold text-gh-text">Health</h3>
+        </div>
+        <div class="p-4 flex flex-col items-center">
+          <div id="health-ring" class="relative w-20 h-20 mb-2">
             <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
               <path
                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 fill="none"
                 stroke-width="3"
-                class="stroke-surface-container-highest dark:stroke-surface-dark-container-highest"
+                class="stroke-gh-bg-tertiary"
               />
               <path
                 id="health-progress"
@@ -128,58 +101,52 @@ const { id } = Astro.params;
                 fill="none"
                 stroke-width="3"
                 stroke-dasharray="100, 100"
-                class="stroke-green-500 dark:stroke-green-400"
+                class="stroke-gh-success"
               />
             </svg>
-            <span id="health-value" class="absolute inset-0 flex items-center justify-center title-large text-green-500 dark:text-green-400">100%</span>
+            <span id="health-value" class="absolute inset-0 flex items-center justify-center text-lg font-semibold text-gh-success">100%</span>
           </div>
-          <p id="health-status" class="body-medium text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">Session is healthy</p>
+          <p id="health-status" class="text-xs text-gh-text-secondary">Session is healthy</p>
         </div>
-      </Card>
+      </div>
 
-      <Card variant="elevated">
-        <h3 class="title-medium text-surface-on-surface dark:text-surface-dark-on-surface mb-4">Version Info</h3>
-        <div class="space-y-3">
-          <div class="flex justify-between items-center py-2 border-b border-outline-variant dark:border-outline-dark-variant">
-            <span class="body-medium text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">wa-runtime</span>
-            <span id="runtime-version" class="label-large text-surface-on-surface dark:text-surface-dark-on-surface">---</span>
+      <div class="bg-gh-bg border border-gh-border rounded-gh">
+        <div class="p-4 border-b border-gh-border">
+          <h3 class="text-sm font-semibold text-gh-text">Info</h3>
+        </div>
+        <div class="p-4 space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-gh-text-secondary">Version</span>
+            <span id="runtime-version" class="text-gh-text font-medium">---</span>
           </div>
-          <div class="flex justify-between items-center py-2 border-b border-outline-variant dark:border-outline-dark-variant">
-            <span class="body-medium text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">Session ID</span>
-            <span class="label-medium text-surface-on-surface dark:text-surface-dark-on-surface font-mono truncate max-w-[150px]">{id}</span>
+          <div class="flex justify-between">
+            <span class="text-gh-text-secondary">Session ID</span>
+            <span class="text-gh-text font-mono text-xs truncate max-w-[120px]">{id}</span>
           </div>
-          <div class="flex justify-between items-center py-2">
-            <span class="body-medium text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">Created</span>
-            <span id="session-created" class="label-large text-surface-on-surface dark:text-surface-dark-on-surface">---</span>
+          <div class="flex justify-between">
+            <span class="text-gh-text-secondary">Created</span>
+            <span id="session-created" class="text-gh-text font-medium">---</span>
           </div>
         </div>
-      </Card>
-    </section>
+      </div>
+    </div>
 
     <!-- Actions -->
-    <section class="flex justify-end gap-4">
-      <button id="refresh-btn" class="flex items-center gap-2 px-6 py-3 rounded-3xl bg-surface-container-highest dark:bg-surface-dark-container-highest text-surface-on-surface dark:text-surface-dark-on-surface label-large border border-outline-variant dark:border-outline-dark-variant hover:bg-surface-container-high dark:hover:bg-surface-dark-container-high transition-all ripple">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+    <div class="flex justify-end gap-3">
+      <button id="refresh-btn" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-gh bg-gh-bg-secondary border border-gh-border text-gh-text hover:bg-gh-bg-tertiary transition-colors">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
           <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
         </svg>
-        Refresh Data
+        Refresh
       </button>
-      <button id="disconnect-btn" class="flex items-center gap-2 px-6 py-3 rounded-3xl text-error label-large border border-error hover:bg-error hover:text-white transition-all ripple">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+      <button id="disconnect-btn" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-gh border border-gh-danger text-gh-danger hover:bg-gh-danger-subtle transition-colors">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
           <path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
         </svg>
-        Disconnect Session
+        Disconnect
       </button>
-    </section>
+    </div>
   </main>
-
-  <!-- Back to Sessions FAB -->
-  <a href="/" class="fixed bottom-6 left-6 flex items-center gap-3 px-6 h-14 rounded-2xl bg-secondary-container text-secondary-on-container shadow-elevation-3 hover:shadow-elevation-4 transition-all ripple z-50">
-    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-    </svg>
-    <span class="label-large">Sessions</span>
-  </a>
 </Layout>
 
 <script define:vars={{ sessionId: id }}>
@@ -211,13 +178,13 @@ const { id } = Astro.params;
 
         const statusEl = document.getElementById('session-status');
         const statusColors = {
-          active: 'bg-green-500',
-          pairing: 'bg-amber-500',
-          inactive: 'bg-gray-400'
+          active: 'bg-gh-success',
+          pairing: 'bg-gh-warning',
+          inactive: 'bg-gh-text-muted'
         };
         statusEl.innerHTML = `
-          <span class="w-2 h-2 rounded-full ${statusColors[data.session.status] || 'bg-gray-400'}"></span>
-          <span class="label-medium text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant capitalize">${data.session.status}</span>
+          <span class="w-2 h-2 rounded-full ${statusColors[data.session.status] || 'bg-gh-text-muted'}"></span>
+          <span class="text-gh-text-secondary capitalize">${data.session.status}</span>
         `;
 
         const createdDate = new Date(data.session.createdAt);
@@ -273,15 +240,11 @@ const { id } = Astro.params;
     let html = '';
     for (let i = 0; i < 24; i++) {
       const value = hourlyData[i] || 0;
-      const height = Math.max((value / maxValue) * 100, 2);
-      const label = i % 3 === 0 ? `${i}` : '';
+      const height = Math.max((value / maxValue) * 100, 4);
       
       html += `
-        <div class="flex-1 flex flex-col items-center h-full">
-          <div class="flex-1 w-full flex items-end justify-center">
-            <div class="w-full max-w-[20px] rounded-t bg-primary dark:bg-primary-dark transition-all" style="height: ${height}%"></div>
-          </div>
-          <span class="body-small text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant mt-2 h-4">${label}</span>
+        <div class="flex-1 h-full flex items-end">
+          <div class="w-full rounded-t bg-gh-accent" style="height: ${height}%"></div>
         </div>
       `;
     }
@@ -293,7 +256,7 @@ const { id } = Astro.params;
     const btn = document.getElementById('refresh-btn');
     btn.disabled = true;
     btn.innerHTML = `
-      <div class="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+      <div class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
       Refreshing...
     `;
     
@@ -301,15 +264,15 @@ const { id } = Astro.params;
     
     btn.disabled = false;
     btn.innerHTML = `
-      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
         <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
       </svg>
-      Refresh Data
+      Refresh
     `;
   });
 
   document.getElementById('disconnect-btn').addEventListener('click', async () => {
-    if (!confirm('Are you sure you want to disconnect this session? This will log you out of WhatsApp.')) {
+    if (!confirm('Are you sure you want to disconnect this session?')) {
       return;
     }
 

@@ -11,7 +11,8 @@
     "globals": "^16.5.0",
     "jiti": "^2.6.1",
     "prettier": "3.7.4",
-    "typescript-eslint": "^8.50.1"
+    "typescript-eslint": "^8.50.1",
+    "concurrently": "^9.1.2"
   },
   "peerDependencies": {
     "typescript": "latest"
@@ -19,9 +20,11 @@
   "scripts": {
     "start": "bun run ./index.ts",
     "server": "bun run ./server.ts",
-    "web": "cd astro-web-runtime && bun run start",
-    "web:dev": "cd astro-web-runtime && bun run dev",
-    "start:all": "bun run server & cd astro-web-runtime && bun run start",
+    "web": "cd astro-web-runtime && node ./dist/server/entry.mjs",
+    "web:dev": "cd astro-web-runtime && npx astro dev",
+    "web:build": "cd astro-web-runtime && npx astro build",
+    "start:all": "concurrently --kill-others \"bun run server\" \"bun run web\"",
+    "dev": "concurrently --kill-others \"bun run server\" \"bun run web:dev\"",
     "postinstall": "bun run hook.ts",
     "lint": "eslint . --ext .ts --fix",
     "format": "prettier --write ."

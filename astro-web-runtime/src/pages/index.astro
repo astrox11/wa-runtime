@@ -1,110 +1,83 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import AppBar from '../components/AppBar.astro';
-import Card from '../components/Card.astro';
 ---
 
 <Layout title="Session Setup">
-  <AppBar title="wa-runtime" showSearch={false} />
+  <AppBar title="wa-runtime" />
   
-  <main class="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 md:p-8">
-    <Card variant="elevated" class="w-full max-w-md">
-      <div class="flex flex-col items-center mb-6">
-        <div class="w-16 h-16 rounded-full bg-primary-container dark:bg-primary-dark-container flex items-center justify-center mb-4">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" class="text-primary-on-container dark:text-primary-dark-on-container">
-            <path d="M12 2C6.48 2 2 6.48 2 12C2 13.85 2.5 15.55 3.36 17L2 22L7.13 20.68C8.53 21.51 10.2 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM16.46 15.46C16.23 16.08 15.17 16.64 14.45 16.77C13.86 16.87 13.11 16.94 10.43 15.83C7.07 14.42 4.93 11.01 4.78 10.81C4.63 10.61 3.53 9.15 3.53 7.64C3.53 6.13 4.28 5.4 4.58 5.08C4.88 4.76 5.23 4.68 5.45 4.68C5.67 4.68 5.88 4.68 6.08 4.69C6.3 4.7 6.58 4.6 6.85 5.18C7.13 5.78 7.8 7.29 7.87 7.44C7.94 7.59 8 7.78 7.9 7.98C7.8 8.18 7.73 8.3 7.58 8.48C7.43 8.66 7.26 8.88 7.13 9.01C6.98 9.16 6.82 9.32 7 9.62C7.18 9.92 7.79 10.9 8.7 11.71C9.87 12.76 10.83 13.09 11.13 13.24C11.43 13.39 11.62 13.36 11.8 13.15C11.98 12.94 12.56 12.27 12.77 11.97C12.98 11.67 13.19 11.72 13.47 11.82C13.75 11.92 15.25 12.66 15.55 12.81C15.85 12.96 16.05 13.03 16.12 13.16C16.19 13.29 16.19 13.84 15.96 14.46L16.46 15.46Z" fill="currentColor"/>
-          </svg>
-        </div>
-        <h1 class="headline-medium text-surface-on-surface dark:text-surface-dark-on-surface">wa-runtime</h1>
-        <p class="body-medium text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant mt-1">Create a new WhatsApp session</p>
+  <main class="max-w-lg mx-auto px-4 py-8">
+    <div class="bg-gh-bg border border-gh-border rounded-gh">
+      <div class="p-4 border-b border-gh-border">
+        <h1 class="text-lg font-semibold text-gh-text">Create Session</h1>
+        <p class="text-sm text-gh-text-secondary mt-1">Create a new WhatsApp session</p>
       </div>
 
-      <form id="session-form" class="space-y-6">
-        <div class="space-y-2">
-          <label for="phone" class="label-large text-surface-on-surface dark:text-surface-dark-on-surface block">
+      <form id="session-form" class="p-4 space-y-4">
+        <div>
+          <label for="phone" class="block text-sm font-medium text-gh-text mb-1">
             Phone Number
           </label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-              <svg class="w-5 h-5 text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
-              </svg>
-            </div>
-            <input 
-              type="tel" 
-              id="phone" 
-              name="phoneNumber" 
-              placeholder="e.g., 14155551234" 
-              required
-              pattern="[0-9]+"
-              class="w-full pl-12 pr-4 py-4 rounded-xl bg-surface-container-highest dark:bg-surface-dark-container-highest text-surface-on-surface dark:text-surface-dark-on-surface placeholder-surface-on-surface-variant dark:placeholder-surface-dark-on-surface-variant body-large border border-outline-variant dark:border-outline-dark-variant focus:outline-none focus:border-primary dark:focus:border-primary-dark focus:ring-1 focus:ring-primary dark:focus:ring-primary-dark transition-colors"
-            />
-          </div>
-          <p class="body-small text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant pl-1">Include country code without + symbol</p>
+          <input 
+            type="tel" 
+            id="phone" 
+            name="phoneNumber" 
+            placeholder="14155551234" 
+            required
+            pattern="[0-9]+"
+            class="w-full px-3 py-1.5 text-sm bg-gh-bg border border-gh-border rounded-gh text-gh-text placeholder-gh-text-muted focus:outline-none focus:border-gh-accent focus:ring-1 focus:ring-gh-accent"
+          />
+          <p class="text-xs text-gh-text-muted mt-1">Include country code without + symbol</p>
         </div>
 
-        <div class="space-y-2">
-          <label for="botName" class="label-large text-surface-on-surface dark:text-surface-dark-on-surface block">
-            Bot Name
+        <div>
+          <label for="botName" class="block text-sm font-medium text-gh-text mb-1">
+            Bot Name <span class="text-gh-text-muted font-normal">(optional)</span>
           </label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-              <svg class="w-5 h-5 text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/>
-              </svg>
-            </div>
-            <input 
-              type="text" 
-              id="botName" 
-              name="botName" 
-              placeholder="My Bot"
-              class="w-full pl-12 pr-4 py-4 rounded-xl bg-surface-container-highest dark:bg-surface-dark-container-highest text-surface-on-surface dark:text-surface-dark-on-surface placeholder-surface-on-surface-variant dark:placeholder-surface-dark-on-surface-variant body-large border border-outline-variant dark:border-outline-dark-variant focus:outline-none focus:border-primary dark:focus:border-primary-dark focus:ring-1 focus:ring-primary dark:focus:ring-primary-dark transition-colors"
-            />
-          </div>
-          <p class="body-small text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant pl-1">Optional display name for your bot</p>
+          <input 
+            type="text" 
+            id="botName" 
+            name="botName" 
+            placeholder="My Bot"
+            class="w-full px-3 py-1.5 text-sm bg-gh-bg border border-gh-border rounded-gh text-gh-text placeholder-gh-text-muted focus:outline-none focus:border-gh-accent focus:ring-1 focus:ring-gh-accent"
+          />
         </div>
 
-        <div class="space-y-2">
-          <label for="version" class="label-large text-surface-on-surface dark:text-surface-dark-on-surface block">
+        <div>
+          <label for="version" class="block text-sm font-medium text-gh-text mb-1">
             Version
           </label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-              <svg class="w-5 h-5 text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-              </svg>
-            </div>
-            <input 
-              type="text" 
-              id="version" 
-              name="version" 
-              readonly
-              disabled
-              class="w-full pl-12 pr-4 py-4 rounded-xl bg-surface-container dark:bg-surface-dark-container text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant body-large border border-outline-variant dark:border-outline-dark-variant cursor-not-allowed opacity-70"
-            />
-          </div>
-          <p class="body-small text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant pl-1">Runtime version (read-only)</p>
+          <input 
+            type="text" 
+            id="version" 
+            name="version" 
+            readonly
+            disabled
+            class="w-full px-3 py-1.5 text-sm bg-gh-bg-secondary border border-gh-border rounded-gh text-gh-text-secondary cursor-not-allowed"
+          />
         </div>
 
         <button 
           type="submit" 
-          class="w-full py-4 px-6 rounded-3xl bg-primary dark:bg-primary-dark text-white label-large font-medium shadow-elevation-1 hover:shadow-elevation-2 active:shadow-elevation-1 transition-all ripple disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-full py-1.5 px-4 text-sm font-medium rounded-gh bg-gh-success text-white hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Create Session
         </button>
       </form>
 
-      <div id="error-message" class="mt-4 p-4 rounded-xl bg-error-container dark:bg-error-container text-error-on-container body-medium hidden"></div>
+      <div id="error-message" class="mx-4 mb-4 p-3 rounded-gh bg-gh-danger-subtle border border-gh-danger text-gh-danger text-sm hidden"></div>
+    </div>
 
-      <div class="mt-8 pt-6 border-t border-outline-variant dark:border-outline-dark-variant">
-        <h3 class="title-medium text-surface-on-surface dark:text-surface-dark-on-surface mb-4">Existing Sessions</h3>
-        <div id="sessions-list" class="space-y-3">
-          <div class="flex items-center justify-center py-8">
-            <div class="w-8 h-8 border-2 border-primary dark:border-primary-dark border-t-transparent rounded-full animate-spin"></div>
-          </div>
+    <div class="mt-6 bg-gh-bg border border-gh-border rounded-gh">
+      <div class="p-4 border-b border-gh-border">
+        <h2 class="text-sm font-semibold text-gh-text">Existing Sessions</h2>
+      </div>
+      <div id="sessions-list" class="divide-y divide-gh-border">
+        <div class="p-8 flex justify-center">
+          <div class="w-5 h-5 border-2 border-gh-accent border-t-transparent rounded-full animate-spin"></div>
         </div>
       </div>
-    </Card>
+    </div>
   </main>
 </Layout>
 
@@ -141,11 +114,8 @@ import Card from '../components/Card.astro';
     if (result.success && result.data) {
       if (result.data.length === 0) {
         sessionsList.innerHTML = `
-          <div class="text-center py-8">
-            <svg class="w-12 h-12 mx-auto mb-3 text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant opacity-50" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/>
-            </svg>
-            <p class="body-medium text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">No sessions yet</p>
+          <div class="p-6 text-center">
+            <p class="text-sm text-gh-text-muted">No sessions yet</p>
           </div>
         `;
         return;
@@ -153,35 +123,28 @@ import Card from '../components/Card.astro';
 
       sessionsList.innerHTML = result.data.map(session => {
         const statusColors: Record<string, string> = {
-          active: 'bg-green-500',
-          pairing: 'bg-amber-500',
-          inactive: 'bg-gray-400'
+          active: 'bg-gh-success',
+          pairing: 'bg-gh-warning',
+          inactive: 'bg-gh-text-muted'
         };
         
         return `
-          <div class="flex items-center justify-between p-4 rounded-xl bg-surface-container dark:bg-surface-dark-container border border-outline-variant dark:border-outline-dark-variant" data-id="${session.id}">
+          <div class="flex items-center justify-between p-4" data-id="${session.id}">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-secondary-container dark:bg-secondary-container flex items-center justify-center">
-                <svg class="w-5 h-5 text-secondary-on-container" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/>
-                </svg>
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full ${statusColors[session.status] || 'bg-gh-text-muted'}"></span>
+                <span class="text-sm font-medium text-gh-text">+${session.phone_number}</span>
               </div>
-              <div>
-                <p class="body-large text-surface-on-surface dark:text-surface-dark-on-surface font-medium">+${session.phone_number}</p>
-                <div class="flex items-center gap-2 mt-0.5">
-                  <span class="w-2 h-2 rounded-full ${statusColors[session.status] || 'bg-gray-400'}"></span>
-                  <span class="body-small text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant capitalize">${session.status}</span>
-                </div>
-              </div>
+              <span class="text-xs text-gh-text-muted capitalize">${session.status}</span>
             </div>
             <div class="flex items-center gap-2">
               ${session.status === 'active' ? `
-                <a href="/dashboard/${session.id}" class="px-4 py-2 rounded-3xl bg-primary dark:bg-primary-dark text-white label-medium ripple">Dashboard</a>
+                <a href="/dashboard/${session.id}" class="px-3 py-1 text-xs font-medium rounded-gh bg-gh-accent text-white hover:bg-gh-accent-emphasis">Dashboard</a>
               ` : session.status === 'pairing' ? `
-                <a href="/pairing/${session.id}" class="px-4 py-2 rounded-3xl bg-primary dark:bg-primary-dark text-white label-medium ripple">Continue</a>
+                <a href="/pairing/${session.id}" class="px-3 py-1 text-xs font-medium rounded-gh bg-gh-accent text-white hover:bg-gh-accent-emphasis">Continue</a>
               ` : ''}
-              <button class="p-2 rounded-full hover:bg-surface-container-highest dark:hover:bg-surface-dark-container-highest transition-colors ripple" data-delete-session="${session.id}" aria-label="Delete session">
-                <svg class="w-5 h-5 text-error" viewBox="0 0 24 24" fill="currentColor">
+              <button class="p-1.5 text-gh-text-secondary hover:text-gh-danger hover:bg-gh-bg-secondary rounded-gh transition-colors" data-delete-session="${session.id}" aria-label="Delete session">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
                 </svg>
               </button>
@@ -201,11 +164,8 @@ import Card from '../components/Card.astro';
       });
     } else {
       sessionsList.innerHTML = `
-        <div class="text-center py-8">
-          <svg class="w-12 h-12 mx-auto mb-3 text-error opacity-50" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-          </svg>
-          <p class="body-medium text-surface-on-surface-variant dark:text-surface-dark-on-surface-variant">Failed to load sessions</p>
+        <div class="p-6 text-center">
+          <p class="text-sm text-gh-danger">Failed to load sessions</p>
         </div>
       `;
     }
