@@ -1,0 +1,29 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Page Not Found - wa-runtime">
+  <main class="min-h-screen flex items-center justify-center px-4">
+    <div class="text-center">
+      <div class="flex justify-center mb-6">
+        <svg class="w-20 h-20 text-gh-text-muted" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M.75 3h14.5a.75.75 0 0 1 0 1.5H.75a.75.75 0 0 1 0-1.5ZM3 7.75A.75.75 0 0 1 3.75 7h8.5a.75.75 0 0 1 0 1.5h-8.5A.75.75 0 0 1 3 7.75Zm0 4a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1-.75-.75Z"/>
+        </svg>
+      </div>
+      <h1 class="text-6xl font-bold text-gh-text mb-2">404</h1>
+      <h2 class="text-xl font-semibold text-gh-text mb-4">Page Not Found</h2>
+      <p class="text-gh-text-secondary mb-8 max-w-md">
+        The page you're looking for doesn't exist or has been moved.
+      </p>
+      <a 
+        href="/" 
+        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-gh bg-gh-success text-white hover:bg-green-700 transition-colors"
+      >
+        <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M7.78 12.53a.75.75 0 0 1-1.06 0L2.47 8.28a.75.75 0 0 1 0-1.06l4.25-4.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L4.81 7h7.44a.75.75 0 0 1 0 1.5H4.81l2.97 2.97a.75.75 0 0 1 0 1.06Z"/>
+        </svg>
+        Back to Home
+      </a>
+    </div>
+  </main>
+</Layout>

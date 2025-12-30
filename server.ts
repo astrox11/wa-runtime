@@ -200,11 +200,16 @@ const server = Bun.serve({
       if (response) return response;
     }
 
-    // Fallback to index.html for SPA routing
-    response = await serveStaticFile(join(STATIC_DIR, "index.html"));
-    if (response) return response;
+    // Try 404 page first
+    const notFoundPage = await serveStaticFile(join(STATIC_DIR, "404.html"));
+    if (notFoundPage) {
+      return new Response(notFoundPage.body, {
+        status: 404,
+        headers: notFoundPage.headers,
+      });
+    }
 
-    // 404 for unknown routes
+    // Fallback to plain 404
     return new Response("Not Found", { status: 404 });
   },
   websocket: {

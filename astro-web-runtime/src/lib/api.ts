@@ -137,9 +137,12 @@ class WsApiClient {
 
     this.connectionPromise = new Promise((resolve, reject) => {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      this.ws = new WebSocket(`${protocol}//${window.location.host}/ws/stats`);
+      const wsUrl = `${protocol}//${window.location.host}/ws/stats`;
+      console.log('[wa-runtime] Connecting to WebSocket:', wsUrl);
+      this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
+        console.log('[wa-runtime] WebSocket connected');
         this.isReconnecting = false;
         resolve();
       };
@@ -165,11 +168,13 @@ class WsApiClient {
         }
       };
 
-      this.ws.onerror = () => {
+      this.ws.onerror = (error) => {
+        console.error('[wa-runtime] WebSocket error:', error);
         reject(new Error('WebSocket connection failed'));
       };
 
-      this.ws.onclose = () => {
+      this.ws.onclose = (event) => {
+        console.log('[wa-runtime] WebSocket closed:', event.code, event.reason);
         this.connectionPromise = null;
         this.ws = null;
         
@@ -182,6 +187,7 @@ class WsApiClient {
         // Reconnect after delay
         if (!this.isReconnecting) {
           this.isReconnecting = true;
+          console.log('[wa-runtime] Reconnecting in 3 seconds...');
           this.reconnectTimeout = setTimeout(() => {
             this.connect();
           }, 3000);
