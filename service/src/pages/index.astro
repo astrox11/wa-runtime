@@ -554,7 +554,7 @@ import Layout from '../layouts/Layout.astro';
 
     // Check if elements exist
     if (!icon || !text || !detail) {
-      console.warn('[wa-runtime] Network status elements not found');
+      console.warn('[Whatsaly] Network status elements not found');
       return;
     }
 
@@ -580,18 +580,18 @@ import Layout from '../layouts/Layout.astro';
   }
 
   function renderSessions(sessions: Array<{id: string; phone_number: string; created_at: number; status: string; pushName?: string; push_name?: string}>) {
-    console.log('[wa-runtime] renderSessions called with', sessions.length, 'sessions');
-    console.log('[wa-runtime] Sessions data:', JSON.stringify(sessions, null, 2));
+    console.log('[Whatsaly] renderSessions called with', sessions.length, 'sessions');
+    console.log('[Whatsaly] Sessions data:', JSON.stringify(sessions, null, 2));
     
     sessionsLoaded = true;
     
     if (!sessionsList) {
-      console.error('[wa-runtime] sessionsList element not found!');
+      console.error('[Whatsaly] sessionsList element not found!');
       return;
     }
     
     if (!sessionCount) {
-      console.error('[wa-runtime] sessionCount element not found!');
+      console.error('[Whatsaly] sessionCount element not found!');
       return;
     }
     
@@ -679,9 +679,9 @@ import Layout from '../layouts/Layout.astro';
 
   // Subscribe to real-time updates via WebSocket
   api.onStats((data) => {
-    console.log('[wa-runtime] Received stats update:', data);
-    console.log('[wa-runtime] Data type:', data?.type);
-    console.log('[wa-runtime] Sessions array:', data?.data?.sessions);
+    console.log('[Whatsaly] Received stats update:', data);
+    console.log('[Whatsaly] Data type:', data?.type);
+    console.log('[Whatsaly] Sessions array:', data?.data?.sessions);
     
     if (data && data.type === 'stats' && data.data) {
       if (data.data.overall) {
@@ -693,7 +693,7 @@ import Layout from '../layouts/Layout.astro';
       // Render sessions - handle both array directly or from data.data
       const sessionsData = data.data.sessions;
       if (sessionsData && Array.isArray(sessionsData)) {
-        console.log('[wa-runtime] Rendering', sessionsData.length, 'sessions');
+        console.log('[Whatsaly] Rendering', sessionsData.length, 'sessions');
         renderSessions(sessionsData.map((s: any) => ({
           id: s.id,
           phone_number: s.phone_number,
@@ -703,10 +703,10 @@ import Layout from '../layouts/Layout.astro';
           push_name: s.push_name,
         })));
       } else {
-        console.log('[wa-runtime] No sessions array found in data');
+        console.log('[Whatsaly] No sessions array found in data');
       }
     } else {
-      console.log('[wa-runtime] Invalid data structure received');
+      console.log('[Whatsaly] Invalid data structure received');
     }
   });
 
@@ -843,7 +843,7 @@ import Layout from '../layouts/Layout.astro';
     const message = args.map(arg => 
       typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
     ).join(' ');
-    if (message.includes('[wa-runtime]')) {
+    if (message.includes('[Whatsaly]')) {
       addLog(message);
     }
   };
@@ -919,5 +919,5 @@ import Layout from '../layouts/Layout.astro';
   });
 
   // Add initial log
-  addLog('[wa-runtime] Application initialized');
+  addLog('[Whatsaly] Application initialized');
 </script>
