@@ -184,19 +184,27 @@ const { id } = Astro.params;
   </main>
 </Layout>
 
-<script define:vars={{ sessionId: id }}>
-  // Import API module dynamically for client-side execution
-  import('../lib/api').then(({ api }) => {
-    function updateSessionDisplay(sessionData) {
+<script>
+  import { api } from '../../lib/api';
+  
+  // Get session ID from URL
+  const sessionId = window.location.pathname.split('/').pop() || '';
+  
+  function updateSessionDisplay(sessionData: { pushName?: string; push_name?: string; phone_number: string; stats?: { messages: number; uptimeFormatted: string; avgMessagesPerHour: number; hourlyActivity?: number[] }; status: string; created_at?: number }) {
       // User name (pushName or phone number)
       const displayName = sessionData.pushName || sessionData.push_name || `+${sessionData.phone_number}`;
-      document.getElementById('user-name').textContent = displayName;
+      const userNameEl = document.getElementById('user-name');
+      if (userNameEl) userNameEl.textContent = displayName;
       
       // Stats from the stats object
       if (sessionData.stats) {
-        document.getElementById('messages-count').textContent = sessionData.stats.messages.toLocaleString();
-        document.getElementById('uptime').textContent = sessionData.stats.uptimeFormatted;
-        document.getElementById('avg-messages').textContent = sessionData.stats.avgMessagesPerHour.toFixed(1);
+        const messagesCountEl = document.getElementById('messages-count');
+        const uptimeEl = document.getElementById('uptime');
+        const avgMessagesEl = document.getElementById('avg-messages');
+        
+        if (messagesCountEl) messagesCountEl.textContent = sessionData.stats.messages.toLocaleString();
+        if (uptimeEl) uptimeEl.textContent = sessionData.stats.uptimeFormatted;
+        if (avgMessagesEl) avgMessagesEl.textContent = sessionData.stats.avgMessagesPerHour.toFixed(1);
         
         if (sessionData.stats.hourlyActivity) {
           renderBarChart(sessionData.stats.hourlyActivity);
@@ -208,6 +216,8 @@ const { id } = Astro.params;
       const healthIcon = document.getElementById('health-icon');
       const healthText = document.getElementById('health-text');
       const healthStatus = document.getElementById('health-status');
+      
+      if (!statusEl || !healthIcon || !healthText || !healthStatus) return;
       
       if (sessionData.status === 'active') {
         statusEl.innerHTML = `
@@ -250,12 +260,15 @@ const { id } = Astro.params;
       // Created date
       if (sessionData.created_at) {
         const createdDate = new Date(sessionData.created_at);
-        document.getElementById('session-created').textContent = createdDate.toLocaleDateString();
+        const createdEl = document.getElementById('session-created');
+        if (createdEl) createdEl.textContent = createdDate.toLocaleDateString();
       }
     }
 
-    function renderBarChart(hourlyData) {
+    function renderBarChart(hourlyData: number[]) {
       const container = document.getElementById('activity-chart');
+      if (!container) return;
+      
       const maxValue = Math.max(...hourlyData, 1);
 
       let html = '';
@@ -278,15 +291,20 @@ const { id } = Astro.params;
       if (data.type === 'stats') {
         // Update overall stats
         if (data.data.overall) {
-          document.getElementById('total-sessions').textContent = data.data.overall.totalSessions.toString();
-          document.getElementById('active-sessions').textContent = data.data.overall.activeSessions.toString();
-          document.getElementById('total-messages').textContent = data.data.overall.totalMessages.toLocaleString();
-          document.getElementById('server-uptime').textContent = data.data.overall.serverUptimeFormatted;
+          const totalSessionsEl = document.getElementById('total-sessions');
+          const activeSessionsEl = document.getElementById('active-sessions');
+          const totalMessagesEl = document.getElementById('total-messages');
+          const serverUptimeEl = document.getElementById('server-uptime');
+          
+          if (totalSessionsEl) totalSessionsEl.textContent = data.data.overall.totalSessions.toString();
+          if (activeSessionsEl) activeSessionsEl.textContent = data.data.overall.activeSessions.toString();
+          if (totalMessagesEl) totalMessagesEl.textContent = data.data.overall.totalMessages.toLocaleString();
+          if (serverUptimeEl) serverUptimeEl.textContent = data.data.overall.serverUptimeFormatted;
         }
         
         // Find current session stats
         if (data.data.sessions) {
-          const sessionData = data.data.sessions.find(s => s.id === sessionId);
+          const sessionData = data.data.sessions.find((s: { id: string }) => s.id === sessionId);
           if (sessionData) {
             updateSessionDisplay(sessionData);
           }
@@ -297,31 +315,36 @@ const { id } = Astro.params;
     // Load config via WebSocket
     api.getConfig().then(result => {
       if (result.success && result.data) {
-        document.getElementById('runtime-version').textContent = `v${result.data.version}`;
+        const versionEl = document.getElementById('runtime-version');
+        if (versionEl) versionEl.textContent = `v${result.data.version}`;
       }
     });
 
     // Button event handlers
-    document.getElementById('refresh-btn').addEventListener('click', async () => {
-      const btn = document.getElementById('refresh-btn');
-      btn.disabled = true;
-      // Data will refresh automatically via WebSocket
-      setTimeout(() => {
-        btn.disabled = false;
-      }, 1000);
-    });
+    const refreshBtn = document.getElementById('refresh-btn') as HTMLButtonElement | null;
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', async () => {
+        refreshBtn.disabled = true;
+        // Data will refresh automatically via WebSocket
+        setTimeout(() => {
+          refreshBtn.disabled = false;
+        }, 1000);
+      });
+    }
 
-    document.getElementById('disconnect-btn').addEventListener('click', async () => {
-      if (!confirm('Disconnect this session?')) {
-        return;
-      }
+    const disconnectBtn = document.getElementById('disconnect-btn');
+    if (disconnectBtn) {
+      disconnectBtn.addEventListener('click', async () => {
+        if (!confirm('Disconnect this session?')) {
+          return;
+        }
 
-      const result = await api.deleteSession(sessionId);
-      if (result.success) {
-        window.location.href = '/';
-      } else {
-        alert(result.error || 'Failed to disconnect session');
-      }
-    });
-  });
+        const result = await api.deleteSession(sessionId);
+        if (result.success) {
+          window.location.href = '/';
+        } else {
+          alert(result.error || 'Failed to disconnect session');
+        }
+      });
+    }
 </script>
