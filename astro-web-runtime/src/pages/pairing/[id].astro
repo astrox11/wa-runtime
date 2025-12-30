@@ -169,7 +169,7 @@ const { id } = Astro.params;
     
     ws.onclose = () => {
       // If closed unexpectedly, fall back to polling
-      if (attempts < maxAttempts && !successContent.classList.contains('hidden') === false && !errorContent.classList.contains('hidden') === false) {
+      if (attempts < maxAttempts && successContent.classList.contains('hidden') && errorContent.classList.contains('hidden')) {
         // Start polling fallback
         pollAuthStatus();
       }

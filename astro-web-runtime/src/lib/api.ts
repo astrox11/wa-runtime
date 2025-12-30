@@ -110,9 +110,14 @@ interface MessagesResponse {
 /**
  * WebSocket-based API Client
  */
+interface PendingRequest {
+  resolve: (value: WsResponse) => void;
+  reject: (error: Error) => void;
+}
+
 class WsApiClient {
   private ws: WebSocket | null = null;
-  private pendingRequests: Map<string, { resolve: (value: WsResponse) => void; reject: (error: Error) => void }> = new Map();
+  private pendingRequests: Map<string, PendingRequest> = new Map();
   private requestId = 0;
   private statsCallbacks: Set<(data: StatsUpdate) => void> = new Set();
   private connectionPromise: Promise<void> | null = null;

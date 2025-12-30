@@ -37,14 +37,14 @@ export type WsAction =
 export interface WsRequest {
   action: WsAction;
   requestId?: string;
-  params?: Record<string, any>;
+  params?: Record<string, string | number | boolean | undefined>;
 }
 
 export interface WsResponse {
   action: WsAction;
   requestId?: string;
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: string;
 }
 

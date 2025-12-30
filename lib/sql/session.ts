@@ -25,8 +25,9 @@ try {
     bunql.exec(`ALTER TABLE "sessions" ADD COLUMN push_name TEXT`);
     log.info("Added push_name column to sessions table");
   }
-} catch {
-  // Ignore if table doesn't exist yet
+} catch (error) {
+  // Log the error but continue - table might not exist yet on first run
+  log.debug("Session table migration check:", error);
 }
 
 export const createSession = (
