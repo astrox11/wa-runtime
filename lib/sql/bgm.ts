@@ -23,23 +23,12 @@ export const saveBgm = (
   audioData: string,
 ) => {
   const tableName = getBgmTable(sessionId);
-  const rows = bunql.query<{ audioData: string }>(
-    `SELECT audioData FROM "${tableName}" WHERE trigger = ?`,
-    [trigger],
+  
+  // Use INSERT OR REPLACE for efficient upsert
+  execWithParams(
+    `INSERT OR REPLACE INTO "${tableName}" (trigger, audioData) VALUES (?, ?)`,
+    [trigger, audioData],
   );
-  const current = rows[0];
-
-  if (current) {
-    execWithParams(`UPDATE "${tableName}" SET audioData = ? WHERE trigger = ?`, [
-      audioData,
-      trigger,
-    ]);
-  } else {
-    execWithParams(`INSERT INTO "${tableName}" (trigger, audioData) VALUES (?, ?)`, [
-      trigger,
-      audioData,
-    ]);
-  }
 
   return { session_id: sessionId, trigger, audioData };
 };

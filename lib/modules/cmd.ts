@@ -18,6 +18,7 @@ export default [
       const commandName = args.trim().toLowerCase();
 
       // Validate if the command exists in the plugin system
+      // Use temporary instance just for validation - the command registry is static
       const plugins = new Plugins(msg, sock);
       const command = plugins.find(commandName);
 

@@ -18,6 +18,8 @@ export default {
       const audioBuffer = await msg.quoted.download();
       
       // Convert buffer to base64 for storage
+      // Note: Base64 encoding adds ~33% storage overhead but simplifies handling
+      // For production with many BGMs, consider storing files on disk instead
       const audioData = audioBuffer.toString("base64");
 
       // Save trigger and audio data to BGM table
