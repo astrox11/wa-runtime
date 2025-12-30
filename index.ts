@@ -22,9 +22,6 @@ import {
 } from "./cli";
 import config from "./config";
 
-/**
- * Main entry point
- */
 const main = async () => {
   const args = process.argv.slice(2);
 
