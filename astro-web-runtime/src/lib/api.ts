@@ -123,6 +123,7 @@ class WsApiClient {
   private connectionPromise: Promise<void> | null = null;
   private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
   private isReconnecting = false;
+  private lastStatsData: StatsUpdate | null = null; // Store last stats for late subscribers
 
   constructor() {
     if (typeof window !== 'undefined') {
@@ -150,6 +151,7 @@ class WsApiClient {
       this.ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
+          console.log('[wa-runtime] WebSocket message received:', data.type, data.requestId ? `(req: ${data.requestId})` : '');
           
           // Check if this is a response to a pending request
           if (data.requestId && this.pendingRequests.has(data.requestId)) {
@@ -161,10 +163,12 @@ class WsApiClient {
 
           // Otherwise it's a broadcast (stats update)
           if (data.type === 'stats') {
+            this.lastStatsData = data; // Store for late subscribers
+            console.log('[wa-runtime] Broadcasting stats to', this.statsCallbacks.size, 'callbacks');
             this.statsCallbacks.forEach(callback => callback(data));
           }
-        } catch {
-          // Ignore parse errors
+        } catch (e) {
+          console.error('[wa-runtime] Failed to parse WebSocket message:', e);
         }
       };
 
@@ -244,6 +248,13 @@ class WsApiClient {
   // Subscribe to stats updates
   onStats(callback: (data: StatsUpdate) => void): () => void {
     this.statsCallbacks.add(callback);
+    
+    // Immediately send the last known stats to new subscribers
+    if (this.lastStatsData) {
+      console.log('[wa-runtime] Sending cached stats to new subscriber');
+      setTimeout(() => callback(this.lastStatsData!), 0);
+    }
+    
     return () => {
       this.statsCallbacks.delete(callback);
     };

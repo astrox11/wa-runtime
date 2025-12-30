@@ -14,7 +14,8 @@ const { id } = Astro.params;
         Sessions
       </a>
       <span id="session-status" class="flex items-center gap-2 px-3 py-1 rounded-gh bg-gh-bg-secondary border border-gh-border text-xs">
-        <span class="text-gh-text-secondary">Loading...</span>
+        <div class="w-3 h-3 bg-gh-bg-tertiary rounded-full animate-pulse"></div>
+        <div class="w-16 h-3 bg-gh-bg-tertiary rounded animate-pulse"></div>
       </span>
     </div>
 
@@ -27,7 +28,7 @@ const { id } = Astro.params;
           </svg>
           <p class="text-xs text-gh-text-secondary">User</p>
         </div>
-        <p id="user-name" class="text-base font-semibold text-gh-text truncate">---</p>
+        <p id="user-name" class="text-base font-semibold text-gh-text truncate"><span class="inline-block w-20 h-4 bg-gh-bg-tertiary rounded animate-pulse"></span></p>
       </div>
       <div class="bg-gh-bg border border-gh-border rounded-gh p-4">
         <div class="flex items-center gap-2 mb-1">
@@ -36,7 +37,7 @@ const { id } = Astro.params;
           </svg>
           <p class="text-xs text-gh-text-secondary">Messages</p>
         </div>
-        <p id="messages-count" class="text-base font-semibold text-gh-text">0</p>
+        <p id="messages-count" class="text-base font-semibold text-gh-text"><span class="inline-block w-10 h-4 bg-gh-bg-tertiary rounded animate-pulse"></span></p>
       </div>
       <div class="bg-gh-bg border border-gh-border rounded-gh p-4">
         <div class="flex items-center gap-2 mb-1">
@@ -45,7 +46,7 @@ const { id } = Astro.params;
           </svg>
           <p class="text-xs text-gh-text-secondary">Uptime</p>
         </div>
-        <p id="uptime" class="text-base font-semibold text-gh-text">0m</p>
+        <p id="uptime" class="text-base font-semibold text-gh-text"><span class="inline-block w-10 h-4 bg-gh-bg-tertiary rounded animate-pulse"></span></p>
       </div>
       <div class="bg-gh-bg border border-gh-border rounded-gh p-4">
         <div class="flex items-center gap-2 mb-1">
@@ -54,7 +55,7 @@ const { id } = Astro.params;
           </svg>
           <p class="text-xs text-gh-text-secondary">Avg/Hour</p>
         </div>
-        <p id="avg-messages" class="text-base font-semibold text-gh-text">0</p>
+        <p id="avg-messages" class="text-base font-semibold text-gh-text"><span class="inline-block w-10 h-4 bg-gh-bg-tertiary rounded animate-pulse"></span></p>
       </div>
     </div>
 
@@ -68,9 +69,31 @@ const { id } = Astro.params;
         <span class="text-xs text-gh-text-muted">Messages per hour (today)</span>
       </div>
       <div id="activity-chart" class="p-4 h-40 flex items-end justify-between gap-0.5">
-        <div class="flex-1 flex items-center justify-center">
-          <div class="w-5 h-5 border-2 border-gh-accent border-t-transparent rounded-full animate-spin"></div>
-        </div>
+        <!-- Skeleton loaders for chart bars -->
+        <div class="flex-1 h-1/4 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-2/5 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-1/3 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-1/2 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-2/3 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-1/4 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-3/5 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-1/2 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-1/3 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-2/5 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-1/4 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-1/2 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-2/3 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-1/3 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-2/5 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-1/2 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-1/4 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-3/5 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-2/5 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-1/3 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-1/2 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-2/3 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-1/4 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
+        <div class="flex-1 h-2/5 bg-gh-bg-tertiary rounded-t animate-pulse"></div>
       </div>
     </div>
 

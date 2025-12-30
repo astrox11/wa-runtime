@@ -79,7 +79,7 @@ import Layout from '../layouts/Layout.astro';
             <label for="phone" class="block text-sm font-medium text-gh-text mb-1">
               <span class="flex items-center gap-2">
                 <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
-                  <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122l-2.19.547a1.745 1.745 0 0 1-1.657-.459L5.482 8.062a1.745 1.745 0 0 1-.46-1.657l.548-2.19a.678.678 0 0 0-.122-.58L3.654 1.328ZM1.884.511a2.178 2.178 0 0 1 3.104.192l1.794 2.307a2.178 2.178 0 0 1 .394 1.857l-.548 2.19c-.048.193.01.392.154.535l2.457 2.457c.143.143.342.202.535.154l2.19-.548a2.178 2.178 0 0 1 1.857.394l2.307 1.794a2.178 2.178 0 0 1 .192 3.104l-1.034 1.034c-.709.709-1.766 1.012-2.771.66a19.068 19.068 0 0 1-7.182-4.535 19.068 19.068 0 0 1-4.536-7.182c-.352-1.005-.049-2.062.66-2.771L1.884.511Z"/>
+                  <path d="M10.561 8.073a6.005 6.005 0 0 1 3.432 5.142.75.75 0 1 1-1.498.07 4.5 4.5 0 0 0-8.99 0 .75.75 0 0 1-1.498-.07 6.004 6.004 0 0 1 3.431-5.142 3.999 3.999 0 1 1 5.123 0ZM10.5 5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z"/>
                 </svg>
                 Phone Number
               </span>
@@ -122,6 +122,30 @@ import Layout from '../layouts/Layout.astro';
             </div>
           </div>
 
+          <!-- Custom Variables -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-sm font-medium text-gh-text">
+                <span class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M0 1.75A.75.75 0 0 1 .75 1h4.253c1.227 0 2.317.59 3 1.501A3.743 3.743 0 0 1 11.006 1h4.245a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75h-4.507a2.25 2.25 0 0 0-1.591.659l-.622.621a.75.75 0 0 1-1.06 0l-.622-.621A2.25 2.25 0 0 0 5.258 13H.75a.75.75 0 0 1-.75-.75Z"/>
+                  </svg>
+                  Custom Variables
+                  <span class="text-gh-text-muted font-normal">(optional)</span>
+                </span>
+              </label>
+              <button type="button" id="add-var-btn" class="text-xs text-gh-link hover:underline flex items-center gap-1">
+                <svg class="w-3 h-3" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"/>
+                </svg>
+                Add
+              </button>
+            </div>
+            <div id="custom-vars" class="space-y-2">
+              <!-- Custom variables will be added here -->
+            </div>
+          </div>
+
           <div class="flex gap-2">
             <button type="button" id="cancel-form-btn" class="flex-1 py-1.5 px-4 text-sm font-medium rounded-gh bg-gh-bg-secondary border border-gh-border text-gh-text hover:bg-gh-bg-tertiary transition-colors">
               Cancel
@@ -156,21 +180,22 @@ import Layout from '../layouts/Layout.astro';
               <p id="network-detail" class="text-xs text-gh-text-muted">All systems operational</p>
             </div>
           </div>
-          <!-- Network Activity Graph -->
-          <div class="h-16 flex items-end gap-0.5" id="network-graph">
-            <!-- Skeleton bars for graph -->
-            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 40%"></div>
-            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 60%"></div>
-            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 30%"></div>
-            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 80%"></div>
-            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 50%"></div>
-            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 70%"></div>
-            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 45%"></div>
-            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 65%"></div>
-            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 55%"></div>
-            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 35%"></div>
-            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 75%"></div>
-            <div class="flex-1 bg-gh-bg-tertiary rounded-t animate-pulse" style="height: 40%"></div>
+          <!-- Network Activity Line Graph -->
+          <div class="h-20 relative" id="network-graph-container">
+            <!-- Skeleton placeholder -->
+            <div class="absolute inset-0 flex items-center justify-center" id="network-graph-skeleton">
+              <div class="w-full h-0.5 bg-gh-bg-tertiary rounded animate-pulse"></div>
+            </div>
+            <svg id="network-graph" class="w-full h-full" viewBox="0 0 120 40" preserveAspectRatio="none">
+              <!-- Grid lines -->
+              <line x1="0" y1="10" x2="120" y2="10" stroke="currentColor" class="text-gh-border" stroke-width="0.5" stroke-dasharray="2"/>
+              <line x1="0" y1="20" x2="120" y2="20" stroke="currentColor" class="text-gh-border" stroke-width="0.5" stroke-dasharray="2"/>
+              <line x1="0" y1="30" x2="120" y2="30" stroke="currentColor" class="text-gh-border" stroke-width="0.5" stroke-dasharray="2"/>
+              <!-- Line path will be rendered dynamically -->
+              <polyline id="network-line" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="" class="text-gh-success"/>
+              <!-- Area fill below line -->
+              <polygon id="network-area" class="text-gh-success opacity-10" fill="currentColor" points=""/>
+            </svg>
           </div>
           <p class="text-xs text-gh-text-muted mt-2 text-center">Network activity (last 12 checks)</p>
         </div>
@@ -228,14 +253,73 @@ import Layout from '../layouts/Layout.astro';
   const cancelFormBtn = document.getElementById('cancel-form-btn') as HTMLButtonElement;
   const botNameInput = document.getElementById('botName') as HTMLInputElement;
   const clearBotnameBtn = document.getElementById('clear-botname') as HTMLButtonElement;
-  const networkGraph = document.getElementById('network-graph') as HTMLDivElement;
+  const networkLine = document.getElementById('network-line') as unknown as SVGPolylineElement;
+  const networkArea = document.getElementById('network-area') as unknown as SVGPolygonElement;
+  const networkGraphSkeleton = document.getElementById('network-graph-skeleton') as HTMLDivElement;
+  const customVarsContainer = document.getElementById('custom-vars') as HTMLDivElement;
+  const addVarBtn = document.getElementById('add-var-btn') as HTMLButtonElement;
 
   let formExpanded = false;
   let sessionsLoaded = false;
+  let varCounter = 0;
   
-  // Network activity history for graph (12 data points)
-  const networkHistory: boolean[] = [];
+  // Network activity history for graph (12 data points: 0 = unhealthy, 1 = healthy)
+  const networkHistory: number[] = [];
   const GRAPH_POINTS = 12;
+
+  // Custom variables management
+  function addCustomVar(name = '', value = '') {
+    const varId = ++varCounter;
+    const varHtml = `
+      <div class="flex gap-2 items-center" data-var-id="${varId}">
+        <input 
+          type="text" 
+          placeholder="Key" 
+          value="${name}"
+          class="flex-1 px-3 py-1.5 text-sm bg-gh-bg border border-gh-border rounded-gh text-gh-text placeholder-gh-text-muted focus:outline-none focus:border-gh-accent focus:ring-1 focus:ring-gh-accent"
+          data-var-key="${varId}"
+        />
+        <input 
+          type="text" 
+          placeholder="Value" 
+          value="${value}"
+          class="flex-1 px-3 py-1.5 text-sm bg-gh-bg border border-gh-border rounded-gh text-gh-text placeholder-gh-text-muted focus:outline-none focus:border-gh-accent focus:ring-1 focus:ring-gh-accent"
+          data-var-value="${varId}"
+        />
+        <button type="button" class="p-1.5 text-gh-text-muted hover:text-gh-danger transition-colors" data-remove-var="${varId}" title="Remove">
+          <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"/>
+          </svg>
+        </button>
+      </div>
+    `;
+    customVarsContainer.insertAdjacentHTML('beforeend', varHtml);
+    
+    // Add event listener for remove button
+    const removeBtn = customVarsContainer.querySelector(`[data-remove-var="${varId}"]`);
+    removeBtn?.addEventListener('click', () => removeCustomVar(varId));
+  }
+
+  function removeCustomVar(varId: number) {
+    const varEl = customVarsContainer.querySelector(`[data-var-id="${varId}"]`);
+    varEl?.remove();
+  }
+
+  function getCustomVars(): Record<string, string> {
+    const vars: Record<string, string> = {};
+    const varElements = customVarsContainer.querySelectorAll('[data-var-id]');
+    varElements.forEach(el => {
+      const varId = el.getAttribute('data-var-id');
+      const keyInput = el.querySelector(`[data-var-key="${varId}"]`) as HTMLInputElement;
+      const valueInput = el.querySelector(`[data-var-value="${varId}"]`) as HTMLInputElement;
+      if (keyInput?.value && valueInput?.value) {
+        vars[keyInput.value] = valueInput.value;
+      }
+    });
+    return vars;
+  }
+
+  addVarBtn.addEventListener('click', () => addCustomVar());
 
   function showForm() {
     formExpanded = true;
@@ -281,29 +365,57 @@ import Layout from '../layouts/Layout.astro';
   }
 
   function updateNetworkGraph(isHealthy: boolean) {
-    // Add new data point
-    networkHistory.push(isHealthy);
+    // Hide skeleton
+    if (networkGraphSkeleton) {
+      networkGraphSkeleton.classList.add('hidden');
+    }
+    
+    // Add new data point (0 = bottom, 1 = top)
+    networkHistory.push(isHealthy ? 1 : 0);
     // Keep only last GRAPH_POINTS
     while (networkHistory.length > GRAPH_POINTS) {
       networkHistory.shift();
     }
     
-    // Render graph bars
-    const bars = networkHistory.map((healthy, idx) => {
-      // Create a varying height based on position for visual interest
-      const baseHeight = healthy ? 80 : 20;
-      const variance = Math.sin((idx + Date.now() / 1000) * 0.5) * 20;
-      const height = Math.max(10, Math.min(100, baseHeight + variance));
-      const color = healthy ? 'bg-gh-success' : 'bg-gh-danger';
-      return `<div class="flex-1 ${color} rounded-t transition-all duration-300" style="height: ${height}%"></div>`;
-    }).join('');
+    // Calculate line graph points
+    const width = 120;
+    const height = 40;
+    const padding = 2;
+    const effectiveHeight = height - (padding * 2);
     
-    // Pad with empty bars if less than GRAPH_POINTS
-    const emptyBars = Array(GRAPH_POINTS - networkHistory.length)
-      .fill('<div class="flex-1 bg-gh-bg-tertiary rounded-t" style="height: 40%"></div>')
-      .join('');
+    const points: string[] = [];
+    const areaPoints: string[] = [];
     
-    networkGraph.innerHTML = emptyBars + bars;
+    networkHistory.forEach((value, idx) => {
+      const x = (idx / (GRAPH_POINTS - 1)) * width;
+      const y = padding + (1 - value) * effectiveHeight; // Invert Y
+      points.push(`${x},${y}`);
+      areaPoints.push(`${x},${y}`);
+    });
+    
+    // Add bottom corners for area fill
+    if (areaPoints.length > 0) {
+      const lastX = ((networkHistory.length - 1) / (GRAPH_POINTS - 1)) * width;
+      const firstX = 0;
+      areaPoints.push(`${lastX},${height}`);
+      areaPoints.push(`${firstX},${height}`);
+    }
+    
+    // Determine color based on overall health (mostly healthy = green, otherwise red)
+    const healthyCount = networkHistory.filter(v => v === 1).length;
+    const isOverallHealthy = healthyCount >= networkHistory.length / 2;
+    const color = isOverallHealthy ? 'rgb(52, 211, 153)' : 'rgb(248, 113, 113)';
+    
+    // Update SVG elements
+    if (networkLine) {
+      networkLine.setAttribute('points', points.join(' '));
+      networkLine.setAttribute('stroke', color);
+    }
+    
+    if (networkArea) {
+      networkArea.setAttribute('points', areaPoints.join(' '));
+      networkArea.setAttribute('fill', color);
+    }
   }
 
   function updateNetworkStatus(network: { isHealthy: boolean; isPaused: boolean; consecutiveFailures: number }) {
