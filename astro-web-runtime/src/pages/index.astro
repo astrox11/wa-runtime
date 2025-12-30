@@ -793,7 +793,9 @@ import Layout from '../layouts/Layout.astro';
   modalForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const phoneInput = document.getElementById('modal-phone') as HTMLInputElement;
+    const phoneInput = document.getElementById('modal-phone') as HTMLInputElement | null;
+    if (!phoneInput) return;
+    
     const phoneNumber = phoneInput.value.replace(/\D/g, '');
     
     if (!phoneNumber) {
@@ -804,7 +806,9 @@ import Layout from '../layouts/Layout.astro';
       return;
     }
 
-    const submitBtn = modalForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const submitBtn = modalForm.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+    if (!submitBtn) return;
+    
     submitBtn.disabled = true;
     submitBtn.textContent = 'Creating...';
     modalErrorDiv?.classList.add('hidden');
