@@ -1,6 +1,6 @@
-# wa-runtime
+# Whatsaly
 
-wa-runtime is a full WhatsApp runtime that provides a backend service for session management, authentication, messaging, and statistics. It includes a web dashboard built with Astro.js for managing WhatsApp sessions.
+Whatsaly is a full WhatsApp runtime that provides a backend service for session management, authentication, messaging, and statistics. It includes a web dashboard built with Astro.js for managing WhatsApp sessions.
 
 ## Features
 
@@ -12,35 +12,18 @@ wa-runtime is a full WhatsApp runtime that provides a backend service for sessio
 - **Real-time Statistics**: Track messages, uptime, and session health
 - **Network Monitoring**: Automatic pause/resume on network issues
 - **Extensible Middleware**: Add custom behavior and business logic
+- **Debug Mode**: Configurable logging for development and production
 
-## Architecture
+## Setup Instructions
 
-```
-wa-runtime/
-├── Backend Server (Bun.js) - Port 3000
-│   ├── HTTP API
-│   ├── WebSocket API (/ws/stats)
-│   ├── Proxy to Astro SSR
-│   ├── Session Management
-│   ├── Authentication
-│   └── WhatsApp Core (Baileys)
-│
-└── Frontend (Astro.js SSR) - Port 4321
-    ├── Session Creation
-    ├── Pairing Flow
-    └── Dashboard
-```
-
-**Unified Access**: Users access port 3000 which handles API requests directly and proxies page requests to the Astro SSR server.
-
-## Requirements
+### Requirements
 
 - [Node.js](https://nodejs.org/) (v20+)
 - [Bun.js](https://bun.sh/)
 - [ffmpeg](https://www.ffmpeg.org/)
 - [libwebp](https://developers.google.com/speed/webp/download)
 
-## Installation
+### Installation
 
 ```bash
 # Clone the repository
@@ -51,11 +34,32 @@ cd wa-runtime
 bun install
 ```
 
-## Running the Application
+### Configuration
 
-### Production Mode
+Create a `.env` file or use environment variables:
 
-For production, start both the backend and Astro SSR server:
+| Variable       | Description                            | Default      |
+| -------------- | -------------------------------------- | ------------ |
+| `PHONE_NUMBER` | Phone number for auto-session creation | -            |
+| `BOT_NAME`     | Display name for the bot               | `Whatsaly`   |
+| `API_PORT`     | Backend API port                       | `3000`       |
+| `API_HOST`     | Backend API host                       | `0.0.0.0`    |
+| `DEBUG`        | Enable debug logging                   | `false`      |
+
+Example `.env` file:
+
+```bash
+PHONE_NUMBER=14155551234
+BOT_NAME=MyBot
+API_PORT=3000
+DEBUG=true
+```
+
+**Debug Mode**: When `DEBUG=true`, all `log.debug`, `log.error`, and `log.trace` messages are visible in the console. When `DEBUG=false`, only `log.info` messages are shown.
+
+### Running the Application
+
+**Production Mode:**
 
 ```bash
 bun run start
@@ -63,177 +67,35 @@ bun run start
 
 Access the dashboard at `http://localhost:3000`
 
-### Development Mode
-
-For development with hot-reload on frontend changes:
+**Development Mode:**
 
 ```bash
 bun run dev
 ```
 
-Access the dashboard at `http://localhost:4321` during development (with Vite proxy).
-
-### Building the Frontend
-
-If you need to rebuild the frontend after changes:
-
-```bash
-bun run web:build
-```
-
-## Configuration
-
-Configuration can be set via environment variables or the `config.ts` file:
-
-| Variable       | Description                            | Default      |
-| -------------- | -------------------------------------- | ------------ |
-| `PHONE_NUMBER` | Phone number for auto-session creation | -            |
-| `BOT_NAME`     | Display name for the bot               | `wa-runtime` |
-| `API_PORT`     | Backend API port                       | `3000`       |
-| `API_HOST`     | Backend API host                       | `0.0.0.0`    |
-
-### Using .env file
-
-```bash
-PHONE_NUMBER=14155551234
-BOT_NAME=MyBot
-API_PORT=3000
-```
-
-## API Reference
-
-### WebSocket API
-
-Connect to `/ws/stats` for real-time bidirectional communication:
-
-```javascript
-const ws = new WebSocket("ws://localhost:3000/ws/stats");
-
-// Receive stats broadcasts
-ws.onmessage = (event) => {
-  const data = JSON.parse(event.data);
-  if (data.type === "stats") {
-    console.log("Sessions:", data.data.sessions);
-    console.log("Network:", data.data.network);
-  }
-};
-
-// Send requests
-ws.send(
-  JSON.stringify({
-    action: "createSession",
-    requestId: "req_1",
-    params: { phoneNumber: "14155551234" },
-  }),
-);
-```
-
-**WebSocket Actions:**
-
-- `getSessions` - List all sessions
-- `createSession` - Create a new session
-- `deleteSession` - Delete a session
-- `getAuthStatus` - Get authentication status
-- `getStats` - Get overall statistics
-- `getSessionStats` - Get session statistics
-- `getMessages` - Get session messages
-- `getConfig` - Get runtime configuration
-- `getNetworkState` - Get network health state
-
-### REST API
-
-| Method | Endpoint                      | Description                     |
-| ------ | ----------------------------- | ------------------------------- |
-| GET    | `/api/sessions`               | List all sessions               |
-| POST   | `/api/sessions`               | Create a new session            |
-| GET    | `/api/sessions/:id`           | Get session details             |
-| DELETE | `/api/sessions/:id`           | Delete a session                |
-| GET    | `/api/auth/status/:sessionId` | Get authentication status       |
-| GET    | `/api/stats`                  | Get overall runtime statistics  |
-| GET    | `/api/stats/:sessionId`       | Get session-specific statistics |
-| GET    | `/api/config`                 | Get runtime configuration       |
-| GET    | `/api/network`                | Get network state               |
-| GET    | `/api/messages/:sessionId`    | Get session messages            |
-
-### Example: Create a Session
-
-```bash
-curl -X POST http://localhost:3000/api/sessions \
-  -H "Content-Type: application/json" \
-  -d '{"phoneNumber": "14155551234"}'
-```
-
-Response:
-
-```json
-{
-  "success": true,
-  "data": {
-    "id": "session_14155551234",
-    "pairingCode": "12345678",
-    "pairingCodeFormatted": "1234-5678"
-  }
-}
-```
-
-## Web Dashboard
-
-The web dashboard provides a visual interface for managing sessions:
-
-### Home Page
-
-- Create new sessions by entering phone number and bot name
-- View existing sessions with real-time status
-- Quick stats: total sessions, active sessions, messages
-- Network health indicator
-
-### Pairing Page
-
-- Displays the 8-digit pairing code
-- Instructions for linking via WhatsApp
-- Automatic redirect to dashboard on success
-
-### Dashboard
-
-- Session statistics (messages, uptime, health)
-- Activity graphs showing messages per hour
-- Runtime statistics (total sessions, server uptime)
-- Session management actions
-
-## CLI Usage
-
-```bash
-# Create a session
-bun start session create 14155551234
-
-# List all sessions
-bun start session list
-
-# Delete a session
-bun start session delete <session_id>
-```
-
-## Docker
-
-```bash
-docker build -t wa-runtime .
-docker run -p 3000:3000 wa-runtime
-```
-
-## Supported Platforms
-
-- Windows
-- Linux
-- macOS
-- Docker
-
-**Not supported:**
-
-- Android (Bun.js limitation)
+Access the dashboard at `http://localhost:4321` during development.
 
 ## Contributing
 
-Contributions are welcome! wa-runtime is evolving and community input directly influences its direction.
+Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting pull requests.
+
+All contributions should:
+- Be focused on a single change
+- Include tests when applicable
+- Pass existing tests and checks
+- Follow the project's coding style
+- Not introduce security risks
+
+## Acknowledgements
+
+This project uses the following open-source libraries:
+
+- [Baileys](https://github.com/WhiskeySockets/Baileys) - WhatsApp Web API
+- [Bun.js](https://bun.sh/) - JavaScript runtime and toolkit
+- [Astro.js](https://astro.build/) - Web framework for the dashboard
+- [Tailwind CSS](https://tailwindcss.com/) - CSS framework
+
+Special thanks to all contributors and the open-source community.
 
 ## License
 

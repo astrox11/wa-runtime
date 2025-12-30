@@ -1,9 +1,12 @@
+import config from "../../config";
+
 const COLORS = {
   reset: "\x1b[0m",
   info: "\x1b[32m",
   warn: "\x1b[33m",
   error: "\x1b[31m",
   debug: "\x1b[34m",
+  trace: "\x1b[35m",
 };
 
 function timestamp(): string {
@@ -27,11 +30,18 @@ export const log = {
     console.warn(prefix, ...args.map(formatArg), COLORS.reset);
   },
   error(...args: any[]) {
+    if (!config.DEBUG) return;
     const prefix = `\x1b[1m${COLORS.error}${timestamp()} [ERROR]`;
     console.error(prefix, ...args.map(formatArg), COLORS.reset);
   },
   debug(...args: any[]) {
+    if (!config.DEBUG) return;
     const prefix = `\x1b[1m${COLORS.debug}${timestamp()} [DEBUG]`;
+    console.log(prefix, ...args.map(formatArg), COLORS.reset);
+  },
+  trace(...args: any[]) {
+    if (!config.DEBUG) return;
+    const prefix = `\x1b[1m${COLORS.trace}${timestamp()} [TRACE]`;
     console.log(prefix, ...args.map(formatArg), COLORS.reset);
   },
 };

@@ -148,11 +148,14 @@ async function parseBody<T>(req: Request): Promise<T | null> {
 export async function handleWsAction(request: WsRequest): Promise<WsResponse> {
   const { action, requestId, params = {} } = request;
 
+  log.debug("WebSocket action received:", action, params);
+
   try {
     let result: ApiResponse;
 
     switch (action) {
       case "getSessions":
+        log.debug("Getting all sessions");
         result = { success: true, data: sessionManager.listExtended() };
         break;
 
@@ -160,6 +163,7 @@ export async function handleWsAction(request: WsRequest): Promise<WsResponse> {
         if (!params.id) {
           result = { success: false, error: "Session ID is required" };
         } else {
+          log.debug("Getting session:", params.id);
           const session = sessionManager.get(params?.id as string);
           if (!session) {
             result = { success: false, error: "Session not found" };
@@ -173,11 +177,13 @@ export async function handleWsAction(request: WsRequest): Promise<WsResponse> {
         if (!params.phoneNumber) {
           result = { success: false, error: "Phone number is required" };
         } else {
+          log.debug("Creating session for:", params.phoneNumber);
           const createResult = await sessionManager.create(
             params.phoneNumber as string,
           );
           if (createResult.success) {
             runtimeStats.recordSessionStart(createResult.id!);
+            log.info("Session created:", createResult.id);
             result = {
               success: true,
               data: {
@@ -189,6 +195,7 @@ export async function handleWsAction(request: WsRequest): Promise<WsResponse> {
               },
             };
           } else {
+            log.error("Failed to create session:", createResult.error);
             result = { success: false, error: createResult.error };
           }
         }
@@ -198,10 +205,13 @@ export async function handleWsAction(request: WsRequest): Promise<WsResponse> {
         if (!params.id) {
           result = { success: false, error: "Session ID is required" };
         } else {
+          log.debug("Deleting session:", params.id);
           const deleteResult = await sessionManager.delete(params.id as string);
           if (deleteResult.success) {
+            log.info("Session deleted:", params.id);
             result = { success: true, data: { message: "Session deleted" } };
           } else {
+            log.error("Failed to delete session:", deleteResult.error);
             result = { success: false, error: deleteResult.error };
           }
         }
@@ -211,6 +221,7 @@ export async function handleWsAction(request: WsRequest): Promise<WsResponse> {
         if (!params.sessionId) {
           result = { success: false, error: "Session ID is required" };
         } else {
+          log.debug("Getting auth status for:", params.sessionId);
           const session = sessionManager.get(params.sessionId as string);
           if (!session) {
             result = { success: false, error: "Session not found" };

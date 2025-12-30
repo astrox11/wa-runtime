@@ -1,5 +1,5 @@
 /**
- * API Client for communicating with wa-runtime backend
+ * API Client for communicating with Whatsaly backend
  * Uses WebSocket for real-time bidirectional communication
  */
 
@@ -150,11 +150,11 @@ class WsApiClient {
       }
 
       const wsUrl = `${protocol}//${wsHost}/ws/stats`;
-      console.log("[wa-runtime] Connecting to WebSocket:", wsUrl);
+      console.log("[Whatsaly] Connecting to WebSocket:", wsUrl);
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
-        console.log("[wa-runtime] WebSocket connected");
+        console.log("[Whatsaly] WebSocket connected");
         this.isReconnecting = false;
         resolve();
       };
@@ -164,11 +164,11 @@ class WsApiClient {
         try {
           data = JSON.parse(event.data);
         } catch (e) {
-          console.error("[wa-runtime] Invalid JSON:", e);
+          console.error("[Whatsaly] Invalid JSON:", e);
           return;
         }
 
-        console.log("[wa-runtime] WebSocket message received:", data.type);
+        console.log("[Whatsaly] WebSocket message received:", data.type);
 
         if (data.requestId && this.pendingRequests.has(data.requestId)) {
           const pending = this.pendingRequests.get(data.requestId)!;
@@ -180,7 +180,7 @@ class WsApiClient {
         if (data?.type === "stats") {
           this.lastStatsData = data;
           console.log(
-            "[wa-runtime] Broadcasting stats to",
+            "[Whatsaly] Broadcasting stats to",
             this.statsCallbacks.size,
             "callbacks",
           );
@@ -189,12 +189,12 @@ class WsApiClient {
       };
 
       this.ws.onerror = (error) => {
-        console.error("[wa-runtime] WebSocket error:", error);
+        console.error("[Whatsaly] WebSocket error:", error);
         reject(new Error("WebSocket connection failed"));
       };
 
       this.ws.onclose = (event) => {
-        console.log("[wa-runtime] WebSocket closed:", event.code, event.reason);
+        console.log("[Whatsaly] WebSocket closed:", event.code, event.reason);
         this.connectionPromise = null;
         this.ws = null;
 
@@ -207,7 +207,7 @@ class WsApiClient {
         // Reconnect after delay
         if (!this.isReconnecting) {
           this.isReconnecting = true;
-          console.log("[wa-runtime] Reconnecting in 3 seconds...");
+          console.log("[Whatsaly] Reconnecting in 3 seconds...");
           this.reconnectTimeout = setTimeout(() => {
             this.connect();
           }, 3000);
@@ -270,7 +270,7 @@ class WsApiClient {
 
     // Immediately send the last known stats to new subscribers
     if (this.lastStatsData) {
-      console.log("[wa-runtime] Sending cached stats to new subscriber");
+      console.log("[Whatsaly] Sending cached stats to new subscriber");
       setTimeout(() => callback(this.lastStatsData!), 0);
     }
 

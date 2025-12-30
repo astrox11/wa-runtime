@@ -1,5 +1,5 @@
 /**
- * wa-runtime Backend Service
+ * Whatsaly Backend Service
  *
  * Exposes HTTP APIs for session management, authentication, messaging, and statistics.
  * Supports multiple isolated sessions consumable by external clients.
@@ -44,6 +44,8 @@ const wsClients: Set<any> = new Set();
  */
 function broadcastStats() {
   if (wsClients.size === 0) return;
+
+  log.debug("Broadcasting stats to", wsClients.size, "WebSocket clients");
 
   const overallStats = runtimeStats.getOverallStats();
   const sessions = sessionManager.listExtended();
@@ -158,6 +160,7 @@ async function serveStaticFile(filePath: string): Promise<Response | null> {
  */
 async function proxyToAstro(req: Request): Promise<Response> {
   try {
+    log.debug("Proxying request to Astro SSR server:", req.url);
     const url = new URL(req.url);
     const astroUrl = new URL(url.pathname + url.search, ASTRO_SERVER_URL);
 
@@ -191,8 +194,11 @@ const server = Bun.serve({
     const url = new URL(req.url);
     const path = url.pathname;
 
+    log.debug("Received request:", req.method, path);
+
     // WebSocket upgrade for stats streaming
     if (path === "/ws/stats" && req.headers.get("upgrade") === "websocket") {
+      log.debug("WebSocket upgrade requested");
       const success = server.upgrade(req);
       if (success) return undefined as any;
       return new Response("WebSocket upgrade failed", { status: 500 });
@@ -200,6 +206,7 @@ const server = Bun.serve({
 
     // Health check endpoint
     if (path === "/health" && req.method === "GET") {
+      log.debug("Health check requested");
       return createResponse({
         success: true,
         data: {
@@ -213,6 +220,7 @@ const server = Bun.serve({
 
     // API routes
     if (path.startsWith("/api/")) {
+      log.debug("API request:", path);
       const result = await handleApiRequest(req);
       return createResponse(result);
     }
@@ -286,8 +294,10 @@ const server = Bun.serve({
 });
 
 log.info(
-  `wa-runtime server running on http://${config.API_HOST}:${config.API_PORT}`,
+  `Whatsaly server running on http://${config.API_HOST}:${config.API_PORT}`,
 );
+
+log.debug("Debug mode:", config.DEBUG ? "enabled" : "disabled");
 
 sessionManager
   .restoreAllSessions()

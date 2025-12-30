@@ -109,12 +109,20 @@ class SessionManager {
 
     const totalSessions = this.sessions.size;
 
+    log.debug(
+      `Network health check: ${disconnectedCount}/${totalSessions} sessions disconnected`,
+    );
+
     // If more than half of sessions are disconnected, assume network issue
     if (
       totalSessions > 0 &&
       disconnectedCount >= Math.ceil(totalSessions / 2)
     ) {
       this.networkState.consecutiveFailures++;
+
+      log.debug(
+        `Network failures: ${this.networkState.consecutiveFailures}/${SessionManager.NETWORK_FAILURE_THRESHOLD}`,
+      );
 
       if (
         this.networkState.consecutiveFailures >=
@@ -254,13 +262,17 @@ class SessionManager {
   ): Promise<{ success: boolean; code?: string; error?: string; id?: string }> {
     const sanitized = this.sanitizePhoneNumber(phoneNumber);
     if (!sanitized) {
+      log.debug("Invalid phone number format:", phoneNumber);
       return { success: false, error: "Invalid phone number format" };
     }
 
     const sessionId = this.generateSessionId(sanitized);
 
+    log.debug("Creating new session:", sessionId);
+
     // Check if session already exists
     if (sessionExists(sessionId) || this.sessions.has(sessionId)) {
+      log.debug("Session already exists:", sessionId);
       return {
         success: false,
         error: "Session already exists for this number",
@@ -269,6 +281,7 @@ class SessionManager {
 
     // Initialize user-specific database tables
     initializeUserTables(sanitized);
+    log.debug("Initialized user tables for:", sanitized);
 
     // Initialize session in memory first (before database record)
     const activeSession: ActiveSession = {
@@ -285,6 +298,7 @@ class SessionManager {
       const code = await this.initializeSession(activeSession, true);
       // Create database record only after successful initialization
       createSession(sessionId, sanitized);
+      log.debug("Session created successfully:", sessionId);
       return { success: true, code, id: sessionId };
     } catch (error) {
       // Cleanup on failure - only need to remove from memory since DB record wasn't created
@@ -292,6 +306,7 @@ class SessionManager {
       deleteUserTables(sanitized);
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
+      log.error("Failed to create session:", sessionId, errorMessage);
       return { success: false, error: errorMessage };
     }
   }
@@ -312,8 +327,12 @@ class SessionManager {
       return undefined;
     }
 
+    log.debug("Initializing session:", session.id);
+
     const { state, saveCreds } = await useSessionAuth(session.id);
     const { version } = await fetchLatestBaileysVersion();
+
+    log.debug("Fetched Baileys version:", version.join("."));
 
     // Create a session-scoped getMessage function
     const sessionGetMessage = async (key: any) => getMessage(session.id, key);
@@ -341,6 +360,7 @@ class SessionManager {
 
     // Request pairing code if needed
     if (requestPairingCode && !sock.authState.creds.registered) {
+      log.debug("Requesting pairing code for session:", session.id);
       await delay(10000);
       pairingCode = await sock.requestPairingCode(session.phoneNumber);
       log.info(
@@ -369,9 +389,18 @@ class SessionManager {
         const update = events["connection.update"];
         const { connection, lastDisconnect } = update;
 
+        log.debug(
+          `Session ${session.id} connection update:`,
+          connection || "no change",
+        );
+
         if (connection === "close") {
           const statusCode = (lastDisconnect?.error as Boom)?.output
             ?.statusCode;
+          log.debug(
+            `Session ${session.id} disconnected with status code:`,
+            statusCode,
+          );
           if (statusCode !== DisconnectReason.loggedOut) {
             // Reconnect only if network is not paused
             session.status = "connecting";
@@ -403,6 +432,7 @@ class SessionManager {
 
           if (!hasSynced) {
             hasSynced = true;
+            log.debug(`Syncing groups for session ${session.id}`);
             addSudo(session.id, sock.user.id, sock.user.lid);
             await delay(15000);
             await syncGroupMetadata(session.id, sock);

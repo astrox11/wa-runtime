@@ -12,19 +12,19 @@ RUN apt-get update && apt-get install -y \
 
 RUN node -v && npm -v && bun -v
 
-# Clone and setup wa-runtime backend
-RUN git clone https://github.com/astrox11/wa-runtime /root/wa-runtime
+# Clone and setup Whatsaly backend
+RUN git clone https://github.com/astrox11/wa-runtime /root/Whatsaly
 
-WORKDIR /root/wa-runtime
+WORKDIR /root/Whatsaly
 
 RUN bun install
 
 # Install and build frontend
-WORKDIR /root/wa-runtime/service
+WORKDIR /root/Whatsaly/service
 RUN npm install
 RUN npm run build
 
-WORKDIR /root/wa-runtime
+WORKDIR /root/Whatsaly
 
 # Expose ports for backend (3000) and frontend (4321)
 EXPOSE 3000 4321

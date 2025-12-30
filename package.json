@@ -1,5 +1,5 @@
 {
-  "name": "wa-runtime",
+  "name": "Whatsaly",
   "version": "1.0.0",
   "description": "A full WhatsApp runtime with backend service and web dashboard",
   "type": "module",
