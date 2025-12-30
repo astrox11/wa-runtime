@@ -162,225 +162,143 @@ const { id } = Astro.params;
 </Layout>
 
 <script define:vars={{ sessionId: id }}>
-  let ws = null;
+  // Import API module dynamically for client-side execution
+  import('../lib/api').then(({ api }) => {
+    function updateSessionDisplay(sessionData) {
+      // User name (pushName or phone number)
+      const displayName = sessionData.pushName || sessionData.push_name || `+${sessionData.phone_number}`;
+      document.getElementById('user-name').textContent = displayName;
+      
+      // Stats from the stats object
+      if (sessionData.stats) {
+        document.getElementById('messages-count').textContent = sessionData.stats.messages.toLocaleString();
+        document.getElementById('uptime').textContent = sessionData.stats.uptimeFormatted;
+        document.getElementById('avg-messages').textContent = sessionData.stats.avgMessagesPerHour.toFixed(1);
+        
+        if (sessionData.stats.hourlyActivity) {
+          renderBarChart(sessionData.stats.hourlyActivity);
+        }
+      }
+      
+      // Status indicator
+      const statusEl = document.getElementById('session-status');
+      const healthIcon = document.getElementById('health-icon');
+      const healthText = document.getElementById('health-text');
+      const healthStatus = document.getElementById('health-status');
+      
+      if (sessionData.status === 'active') {
+        statusEl.innerHTML = `
+          <svg class="w-4 h-4 text-gh-success" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>
+          </svg>
+          <span class="text-gh-success">Active</span>
+        `;
+        healthIcon.className = 'w-8 h-8 text-gh-success';
+        healthIcon.innerHTML = '<path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>';
+        healthText.textContent = 'Healthy';
+        healthText.className = 'text-lg font-semibold text-gh-success';
+        healthStatus.textContent = 'Session is active and connected';
+      } else if (sessionData.status === 'pairing') {
+        statusEl.innerHTML = `
+          <svg class="w-4 h-4 text-gh-warning" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Z"/>
+          </svg>
+          <span class="text-gh-warning">Pairing</span>
+        `;
+        healthIcon.className = 'w-8 h-8 text-gh-warning';
+        healthIcon.innerHTML = '<path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Z"/>';
+        healthText.textContent = 'Pairing';
+        healthText.className = 'text-lg font-semibold text-gh-warning';
+        healthStatus.textContent = 'Waiting for device pairing';
+      } else {
+        statusEl.innerHTML = `
+          <svg class="w-4 h-4 text-gh-text-muted" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Z"/>
+          </svg>
+          <span class="text-gh-text-muted">Inactive</span>
+        `;
+        healthIcon.className = 'w-8 h-8 text-gh-text-muted';
+        healthIcon.innerHTML = '<path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Z"/>';
+        healthText.textContent = 'Offline';
+        healthText.className = 'text-lg font-semibold text-gh-text-muted';
+        healthStatus.textContent = 'Session is disconnected';
+      }
+      
+      // Created date
+      if (sessionData.created_at) {
+        const createdDate = new Date(sessionData.created_at);
+        document.getElementById('session-created').textContent = createdDate.toLocaleDateString();
+      }
+    }
 
-  async function init() {
-    await Promise.all([
-      loadSessionStats(),
-      loadOverallStats(),
-      loadConfig(),
-    ]);
+    function renderBarChart(hourlyData) {
+      const container = document.getElementById('activity-chart');
+      const maxValue = Math.max(...hourlyData, 1);
 
-    // Connect to WebSocket for real-time updates (1s interval)
-    connectWebSocket();
-  }
+      let html = '';
+      for (let i = 0; i < 24; i++) {
+        const value = hourlyData[i] || 0;
+        const height = Math.max((value / maxValue) * 100, 4);
+        
+        html += `
+          <div class="flex-1 h-full flex items-end">
+            <div class="w-full rounded-t bg-gh-accent" style="height: ${height}%"></div>
+          </div>
+        `;
+      }
+      
+      container.innerHTML = html;
+    }
 
-  function connectWebSocket() {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    ws = new WebSocket(`${protocol}//${window.location.host}/ws/stats`);
-    
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'stats') {
-          // Update overall stats
-          if (data.data.overall) {
-            document.getElementById('total-sessions').textContent = data.data.overall.totalSessions;
-            document.getElementById('active-sessions').textContent = data.data.overall.activeSessions;
-            document.getElementById('total-messages').textContent = data.data.overall.totalMessages.toLocaleString();
-            document.getElementById('server-uptime').textContent = data.data.overall.serverUptimeFormatted;
-          }
-          
-          // Find current session stats
-          if (data.data.sessions) {
-            const sessionData = data.data.sessions.find(s => s.id === sessionId);
-            if (sessionData) {
-              updateSessionDisplay(sessionData);
-            }
+    // Subscribe to real-time updates via WebSocket
+    api.onStats((data) => {
+      if (data.type === 'stats') {
+        // Update overall stats
+        if (data.data.overall) {
+          document.getElementById('total-sessions').textContent = data.data.overall.totalSessions.toString();
+          document.getElementById('active-sessions').textContent = data.data.overall.activeSessions.toString();
+          document.getElementById('total-messages').textContent = data.data.overall.totalMessages.toLocaleString();
+          document.getElementById('server-uptime').textContent = data.data.overall.serverUptimeFormatted;
+        }
+        
+        // Find current session stats
+        if (data.data.sessions) {
+          const sessionData = data.data.sessions.find(s => s.id === sessionId);
+          if (sessionData) {
+            updateSessionDisplay(sessionData);
           }
         }
-      } catch (e) {
-        console.error('WebSocket message parse error:', e);
       }
-    };
-    
-    ws.onclose = () => {
-      // Reconnect after 3 seconds
-      setTimeout(connectWebSocket, 3000);
-    };
-    
-    ws.onerror = () => {
-      console.error('WebSocket error');
-    };
-  }
+    });
 
-  function updateSessionDisplay(sessionData) {
-    // User name (pushName or phone number)
-    const displayName = sessionData.pushName || `+${sessionData.phone_number}`;
-    document.getElementById('user-name').textContent = displayName;
-    
-    // Stats from the stats object
-    if (sessionData.stats) {
-      document.getElementById('messages-count').textContent = sessionData.stats.messages.toLocaleString();
-      document.getElementById('uptime').textContent = sessionData.stats.uptimeFormatted;
-      document.getElementById('avg-messages').textContent = sessionData.stats.avgMessagesPerHour.toFixed(1);
-      
-      if (sessionData.stats.hourlyActivity) {
-        renderBarChart(sessionData.stats.hourlyActivity);
-      }
-    }
-    
-    // Status indicator
-    const statusEl = document.getElementById('session-status');
-    const healthIcon = document.getElementById('health-icon');
-    const healthText = document.getElementById('health-text');
-    const healthStatus = document.getElementById('health-status');
-    
-    if (sessionData.status === 'active') {
-      statusEl.innerHTML = `
-        <svg class="w-4 h-4 text-gh-success" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>
-        </svg>
-        <span class="text-gh-success">Active</span>
-      `;
-      healthIcon.className = 'w-8 h-8 text-gh-success';
-      healthIcon.innerHTML = '<path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>';
-      healthText.textContent = 'Healthy';
-      healthText.className = 'text-lg font-semibold text-gh-success';
-      healthStatus.textContent = 'Session is active and connected';
-    } else if (sessionData.status === 'pairing') {
-      statusEl.innerHTML = `
-        <svg class="w-4 h-4 text-gh-warning" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Z"/>
-        </svg>
-        <span class="text-gh-warning">Pairing</span>
-      `;
-      healthIcon.className = 'w-8 h-8 text-gh-warning';
-      healthIcon.innerHTML = '<path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Z"/>';
-      healthText.textContent = 'Pairing';
-      healthText.className = 'text-lg font-semibold text-gh-warning';
-      healthStatus.textContent = 'Waiting for device pairing';
-    } else {
-      statusEl.innerHTML = `
-        <svg class="w-4 h-4 text-gh-text-muted" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Z"/>
-        </svg>
-        <span class="text-gh-text-muted">Inactive</span>
-      `;
-      healthIcon.className = 'w-8 h-8 text-gh-text-muted';
-      healthIcon.innerHTML = '<path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Z"/>';
-      healthText.textContent = 'Offline';
-      healthText.className = 'text-lg font-semibold text-gh-text-muted';
-      healthStatus.textContent = 'Session is disconnected';
-    }
-    
-    // Created date
-    if (sessionData.created_at) {
-      const createdDate = new Date(sessionData.created_at);
-      document.getElementById('session-created').textContent = createdDate.toLocaleDateString();
-    }
-  }
-
-  async function loadSessionStats() {
-    try {
-      const response = await fetch(`/api/stats/${sessionId}`);
-      const result = await response.json();
-
-      if (result.success && result.data) {
-        const data = result.data;
-
-        document.getElementById('user-name').textContent = data.session.pushName || `+${data.session.phoneNumber}`;
-        document.getElementById('messages-count').textContent = data.messages.toLocaleString();
-        document.getElementById('uptime').textContent = data.uptimeFormatted;
-        document.getElementById('avg-messages').textContent = data.avgMessagesPerHour.toFixed(1);
-
-        const createdDate = new Date(data.session.createdAt);
-        document.getElementById('session-created').textContent = createdDate.toLocaleDateString();
-
-        renderBarChart(data.hourlyActivity);
-      }
-    } catch (error) {
-      console.error('Failed to load session stats:', error);
-    }
-  }
-
-  async function loadOverallStats() {
-    try {
-      const response = await fetch('/api/stats');
-      const result = await response.json();
-
-      if (result.success && result.data) {
-        document.getElementById('total-sessions').textContent = result.data.totalSessions;
-        document.getElementById('active-sessions').textContent = result.data.activeSessions;
-        document.getElementById('total-messages').textContent = result.data.totalMessages.toLocaleString();
-        document.getElementById('server-uptime').textContent = result.data.serverUptimeFormatted;
-      }
-    } catch (error) {
-      console.error('Failed to load overall stats:', error);
-    }
-  }
-
-  async function loadConfig() {
-    try {
-      const response = await fetch('/api/config');
-      const result = await response.json();
-
+    // Load config via WebSocket
+    api.getConfig().then(result => {
       if (result.success && result.data) {
         document.getElementById('runtime-version').textContent = `v${result.data.version}`;
       }
-    } catch (error) {
-      console.error('Failed to load config:', error);
-    }
-  }
+    });
 
-  function renderBarChart(hourlyData) {
-    const container = document.getElementById('activity-chart');
-    const maxValue = Math.max(...hourlyData, 1);
+    // Button event handlers
+    document.getElementById('refresh-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('refresh-btn');
+      btn.disabled = true;
+      // Data will refresh automatically via WebSocket
+      setTimeout(() => {
+        btn.disabled = false;
+      }, 1000);
+    });
 
-    let html = '';
-    for (let i = 0; i < 24; i++) {
-      const value = hourlyData[i] || 0;
-      const height = Math.max((value / maxValue) * 100, 4);
-      
-      html += `
-        <div class="flex-1 h-full flex items-end">
-          <div class="w-full rounded-t bg-gh-accent" style="height: ${height}%"></div>
-        </div>
-      `;
-    }
-    
-    container.innerHTML = html;
-  }
+    document.getElementById('disconnect-btn').addEventListener('click', async () => {
+      if (!confirm('Disconnect this session?')) {
+        return;
+      }
 
-  document.getElementById('refresh-btn').addEventListener('click', async () => {
-    const btn = document.getElementById('refresh-btn');
-    btn.disabled = true;
-    
-    await Promise.all([loadSessionStats(), loadOverallStats()]);
-    
-    btn.disabled = false;
-  });
-
-  document.getElementById('disconnect-btn').addEventListener('click', async () => {
-    if (!confirm('Disconnect this session?')) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/sessions/${sessionId}`, {
-        method: 'DELETE',
-      });
-      const result = await response.json();
-
+      const result = await api.deleteSession(sessionId);
       if (result.success) {
         window.location.href = '/';
       } else {
         alert(result.error || 'Failed to disconnect session');
       }
-    } catch (error) {
-      alert('Failed to disconnect session');
-    }
+    });
   });
-
-  init();
 </script>

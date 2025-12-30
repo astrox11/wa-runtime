@@ -2,72 +2,174 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="Session Setup">
-  <main class="max-w-lg mx-auto px-4 py-8">
-    <div class="bg-gh-bg border border-gh-border rounded-gh">
-      <div class="p-4 border-b border-gh-border">
-        <h1 class="text-lg font-semibold text-gh-text">Create Session</h1>
-        <p class="text-sm text-gh-text-secondary mt-1">Create a new WhatsApp session</p>
+<Layout title="wa-runtime">
+  <main class="max-w-4xl mx-auto px-4 py-8">
+    <!-- Hero Section -->
+    <div class="text-center mb-8">
+      <div class="flex justify-center mb-4">
+        <svg class="w-16 h-16 text-gh-success" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
       </div>
-
-      <form id="session-form" class="p-4 space-y-4">
-        <div>
-          <label for="phone" class="block text-sm font-medium text-gh-text mb-1">
-            Phone Number
-          </label>
-          <input 
-            type="tel" 
-            id="phone" 
-            name="phoneNumber" 
-            placeholder="14155551234" 
-            required
-            pattern="[0-9]+"
-            class="w-full px-3 py-1.5 text-sm bg-gh-bg border border-gh-border rounded-gh text-gh-text placeholder-gh-text-muted focus:outline-none focus:border-gh-accent focus:ring-1 focus:ring-gh-accent"
-          />
-          <p class="text-xs text-gh-text-muted mt-1">Include country code without + symbol</p>
-        </div>
-
-        <div>
-          <label for="botName" class="block text-sm font-medium text-gh-text mb-1">
-            Bot Name <span class="text-gh-text-muted font-normal">(optional)</span>
-          </label>
-          <input 
-            type="text" 
-            id="botName" 
-            name="botName" 
-            placeholder="My Bot"
-            class="w-full px-3 py-1.5 text-sm bg-gh-bg border border-gh-border rounded-gh text-gh-text placeholder-gh-text-muted focus:outline-none focus:border-gh-accent focus:ring-1 focus:ring-gh-accent"
-          />
-        </div>
-
-        <div>
-          <label for="version" class="block text-sm font-medium text-gh-text mb-1">
-            Version
-          </label>
-          <input 
-            type="text" 
-            id="version" 
-            name="version" 
-            readonly
-            disabled
-            class="w-full px-3 py-1.5 text-sm bg-gh-bg-secondary border border-gh-border rounded-gh text-gh-text-secondary cursor-not-allowed"
-          />
-        </div>
-
-        <button 
-          type="submit" 
-          class="w-full py-1.5 px-4 text-sm font-medium rounded-gh bg-gh-success text-white hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Create Session
-        </button>
-      </form>
-
-      <div id="error-message" class="mx-4 mb-4 p-3 rounded-gh bg-gh-danger-subtle border border-gh-danger text-gh-danger text-sm hidden"></div>
+      <h1 class="text-2xl font-bold text-gh-text mb-2">wa-runtime</h1>
+      <p class="text-gh-text-secondary">WhatsApp Multi-Session Runtime</p>
     </div>
 
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-3 gap-4 mb-8">
+      <div class="bg-gh-bg border border-gh-border rounded-gh p-4 text-center">
+        <div class="flex justify-center mb-2">
+          <svg class="w-5 h-5 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M2 5.5a3.5 3.5 0 1 1 5.898 2.549 5.508 5.508 0 0 1 3.034 4.084.75.75 0 1 1-1.482.235 4 4 0 0 0-7.9 0 .75.75 0 0 1-1.482-.236A5.507 5.507 0 0 1 3.102 8.05 3.493 3.493 0 0 1 2 5.5ZM11 4a3.001 3.001 0 0 1 2.22 5.018 5.01 5.01 0 0 1 2.56 3.012.749.749 0 0 1-.885.954.752.752 0 0 1-.549-.514 3.507 3.507 0 0 0-2.522-2.372.75.75 0 0 1-.574-.73v-.352a.75.75 0 0 1 .416-.672A1.5 1.5 0 0 0 11 5.5.75.75 0 0 1 11 4Zm-5.5-.5a2 2 0 1 0-.001 3.999A2 2 0 0 0 5.5 3.5Z"/>
+          </svg>
+        </div>
+        <p id="stat-sessions" class="text-lg font-semibold text-gh-text">0</p>
+        <p class="text-xs text-gh-text-muted">Sessions</p>
+      </div>
+      <div class="bg-gh-bg border border-gh-border rounded-gh p-4 text-center">
+        <div class="flex justify-center mb-2">
+          <svg class="w-5 h-5 text-gh-success" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>
+          </svg>
+        </div>
+        <p id="stat-active" class="text-lg font-semibold text-gh-success">0</p>
+        <p class="text-xs text-gh-text-muted">Active</p>
+      </div>
+      <div class="bg-gh-bg border border-gh-border rounded-gh p-4 text-center">
+        <div class="flex justify-center mb-2">
+          <svg class="w-5 h-5 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M1.75 1h8.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 10.25 10H7.061l-2.574 2.573A1.458 1.458 0 0 1 2 11.543V10h-.25A1.75 1.75 0 0 1 0 8.25v-5.5C0 1.784.784 1 1.75 1Z"/>
+          </svg>
+        </div>
+        <p id="stat-messages" class="text-lg font-semibold text-gh-text">0</p>
+        <p class="text-xs text-gh-text-muted">Messages</p>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Create Session Card -->
+      <div class="bg-gh-bg border border-gh-border rounded-gh">
+        <div class="p-4 border-b border-gh-border flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"/>
+            </svg>
+            <h2 class="text-sm font-semibold text-gh-text">New Session</h2>
+          </div>
+          <button id="toggle-form-btn" class="text-xs text-gh-link hover:underline">
+            Show Form
+          </button>
+        </div>
+
+        <!-- Collapsed State -->
+        <div id="form-collapsed" class="p-6 text-center">
+          <p class="text-sm text-gh-text-secondary mb-4">Create a new WhatsApp session to get started</p>
+          <button id="show-form-btn" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-gh bg-gh-success text-white hover:bg-green-700 transition-colors">
+            <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"/>
+            </svg>
+            Create Session
+          </button>
+        </div>
+
+        <!-- Expanded Form -->
+        <form id="session-form" class="p-4 space-y-4 hidden">
+          <div>
+            <label for="phone" class="block text-sm font-medium text-gh-text mb-1">
+              <span class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122l-2.19.547a1.745 1.745 0 0 1-1.657-.459L5.482 8.062a1.745 1.745 0 0 1-.46-1.657l.548-2.19a.678.678 0 0 0-.122-.58L3.654 1.328ZM1.884.511a2.178 2.178 0 0 1 3.104.192l1.794 2.307a2.178 2.178 0 0 1 .394 1.857l-.548 2.19c-.048.193.01.392.154.535l2.457 2.457c.143.143.342.202.535.154l2.19-.548a2.178 2.178 0 0 1 1.857.394l2.307 1.794a2.178 2.178 0 0 1 .192 3.104l-1.034 1.034c-.709.709-1.766 1.012-2.771.66a19.068 19.068 0 0 1-7.182-4.535 19.068 19.068 0 0 1-4.536-7.182c-.352-1.005-.049-2.062.66-2.771L1.884.511Z"/>
+                </svg>
+                Phone Number
+              </span>
+            </label>
+            <input 
+              type="tel" 
+              id="phone" 
+              name="phoneNumber" 
+              placeholder="14155551234" 
+              required
+              pattern="[0-9]+"
+              class="w-full px-3 py-1.5 text-sm bg-gh-bg border border-gh-border rounded-gh text-gh-text placeholder-gh-text-muted focus:outline-none focus:border-gh-accent focus:ring-1 focus:ring-gh-accent"
+            />
+            <p class="text-xs text-gh-text-muted mt-1">Include country code without + symbol</p>
+          </div>
+
+          <div>
+            <label for="botName" class="block text-sm font-medium text-gh-text mb-1">
+              <span class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M11.93 8.5a4.002 4.002 0 0 1-7.86 0H.75a.75.75 0 0 1 0-1.5h3.32a4.002 4.002 0 0 1 7.86 0h3.32a.75.75 0 0 1 0 1.5Zm-1.43-.75a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z"/>
+                </svg>
+                Bot Name
+                <span class="text-gh-text-muted font-normal">(optional)</span>
+              </span>
+            </label>
+            <div class="relative">
+              <input 
+                type="text" 
+                id="botName" 
+                name="botName" 
+                placeholder="My Bot"
+                class="w-full px-3 py-1.5 pr-8 text-sm bg-gh-bg border border-gh-border rounded-gh text-gh-text placeholder-gh-text-muted focus:outline-none focus:border-gh-accent focus:ring-1 focus:ring-gh-accent"
+              />
+              <button type="button" id="clear-botname" class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gh-text-muted hover:text-gh-danger transition-colors hidden" title="Clear">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex gap-2">
+            <button type="button" id="cancel-form-btn" class="flex-1 py-1.5 px-4 text-sm font-medium rounded-gh bg-gh-bg-secondary border border-gh-border text-gh-text hover:bg-gh-bg-tertiary transition-colors">
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              class="flex-1 py-1.5 px-4 text-sm font-medium rounded-gh bg-gh-success text-white hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Create Session
+            </button>
+          </div>
+        </form>
+
+        <div id="error-message" class="mx-4 mb-4 p-3 rounded-gh bg-gh-danger-subtle border border-gh-danger text-gh-danger text-sm hidden"></div>
+      </div>
+
+      <!-- Network Status Card -->
+      <div class="bg-gh-bg border border-gh-border rounded-gh">
+        <div class="p-4 border-b border-gh-border flex items-center gap-2">
+          <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2l-2.218-.887zm3.564 1.426L5.596 5 8 5.961 14.154 3.5l-2.404-.961zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z"/>
+          </svg>
+          <h2 class="text-sm font-semibold text-gh-text">Network Status</h2>
+        </div>
+        <div class="p-4">
+          <div id="network-status" class="flex items-center justify-center gap-3 py-4">
+            <svg id="network-icon" class="w-8 h-8 text-gh-success" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>
+            </svg>
+            <div>
+              <p id="network-text" class="text-lg font-semibold text-gh-success">Connected</p>
+              <p id="network-detail" class="text-xs text-gh-text-muted">All systems operational</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Existing Sessions -->
     <div class="mt-6 bg-gh-bg border border-gh-border rounded-gh">
-      <div class="p-4 border-b border-gh-border">
-        <h2 class="text-sm font-semibold text-gh-text">Existing Sessions</h2>
+      <div class="p-4 border-b border-gh-border flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M0 1.75A.75.75 0 0 1 .75 1h4.253c1.227 0 2.317.59 3 1.501A3.743 3.743 0 0 1 11.006 1h4.245a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75h-4.507a2.25 2.25 0 0 0-1.591.659l-.622.621a.75.75 0 0 1-1.06 0l-.622-.621A2.25 2.25 0 0 0 5.258 13H.75a.75.75 0 0 1-.75-.75Zm7.251 10.324.004-5.073-.002-2.253A2.25 2.25 0 0 0 5.003 2.5H1.5v9h3.757a3.75 3.75 0 0 1 1.994.574ZM8.755 4.75l-.004 7.322a3.752 3.752 0 0 1 1.992-.572H14.5v-9h-3.495a2.25 2.25 0 0 0-2.25 2.25Z"/>
+          </svg>
+          <h2 class="text-sm font-semibold text-gh-text">Sessions</h2>
+        </div>
+        <span id="session-count" class="text-xs text-gh-text-muted">0 sessions</span>
       </div>
       <div id="sessions-list" class="divide-y divide-gh-border">
         <div class="p-8 flex justify-center">
@@ -82,70 +184,106 @@ import Layout from '../layouts/Layout.astro';
   import { api } from '../lib/api';
 
   const form = document.getElementById('session-form') as HTMLFormElement;
+  const formCollapsed = document.getElementById('form-collapsed') as HTMLDivElement;
   const errorDiv = document.getElementById('error-message') as HTMLDivElement;
   const sessionsList = document.getElementById('sessions-list') as HTMLDivElement;
-  const versionInput = document.getElementById('version') as HTMLInputElement;
+  const sessionCount = document.getElementById('session-count') as HTMLSpanElement;
+  const showFormBtn = document.getElementById('show-form-btn') as HTMLButtonElement;
+  const toggleFormBtn = document.getElementById('toggle-form-btn') as HTMLButtonElement;
+  const cancelFormBtn = document.getElementById('cancel-form-btn') as HTMLButtonElement;
+  const botNameInput = document.getElementById('botName') as HTMLInputElement;
+  const clearBotnameBtn = document.getElementById('clear-botname') as HTMLButtonElement;
 
-  let ws: WebSocket | null = null;
+  let formExpanded = false;
 
-  async function init() {
-    const configResult = await api.getConfig();
-    if (configResult.success && configResult.data) {
-      versionInput.value = configResult.data.version;
-    }
-    await loadSessions();
-    
-    // Connect to WebSocket for real-time updates
-    connectWebSocket();
+  function showForm() {
+    formExpanded = true;
+    form.classList.remove('hidden');
+    formCollapsed.classList.add('hidden');
+    toggleFormBtn.textContent = 'Hide Form';
   }
 
-  function connectWebSocket() {
-    ws = api.connectStats((data) => {
-      if (data.type === 'stats' && data.data.sessions) {
-        renderSessions(data.data.sessions.map(s => ({
-          id: s.id,
-          phone_number: s.phone_number,
-          created_at: s.created_at,
-          status: s.status,
-          pushName: s.pushName,
-        })));
-      }
-    });
-    
-    if (ws) {
-      ws.onclose = () => {
-        // Reconnect after 3 seconds
-        setTimeout(connectWebSocket, 3000);
-      };
-    }
+  function hideForm() {
+    formExpanded = false;
+    form.classList.add('hidden');
+    formCollapsed.classList.remove('hidden');
+    toggleFormBtn.textContent = 'Show Form';
   }
+
+  showFormBtn.addEventListener('click', showForm);
+  toggleFormBtn.addEventListener('click', () => {
+    if (formExpanded) {
+      hideForm();
+    } else {
+      showForm();
+    }
+  });
+  cancelFormBtn.addEventListener('click', hideForm);
+
+  // Clear button visibility
+  botNameInput.addEventListener('input', () => {
+    clearBotnameBtn.classList.toggle('hidden', !botNameInput.value);
+  });
+
+  clearBotnameBtn.addEventListener('click', () => {
+    botNameInput.value = '';
+    clearBotnameBtn.classList.add('hidden');
+  });
 
   async function deleteSession(id: string) {
     if (!confirm('Delete this session?')) return;
     
     const result = await api.deleteSession(id);
-    if (result.success) {
-      await loadSessions();
-    } else {
+    if (!result.success) {
       alert(result.error || 'Failed to delete session');
     }
   }
 
-  function renderSessions(sessions: Array<{id: string; phone_number: string; created_at: number; status: string; pushName?: string}>) {
+  function updateNetworkStatus(network: { isHealthy: boolean; isPaused: boolean; consecutiveFailures: number }) {
+    const icon = document.getElementById('network-icon') as SVGElement;
+    const text = document.getElementById('network-text') as HTMLParagraphElement;
+    const detail = document.getElementById('network-detail') as HTMLParagraphElement;
+
+    if (network.isPaused) {
+      icon.className = 'w-8 h-8 text-gh-warning';
+      icon.innerHTML = '<path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Z"/>';
+      text.textContent = 'Paused';
+      text.className = 'text-lg font-semibold text-gh-warning';
+      detail.textContent = 'Sessions paused due to network issues';
+    } else if (network.isHealthy) {
+      icon.className = 'w-8 h-8 text-gh-success';
+      icon.innerHTML = '<path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>';
+      text.textContent = 'Connected';
+      text.className = 'text-lg font-semibold text-gh-success';
+      detail.textContent = 'All systems operational';
+    } else {
+      icon.className = 'w-8 h-8 text-gh-danger';
+      icon.innerHTML = '<path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"/>';
+      text.textContent = 'Issues Detected';
+      text.className = 'text-lg font-semibold text-gh-danger';
+      detail.textContent = `${network.consecutiveFailures} consecutive failures`;
+    }
+  }
+
+  function renderSessions(sessions: Array<{id: string; phone_number: string; created_at: number; status: string; pushName?: string; push_name?: string}>) {
+    sessionCount.textContent = `${sessions.length} session${sessions.length !== 1 ? 's' : ''}`;
+    
     if (sessions.length === 0) {
       sessionsList.innerHTML = `
         <div class="p-6 text-center">
-          <p class="text-sm text-gh-text-muted">No sessions yet</p>
+          <svg class="w-12 h-12 mx-auto mb-3 text-gh-text-muted" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M0 1.75A.75.75 0 0 1 .75 1h4.253c1.227 0 2.317.59 3 1.501A3.743 3.743 0 0 1 11.006 1h4.245a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75h-4.507a2.25 2.25 0 0 0-1.591.659l-.622.621a.75.75 0 0 1-1.06 0l-.622-.621A2.25 2.25 0 0 0 5.258 13H.75a.75.75 0 0 1-.75-.75Z"/>
+          </svg>
+          <p class="text-sm text-gh-text-secondary mb-1">No sessions yet</p>
+          <p class="text-xs text-gh-text-muted">Create your first session to get started</p>
         </div>
       `;
       return;
     }
 
     sessionsList.innerHTML = sessions.map(session => {
-      // Use pushName if available, otherwise show phone number
-      const displayName = session.pushName || `+${session.phone_number}`;
+      const displayName = session.pushName || session.push_name || `+${session.phone_number}`;
       
-      // Status icon - green checkmark for active (GitHub style)
       const statusIcon = session.status === 'active' 
         ? `<svg class="w-4 h-4 text-gh-success" viewBox="0 0 16 16" fill="currentColor">
             <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>
@@ -199,19 +337,31 @@ import Layout from '../layouts/Layout.astro';
     });
   }
 
-  async function loadSessions() {
-    const result = await api.getSessions();
-    
-    if (result.success && result.data) {
-      renderSessions(result.data);
-    } else {
-      sessionsList.innerHTML = `
-        <div class="p-6 text-center">
-          <p class="text-sm text-gh-danger">Failed to load sessions</p>
-        </div>
-      `;
-    }
+  function updateStats(overall: { totalSessions: number; activeSessions: number; totalMessages: number }) {
+    document.getElementById('stat-sessions')!.textContent = overall.totalSessions.toString();
+    document.getElementById('stat-active')!.textContent = overall.activeSessions.toString();
+    document.getElementById('stat-messages')!.textContent = overall.totalMessages.toLocaleString();
   }
+
+  // Subscribe to real-time updates
+  api.onStats((data) => {
+    if (data.type === 'stats') {
+      updateStats(data.data.overall);
+      if (data.data.network) {
+        updateNetworkStatus(data.data.network);
+      }
+      if (data.data.sessions) {
+        renderSessions(data.data.sessions.map(s => ({
+          id: s.id,
+          phone_number: s.phone_number,
+          created_at: s.created_at,
+          status: s.status,
+          pushName: s.pushName,
+          push_name: s.push_name,
+        })));
+      }
+    }
+  });
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -248,6 +398,4 @@ import Layout from '../layouts/Layout.astro';
   function hideError() {
     errorDiv.classList.add('hidden');
   }
-
-  init();
 </script>

@@ -29,6 +29,7 @@ import {
   getAllSessions,
   deleteSession as deleteSessionRecord,
   updateSessionStatus,
+  updateSessionPushName,
   sessionExists,
   initializeUserTables,
   deleteUserTables,
@@ -44,17 +45,169 @@ interface ActiveSession {
   socket: WASocket | null;
   msgRetryCounterCache: CacheStore;
   status: "connecting" | "connected" | "disconnected" | "pairing";
+  pushNameInterval?: ReturnType<typeof setInterval>;
+}
+
+/**
+ * Network monitoring state
+ */
+interface NetworkState {
+  isHealthy: boolean;
+  consecutiveFailures: number;
+  lastCheck: number;
+  isPaused: boolean;
 }
 
 class SessionManager {
   private sessions: Map<string, ActiveSession> = new Map();
   private static instance: SessionManager | null = null;
+  private networkState: NetworkState = {
+    isHealthy: true,
+    consecutiveFailures: 0,
+    lastCheck: Date.now(),
+    isPaused: false,
+  };
+  private networkCheckInterval?: ReturnType<typeof setInterval>;
+  
+  // Configurable thresholds
+  private static readonly NETWORK_FAILURE_THRESHOLD = 3;
+  private static readonly NETWORK_CHECK_INTERVAL_MS = 5000;
+  private static readonly PUSHNAME_CHECK_INTERVAL_MS = 10000;
 
   static getInstance(): SessionManager {
     if (!SessionManager.instance) {
       SessionManager.instance = new SessionManager();
     }
     return SessionManager.instance;
+  }
+
+  constructor() {
+    // Start network monitoring
+    this.startNetworkMonitoring();
+  }
+
+  /**
+   * Start continuous network health monitoring
+   */
+  private startNetworkMonitoring() {
+    this.networkCheckInterval = setInterval(() => {
+      this.checkNetworkHealth();
+    }, SessionManager.NETWORK_CHECK_INTERVAL_MS);
+  }
+
+  /**
+   * Check network health and pause/resume sessions accordingly
+   */
+  private checkNetworkHealth() {
+    const now = Date.now();
+    this.networkState.lastCheck = now;
+
+    // Count disconnected sessions
+    const disconnectedCount = [...this.sessions.values()].filter(
+      (s) => s.status === "disconnected" || s.status === "connecting"
+    ).length;
+
+    const totalSessions = this.sessions.size;
+
+    // If more than half of sessions are disconnected, assume network issue
+    if (totalSessions > 0 && disconnectedCount >= Math.ceil(totalSessions / 2)) {
+      this.networkState.consecutiveFailures++;
+      
+      if (this.networkState.consecutiveFailures >= SessionManager.NETWORK_FAILURE_THRESHOLD) {
+        if (!this.networkState.isPaused) {
+          this.pauseAllSessions();
+        }
+        this.networkState.isHealthy = false;
+      }
+    } else {
+      // Network is healthy
+      this.networkState.consecutiveFailures = 0;
+      
+      if (this.networkState.isPaused && !this.networkState.isHealthy) {
+        // Resume sessions when network recovers
+        this.resumeAllSessions();
+      }
+      this.networkState.isHealthy = true;
+    }
+  }
+
+  /**
+   * Pause all sessions to prevent reconnection spam
+   */
+  private pauseAllSessions() {
+    log.warn("Network appears unhealthy, pausing all sessions to prevent reconnection spam");
+    this.networkState.isPaused = true;
+  }
+
+  /**
+   * Resume all sessions after network recovery
+   */
+  private resumeAllSessions() {
+    log.info("Network recovered, resuming sessions");
+    this.networkState.isPaused = false;
+    
+    // Restart disconnected sessions
+    for (const [sessionId, session] of this.sessions) {
+      if (session.status === "disconnected") {
+        log.info(`Resuming session ${sessionId}...`);
+        this.initializeSession(session, false).catch((error) => {
+          log.error(`Failed to resume session ${sessionId}:`, error);
+        });
+      }
+    }
+  }
+
+  /**
+   * Get network state for monitoring
+   */
+  getNetworkState(): NetworkState {
+    return { ...this.networkState };
+  }
+
+  /**
+   * Start continuous pushName fetching for a session
+   */
+  private startPushNameFetching(session: ActiveSession) {
+    // Clear existing interval if any
+    if (session.pushNameInterval) {
+      clearInterval(session.pushNameInterval);
+    }
+
+    // Check immediately
+    this.fetchAndSavePushName(session);
+
+    // Then check periodically until we have it
+    session.pushNameInterval = setInterval(() => {
+      const dbSession = getSession(session.id);
+      
+      // Stop checking once we have a pushName saved
+      if (dbSession?.push_name) {
+        if (session.pushNameInterval) {
+          clearInterval(session.pushNameInterval);
+          session.pushNameInterval = undefined;
+        }
+        return;
+      }
+
+      this.fetchAndSavePushName(session);
+    }, SessionManager.PUSHNAME_CHECK_INTERVAL_MS);
+  }
+
+  /**
+   * Fetch pushName from socket and save to database
+   */
+  private fetchAndSavePushName(session: ActiveSession) {
+    if (session.socket?.user?.name) {
+      const pushName = session.socket.user.name;
+      updateSessionPushName(session.id, pushName);
+      log.debug(`Saved pushName "${pushName}" for session ${session.id}`);
+      
+      // Clear interval once saved
+      if (session.pushNameInterval) {
+        clearInterval(session.pushNameInterval);
+        session.pushNameInterval = undefined;
+      }
+    }
   }
 
   /**
@@ -142,6 +295,13 @@ class SessionManager {
     session: ActiveSession,
     requestPairingCode: boolean,
   ): Promise<string | undefined> {
+    // Check if network is paused
+    if (this.networkState.isPaused) {
+      log.info(`Session ${session.id} initialization deferred due to network pause`);
+      session.status = "disconnected";
+      return undefined;
+    }
+
     const { state, saveCreds } = await useSessionAuth(session.id);
     const { version } = await fetchLatestBaileysVersion();
 
@@ -203,10 +363,16 @@ class SessionManager {
           const statusCode = (lastDisconnect?.error as Boom)?.output
             ?.statusCode;
           if (statusCode !== DisconnectReason.loggedOut) {
-            // Reconnect
+            // Reconnect only if network is not paused
             session.status = "connecting";
             log.info(`Session ${session.id} reconnecting...`);
-            await this.initializeSession(session, false);
+            
+            if (!this.networkState.isPaused) {
+              await this.initializeSession(session, false);
+            } else {
+              session.status = "disconnected";
+              log.info(`Session ${session.id} reconnection deferred due to network pause`);
+            }
           } else {
             // Logged out - cleanup
             session.status = "disconnected";
@@ -219,6 +385,9 @@ class SessionManager {
           session.status = "connected";
           updateSessionStatus(session.id, "active");
           log.info(`Session ${session.id} connected to WhatsApp`);
+
+          // Start pushName fetching
+          this.startPushNameFetching(session);
 
           if (!hasSynced) {
             hasSynced = true;
@@ -337,6 +506,11 @@ class SessionManager {
       }
       activeSession.socket = null;
       phoneNumber = phoneNumber || activeSession.phoneNumber;
+      
+      // Clear pushName interval
+      if (activeSession.pushNameInterval) {
+        clearInterval(activeSession.pushNameInterval);
+      }
     }
 
     this.sessions.delete(sessionId);
@@ -423,14 +597,18 @@ class SessionManager {
   }
 
   /**
-   * Get pushName for a session from the active socket
+   * Get pushName for a session from the active socket or database
    */
   getPushName(sessionId: string): string | undefined {
+    // First check the active socket
     const activeSession = this.sessions.get(sessionId);
     if (activeSession?.socket?.user?.name) {
       return activeSession.socket.user.name;
     }
-    return undefined;
+    
+    // Fall back to database
+    const dbSession = getSession(sessionId);
+    return dbSession?.push_name;
   }
 
   /**
@@ -440,7 +618,7 @@ class SessionManager {
     const sessions = getAllSessions();
     return sessions.map((session) => ({
       ...session,
-      pushName: this.getPushName(session.id),
+      pushName: this.getPushName(session.id) || session.push_name,
     }));
   }
 }

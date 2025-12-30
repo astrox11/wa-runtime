@@ -2,9 +2,10 @@
  * API Routes Handler
  *
  * Handles all API endpoints for session management, authentication, messaging, and statistics.
+ * Also provides WebSocket message handlers for real-time communication.
  */
 
-import { sessionManager, log } from "./lib";
+import { sessionManager, log, getAllMessages, getMessagesCount } from "./lib";
 import config from "./config";
 
 export interface ApiResponse {
@@ -16,6 +17,35 @@ export interface ApiResponse {
 interface SessionCreateRequest {
   phoneNumber: string;
   botName?: string;
+}
+
+/**
+ * WebSocket Action Types
+ */
+export type WsAction =
+  | "getSessions"
+  | "getSession"
+  | "createSession"
+  | "deleteSession"
+  | "getAuthStatus"
+  | "getStats"
+  | "getSessionStats"
+  | "getMessages"
+  | "getConfig"
+  | "getNetworkState";
+
+export interface WsRequest {
+  action: WsAction;
+  requestId?: string;
+  params?: Record<string, any>;
+}
+
+export interface WsResponse {
+  action: WsAction;
+  requestId?: string;
+  success: boolean;
+  data?: any;
+  error?: string;
 }
 
 /**
@@ -117,9 +147,183 @@ async function parseBody<T>(req: Request): Promise<T | null> {
 }
 
 /**
- * Route handlers
+ * WebSocket Action Handlers
  */
-const routes: Record<string, Record<string, (req: Request, params?: Record<string, string>) => Promise<ApiResponse>>> = {
+export async function handleWsAction(request: WsRequest): Promise<WsResponse> {
+  const { action, requestId, params = {} } = request;
+
+  try {
+    let result: ApiResponse;
+
+    switch (action) {
+      case "getSessions":
+        result = { success: true, data: sessionManager.listExtended() };
+        break;
+
+      case "getSession":
+        if (!params.id) {
+          result = { success: false, error: "Session ID is required" };
+        } else {
+          const session = sessionManager.get(params.id);
+          if (!session) {
+            result = { success: false, error: "Session not found" };
+          } else {
+            result = { success: true, data: session };
+          }
+        }
+        break;
+
+      case "createSession":
+        if (!params.phoneNumber) {
+          result = { success: false, error: "Phone number is required" };
+        } else {
+          const createResult = await sessionManager.create(params.phoneNumber);
+          if (createResult.success) {
+            runtimeStats.recordSessionStart(createResult.id!);
+            result = {
+              success: true,
+              data: {
+                id: createResult.id,
+                pairingCode: createResult.code,
+                pairingCodeFormatted: createResult.code
+                  ? `${createResult.code.slice(0, 4)}-${createResult.code.slice(4)}`
+                  : null,
+              },
+            };
+          } else {
+            result = { success: false, error: createResult.error };
+          }
+        }
+        break;
+
+      case "deleteSession":
+        if (!params.id) {
+          result = { success: false, error: "Session ID is required" };
+        } else {
+          const deleteResult = await sessionManager.delete(params.id);
+          if (deleteResult.success) {
+            result = { success: true, data: { message: "Session deleted" } };
+          } else {
+            result = { success: false, error: deleteResult.error };
+          }
+        }
+        break;
+
+      case "getAuthStatus":
+        if (!params.sessionId) {
+          result = { success: false, error: "Session ID is required" };
+        } else {
+          const session = sessionManager.get(params.sessionId);
+          if (!session) {
+            result = { success: false, error: "Session not found" };
+          } else {
+            result = {
+              success: true,
+              data: {
+                sessionId: session.id,
+                phoneNumber: session.phone_number,
+                status: session.status,
+                isAuthenticated: session.status === "active",
+                isPairing: session.status === "pairing",
+              },
+            };
+          }
+        }
+        break;
+
+      case "getStats":
+        result = { success: true, data: runtimeStats.getOverallStats() };
+        break;
+
+      case "getSessionStats":
+        if (!params.sessionId) {
+          result = { success: false, error: "Session ID is required" };
+        } else {
+          const session = sessionManager.get(params.sessionId);
+          if (!session) {
+            result = { success: false, error: "Session not found" };
+          } else {
+            const stats = runtimeStats.getStats(params.sessionId);
+            result = {
+              success: true,
+              data: {
+                session: {
+                  id: session.id,
+                  phoneNumber: session.phone_number,
+                  status: session.status,
+                  createdAt: session.created_at,
+                  pushName: session.push_name,
+                },
+                ...stats,
+              },
+            };
+          }
+        }
+        break;
+
+      case "getMessages":
+        if (!params.sessionId) {
+          result = { success: false, error: "Session ID is required" };
+        } else {
+          const limit = params.limit || 100;
+          const offset = params.offset || 0;
+          const messages = getAllMessages(params.sessionId, limit, offset);
+          const total = getMessagesCount(params.sessionId);
+          result = {
+            success: true,
+            data: {
+              messages,
+              total,
+              limit,
+              offset,
+            },
+          };
+        }
+        break;
+
+      case "getConfig":
+        result = {
+          success: true,
+          data: {
+            version: config.VERSION,
+            defaultBotName: config.BOT_NAME,
+          },
+        };
+        break;
+
+      case "getNetworkState":
+        result = {
+          success: true,
+          data: sessionManager.getNetworkState(),
+        };
+        break;
+
+      default:
+        result = { success: false, error: `Unknown action: ${action}` };
+    }
+
+    return {
+      action,
+      requestId,
+      success: result.success,
+      data: result.data,
+      error: result.error,
+    };
+  } catch (error) {
+    log.error(`WebSocket action error on ${action}:`, error);
+    return {
+      action,
+      requestId,
+      success: false,
+      error: error instanceof Error ? error.message : "Internal server error",
+    };
+  }
+}
+
+/**
+ * Route handlers (HTTP fallback)
+ */
+const routes: Record<string, (req: Request, params?: Record<string, string>) => Promise<ApiResponse>> = {
   // Session management
   "GET /api/sessions": async () => {
     const sessions = sessionManager.listExtended();
@@ -199,6 +403,30 @@ const routes: Record<string, Record<string, (req: Request, params?: Record<strin
     };
   },
 
+  // Messages
+  "GET /api/messages/:sessionId": async (_req, params) => {
+    if (!params?.sessionId) {
+      return { success: false, error: "Session ID is required" };
+    }
+
+    const url = new URL(_req.url);
+    const limit = parseInt(url.searchParams.get("limit") || "100", 10);
+    const offset = parseInt(url.searchParams.get("offset") || "0", 10);
+
+    const messages = getAllMessages(params.sessionId, limit, offset);
+    const total = getMessagesCount(params.sessionId);
+
+    return {
+      success: true,
+      data: {
+        messages,
+        total,
+        limit,
+        offset,
+      },
+    };
+  },
+
   // Statistics
   "GET /api/stats": async () => {
     return { success: true, data: runtimeStats.getOverallStats() };
@@ -223,9 +451,18 @@ const routes: Record<string, Record<string, (req: Request, params?: Record<strin
           phoneNumber: session.phone_number,
           status: session.status,
           createdAt: session.created_at,
+          pushName: session.push_name,
         },
         ...stats,
       },
+    };
+  },
+
+  // Network state
+  "GET /api/network": async () => {
+    return {
+      success: true,
+      data: sessionManager.getNetworkState(),
     };
   },
 

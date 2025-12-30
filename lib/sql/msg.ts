@@ -58,3 +58,36 @@ export const saveMessage = (
     }
   }
 };
+
+/**
+ * Get all messages for a session from the database
+ * Returns messages with their IDs and parsed content
+ */
+export const getAllMessages = (
+  sessionId: string,
+  limit: number = 100,
+  offset: number = 0,
+): Array<{ id: string; message: WAMessage }> => {
+  const tableName = getMessagesTable(sessionId);
+  const results = bunql.query<{ id: string; msg: string }>(
+    `SELECT id, msg FROM "${tableName}" ORDER BY rowid DESC LIMIT ? OFFSET ?`,
+    [limit, offset],
+  );
+  
+  return results.map((row) => ({
+    id: row.id,
+    message: JSON.parse(row.msg || "{}") as WAMessage,
+  }));
+};
+
+/**
+ * Get the total count of messages for a session
+ */
+export const getMessagesCount = (sessionId: string): number => {
+  const tableName = getMessagesTable(sessionId);
+  const result = bunql.query<{ count: number }>(
+    `SELECT COUNT(*) as count FROM "${tableName}"`,
+    [],
+  );
+  return result[0]?.count || 0;
+};

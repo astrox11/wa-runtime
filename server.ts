@@ -4,7 +4,7 @@
  * Exposes HTTP APIs for session management, authentication, messaging, and statistics.
  * Supports multiple isolated sessions consumable by external clients.
  * Serves static frontend files from the same host.
- * Includes WebSocket support for real-time stats streaming.
+ * Includes WebSocket support for real-time stats streaming and bidirectional communication.
  */
 
 import { WebSocket } from "ws";
@@ -26,7 +26,7 @@ if (wsListener) {
 
 import { log, sessionManager } from "./lib";
 import config from "./config";
-import { handleApiRequest, runtimeStats, type ApiResponse } from "./api";
+import { handleApiRequest, handleWsAction, runtimeStats, type ApiResponse, type WsRequest } from "./api";
 
 /**
  * WebSocket clients for stats streaming
@@ -41,6 +41,7 @@ function broadcastStats() {
   
   const overallStats = runtimeStats.getOverallStats();
   const sessions = sessionManager.listExtended();
+  const networkState = sessionManager.getNetworkState();
   
   const message = JSON.stringify({
     type: "stats",
@@ -50,6 +51,7 @@ function broadcastStats() {
         ...s,
         stats: runtimeStats.getStats(s.id),
       })),
+      network: networkState,
     },
   });
   
@@ -62,8 +64,9 @@ function broadcastStats() {
   }
 }
 
-// Broadcast stats every 1 second
-setInterval(broadcastStats, 1000);
+// Broadcast stats every 500ms for more instant updates
+const BROADCAST_INTERVAL_MS = 500;
+setInterval(broadcastStats, BROADCAST_INTERVAL_MS);
 
 const STATIC_DIR = join(import.meta.dir, "astro-web-runtime", "dist");
 
@@ -168,6 +171,7 @@ const server = Bun.serve({
           status: "healthy",
           version: config.VERSION,
           uptime: process.uptime(),
+          network: sessionManager.getNetworkState(),
         },
       });
     }
@@ -207,9 +211,41 @@ const server = Bun.serve({
     open(ws) {
       wsClients.add(ws);
       log.info("WebSocket client connected for stats");
+      
+      // Send initial stats immediately
+      const overallStats = runtimeStats.getOverallStats();
+      const sessions = sessionManager.listExtended();
+      const networkState = sessionManager.getNetworkState();
+      
+      ws.send(JSON.stringify({
+        type: "stats",
+        data: {
+          overall: overallStats,
+          sessions: sessions.map(s => ({
+            ...s,
+            stats: runtimeStats.getStats(s.id),
+          })),
+          network: networkState,
+        },
+      }));
     },
-    message() {
-      // Client messages not needed for stats streaming
+    async message(ws, message) {
+      // Handle WebSocket action requests
+      try {
+        const msgStr = typeof message === "string" ? message : message.toString();
+        const request = JSON.parse(msgStr) as WsRequest;
+        
+        if (request.action) {
+          const response = await handleWsAction(request);
+          ws.send(JSON.stringify(response));
+        }
+      } catch (error) {
+        log.error("WebSocket message error:", error);
+        ws.send(JSON.stringify({
+          success: false,
+          error: "Invalid message format",
+        }));
+      }
     },
     close(ws) {
       wsClients.delete(ws);

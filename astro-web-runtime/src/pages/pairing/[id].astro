@@ -98,7 +98,82 @@ const { id } = Astro.params;
       </div>
     `;
 
-    pollAuthStatus();
+    // Use WebSocket for instant pairing status updates
+    connectAndWatchPairing();
+  }
+
+  function connectAndWatchPairing() {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(`${protocol}//${window.location.host}/ws/stats`);
+    
+    let maxAttempts = 120; // 2 minutes with 1s intervals
+    let attempts = 0;
+    
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        
+        // Check for response to our auth status request
+        if (data.action === 'getAuthStatus' && data.success && data.data) {
+          if (data.data.isAuthenticated) {
+            ws.close();
+            showSuccess();
+            return;
+          }
+          if (data.data.status === 'inactive') {
+            ws.close();
+            showError('Session was disconnected or timed out');
+            return;
+          }
+        }
+        
+        // Also check stats broadcasts for session status
+        if (data.type === 'stats' && data.data?.sessions) {
+          const session = data.data.sessions.find(s => s.id === sessionId);
+          if (session) {
+            if (session.status === 'active') {
+              ws.close();
+              showSuccess();
+              return;
+            }
+            if (session.status === 'inactive') {
+              ws.close();
+              showError('Session was disconnected or timed out');
+              return;
+            }
+          }
+        }
+        
+        attempts++;
+        if (attempts >= maxAttempts) {
+          ws.close();
+          showError('Pairing timed out. Please try again.');
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    };
+    
+    ws.onopen = () => {
+      // Request auth status
+      ws.send(JSON.stringify({
+        action: 'getAuthStatus',
+        requestId: 'pairing-check',
+        params: { sessionId },
+      }));
+    };
+    
+    ws.onerror = () => {
+      showError('Connection error. Please check your network and try again.');
+    };
+    
+    ws.onclose = () => {
+      // If closed unexpectedly, fall back to polling
+      if (attempts < maxAttempts && !successContent.classList.contains('hidden') === false && !errorContent.classList.contains('hidden') === false) {
+        // Start polling fallback
+        pollAuthStatus();
+      }
+    };
   }
 
   async function pollAuthStatus() {
