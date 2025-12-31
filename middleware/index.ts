@@ -10,7 +10,7 @@ import {
   extractText,
   classifyMessage,
   extractCommand,
-} from "./messageHandler";
+} from "./handler";
 import {
   dispatchCommand,
   dispatchEvents,
@@ -22,7 +22,7 @@ import {
   requiresDispatch,
   type CommandDefinition,
   type CommandRegistry,
-} from "./commandDispatcher";
+} from "./dispatcher";
 
 export * from "./types";
 export * from "./api";
