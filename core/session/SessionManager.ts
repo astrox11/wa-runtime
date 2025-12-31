@@ -285,6 +285,7 @@ class SessionManager {
     session: ActiveSession,
     requestPairingCode: boolean,
   ): Promise<string | undefined> {
+    log.debug("Session State:", session);
     if (this.networkState.isPaused) {
       log.info(
         `Session ${session.id} initialization deferred due to network pause`,
@@ -294,6 +295,7 @@ class SessionManager {
     }
 
     log.debug("Initializing session:", session.id);
+    const session_state = getSession(session.id);
 
     const { state, saveCreds } = await useSessionAuth(session.id);
     const { version } = await fetchLatestBaileysVersion();
@@ -581,6 +583,8 @@ class SessionManager {
       return { success: false, error: "Session not active" };
     }
 
+    log.debug("Session To Be Paused:", activeSession);
+
     if (activeSession.status === "paused") {
       return { success: false, error: "Session already paused" };
     }
@@ -602,6 +606,9 @@ class SessionManager {
     }
 
     activeSession.status = "paused";
+
+    log.debug("Session Status:", activeSession);
+
     updateSessionStatus(sessionId, "paused");
 
     log.info(`Session ${sessionId} paused`);

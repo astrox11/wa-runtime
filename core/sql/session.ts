@@ -5,7 +5,7 @@ export interface SessionRecord {
   id: string;
   phone_number: string;
   created_at: number;
-  status: "active" | "inactive" | "pairing" | paused;
+  status: "active" | "inactive" | "pairing" | "paused";
   push_name?: string;
 }
 
