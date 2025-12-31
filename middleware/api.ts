@@ -192,10 +192,17 @@ export class RuntimeStats {
 
   getOverallStats(): OverallStatsData {
     const sessions = sessionManager.list();
+    // Sum messages across all sessions, or return 0 if no sessions exist
+    let totalMessages = 0;
+    if (sessions.length > 0) {
+      for (const session of sessions) {
+        totalMessages += getMessagesCount(session.id);
+      }
+    }
     return {
       totalSessions: sessions.length,
       activeSessions: sessionManager.getActiveCount(),
-      totalMessages: getMessagesCount(sessions?.[0]?.id),
+      totalMessages,
       version: config.VERSION,
       serverUptime: process.uptime(),
       serverUptimeFormatted: formatUptime(process.uptime() * 1000),
