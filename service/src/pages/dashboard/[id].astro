@@ -223,6 +223,24 @@ const hashedId = hashSessionId(id || '');
       </div>
     </div>
 
+    <!-- Groups Section -->
+    <div class="bg-gh-bg border border-gh-border rounded-gh mb-6">
+      <div class="p-4 border-b border-gh-border flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M5.5 3.5A2 2 0 0 1 7.5 1.5h1A2 2 0 0 1 10.5 3.5v1A2 2 0 0 1 8.5 6.5h-1A2 2 0 0 1 5.5 4.5ZM7.5 3a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5ZM2 10.5A2 2 0 0 1 4 8.5h1a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2Zm2-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5Zm5.5 0a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2Zm2-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5Z"/>
+          </svg>
+          <h2 class="text-sm font-semibold text-gh-text">Groups</h2>
+          <span id="groups-count" class="text-xs text-gh-text-muted">Loading...</span>
+        </div>
+      </div>
+      <div id="groups-list" class="divide-y divide-gh-border max-h-64 overflow-y-auto">
+        <div class="p-4 text-center">
+          <div class="inline-block w-40 h-4 bg-gh-bg-tertiary rounded animate-pulse"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Actions -->
     <div class="flex justify-end gap-2">
       <button id="refresh-btn" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-gh bg-gh-bg-secondary border border-gh-border text-gh-text hover:bg-gh-bg-tertiary transition-colors" title="Refresh">
@@ -447,6 +465,56 @@ const hashedId = hashSessionId(id || '');
       if (versionEl) versionEl.textContent = `v${result.data.version}`;
     }
   });
+
+  // Load groups for this session
+  function loadGroups() {
+    api.sendAction('getGroups', { sessionId }).then(result => {
+      const groupsList = document.getElementById('groups-list');
+      const groupsCount = document.getElementById('groups-count');
+      
+      if (!groupsList || !groupsCount) return;
+      
+      if (result.success && result.data) {
+        const groups = result.data.groups || [];
+        groupsCount.textContent = `${groups.length} group${groups.length !== 1 ? 's' : ''}`;
+        
+        if (groups.length === 0) {
+          groupsList.innerHTML = `
+            <div class="p-6 text-center">
+              <svg class="w-8 h-8 mx-auto mb-2 text-gh-text-muted" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M5.5 3.5A2 2 0 0 1 7.5 1.5h1A2 2 0 0 1 10.5 3.5v1A2 2 0 0 1 8.5 6.5h-1A2 2 0 0 1 5.5 4.5ZM7.5 3a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5ZM2 10.5A2 2 0 0 1 4 8.5h1a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2Zm2-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5Zm5.5 0a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2Zm2-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5Z"/>
+              </svg>
+              <p class="text-xs text-gh-text-muted">No groups found</p>
+            </div>
+          `;
+        } else {
+          groupsList.innerHTML = groups.map((group: { id: string; subject: string; participantCount: number }) => `
+            <div class="flex items-center justify-between p-3 hover:bg-gh-bg-secondary transition-colors">
+              <div class="flex items-center gap-3 flex-1 min-w-0">
+                <svg class="w-4 h-4 text-gh-text-secondary flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M5.5 3.5A2 2 0 0 1 7.5 1.5h1A2 2 0 0 1 10.5 3.5v1A2 2 0 0 1 8.5 6.5h-1A2 2 0 0 1 5.5 4.5ZM7.5 3a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5ZM2 10.5A2 2 0 0 1 4 8.5h1a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2Zm2-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5Zm5.5 0a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2Zm2-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5Z"/>
+                </svg>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-gh-text truncate">${group.subject}</p>
+                  <p class="text-xs text-gh-text-muted">${group.participantCount} member${group.participantCount !== 1 ? 's' : ''}</p>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        }
+      } else {
+        groupsCount.textContent = 'Error';
+        groupsList.innerHTML = `
+          <div class="p-4 text-center">
+            <p class="text-sm text-gh-danger">Failed to load groups</p>
+          </div>
+        `;
+      }
+    });
+  }
+  
+  // Load groups on page load
+  loadGroups();
 
   // Button event handlers
   const refreshBtn = document.getElementById('refresh-btn') as HTMLButtonElement | null;

@@ -16,7 +16,8 @@ type WsAction =
   | "getSessionStats"
   | "getMessages"
   | "getConfig"
-  | "getNetworkState";
+  | "getNetworkState"
+  | "getGroups";
 
 interface WsRequest {
   action: WsAction;
@@ -415,6 +416,11 @@ export const api = {
   // Network
   async getNetworkState(): Promise<ApiResponse<NetworkState>> {
     return getApiClient().getNetworkState();
+  },
+
+  // Generic action sender (for custom actions)
+  async sendAction(action: WsAction, params?: Record<string, unknown>): Promise<WsResponse> {
+    return getApiClient().send(action, params);
   },
 
   // Stats subscription

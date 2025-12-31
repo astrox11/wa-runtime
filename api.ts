@@ -1,4 +1,4 @@
-import { sessionManager, log, getAllMessages, getMessagesCount } from "./lib";
+import { sessionManager, log, getAllMessages, getMessagesCount, getAllGroups } from "./lib";
 import config from "./config";
 
 export interface ApiResponse {
@@ -22,7 +22,8 @@ export type WsAction =
   | "getSessionStats"
   | "getMessages"
   | "getConfig"
-  | "getNetworkState";
+  | "getNetworkState"
+  | "getGroups";
 
 export interface WsRequest {
   action: WsAction;
@@ -298,6 +299,25 @@ export async function handleWsAction(request: WsRequest): Promise<WsResponse> {
           success: true,
           data: sessionManager.getNetworkState(),
         };
+        break;
+
+      case "getGroups":
+        if (!params.sessionId) {
+          result = { success: false, error: "Session ID is required" };
+        } else {
+          try {
+            const groups = getAllGroups(params.sessionId as string);
+            result = {
+              success: true,
+              data: { groups, count: groups.length },
+            };
+          } catch (error) {
+            result = {
+              success: false,
+              error: "Failed to retrieve groups",
+            };
+          }
+        }
         break;
 
       default:
