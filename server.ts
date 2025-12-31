@@ -202,7 +202,6 @@ const server = Bun.serve({
   websocket: {
     open(ws) {
       wsClients.add(ws);
-      log.info("WebSocket client connected for stats");
 
       const overallStats = runtimeStats.getOverallStats();
       const sessions = sessionManager.listExtended();
@@ -244,7 +243,6 @@ const server = Bun.serve({
     },
     close(ws) {
       wsClients.delete(ws);
-      log.info("WebSocket client disconnected");
     },
   },
 });
