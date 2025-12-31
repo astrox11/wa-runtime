@@ -63,7 +63,14 @@ class RuntimeStats {
 
   getStats(sessionId: string) {
     const messages = getMessagesCount(sessionId);
-    const startTime = this.sessionStartTimes.get(sessionId) || Date.now();
+    let startTime = this.sessionStartTimes.get(sessionId);
+    
+    if (!startTime) {
+      const session = sessionManager.get(sessionId);
+      startTime = session?.created_at || Date.now();
+      this.sessionStartTimes.set(sessionId, startTime);
+    }
+    
     const uptime = Date.now() - startTime;
 
     const hourlyKey = `${sessionId}_${new Date().toDateString()}`;

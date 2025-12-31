@@ -613,18 +613,25 @@ import Layout from '../layouts/Layout.astro';
     sessionsList.innerHTML = sessions.map(session => {
       const displayName = session.pushName || session.push_name || `+${session.phone_number}`;
       
-      // Status icons: active = green checkmark, pairing = brown/yellow donut loading, inactive = red X
-      const statusIcon = session.status === 'active' 
-        ? `<svg class="w-4 h-4 text-gh-success" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/>
-          </svg>`
-        : session.status === 'pairing'
-        ? `<svg class="w-4 h-4 text-amber-600 animate-spin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-            <circle cx="8" cy="8" r="6" stroke-dasharray="28" stroke-dashoffset="7"/>
-          </svg>`
-        : `<svg class="w-4 h-4 text-gh-danger" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"/>
+      let statusIcon = '';
+      let statusClass = '';
+      
+      if (session.status === 'active') {
+        statusIcon = `<svg class="w-4 h-4 text-gh-success" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16Zm3.78-9.72a.751.751 0 0 0-.018-1.042.751.751 0 0 0-1.042-.018L6.75 9.19 5.28 7.72a.751.751 0 0 0-1.042.018.751.751 0 0 0-.018 1.042l2 2a.75.75 0 0 0 1.06 0Z"/>
           </svg>`;
+        statusClass = 'text-gh-success';
+      } else if (session.status === 'pairing') {
+        statusIcon = `<svg class="w-4 h-4 text-amber-600 animate-spin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="8" cy="8" r="6" stroke-dasharray="28" stroke-dashoffset="7"/>
+          </svg>`;
+        statusClass = 'text-amber-600';
+      } else {
+        statusIcon = `<svg class="w-4 h-4 text-gh-danger" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M2.343 13.657A8 8 0 1 1 13.658 2.343 8 8 0 0 1 2.343 13.657ZM6.03 4.97a.751.751 0 0 0-1.042.018.751.751 0 0 0-.018 1.042L6.94 8 4.97 9.97a.749.749 0 0 0 .326 1.275.749.749 0 0 0 .734-.215L8 9.06l1.97 1.97a.749.749 0 0 0 1.275-.326.749.749 0 0 0-.215-.734L9.06 8l1.97-1.97a.749.749 0 0 0-.326-1.275.749.749 0 0 0-.734.215L8 6.94Z"/>
+          </svg>`;
+        statusClass = 'text-gh-danger';
+      }
       
       return `
         <div class="flex items-center justify-between p-3 hover:bg-gh-bg-secondary transition-colors" data-id="${session.id}">
@@ -634,18 +641,29 @@ import Layout from '../layouts/Layout.astro';
           </div>
           <div class="flex items-center gap-1">
             ${session.status === 'active' ? `
-              <a href="/dashboard/${session.id}" class="p-1.5 text-gh-text-secondary hover:text-gh-accent hover:bg-gh-bg-tertiary rounded-gh transition-colors" title="Dashboard">
+              <a href="/dashboard/${session.id}" class="p-1.5 text-gh-text-secondary hover:text-gh-success hover:bg-gh-bg-tertiary rounded-gh transition-colors" title="View Dashboard">
                 <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
-                  <path d="M0 1.75A.75.75 0 0 1 .75 1h4.253c1.227 0 2.317.59 3 1.501A3.743 3.743 0 0 1 11.006 1h4.245a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75h-4.507a2.25 2.25 0 0 0-1.591.659l-.622.621a.75.75 0 0 1-1.06 0l-.622-.621A2.25 2.25 0 0 0 5.258 13H.75a.75.75 0 0 1-.75-.75Zm7.251 10.324.004-5.073-.002-2.253A2.25 2.25 0 0 0 5.003 2.5H1.5v9h3.757a3.75 3.75 0 0 1 1.994.574ZM8.755 4.75l-.004 7.322a3.752 3.752 0 0 1 1.992-.572H14.5v-9h-3.495a2.25 2.25 0 0 0-2.25 2.25Z"/>
+                  <path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16Zm3.78-9.72a.751.751 0 0 0-.018-1.042.751.751 0 0 0-1.042-.018L6.75 9.19 5.28 7.72a.751.751 0 0 0-1.042.018.751.751 0 0 0-.018 1.042l2 2a.75.75 0 0 0 1.06 0Z"/>
                 </svg>
               </a>
+              <button class="p-1.5 text-gh-text-secondary hover:text-amber-600 hover:bg-gh-bg-tertiary rounded-gh transition-colors" data-pause-session="${session.id}" title="Pause Session">
+                <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5Zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5Z"/>
+                </svg>
+              </button>
             ` : session.status === 'pairing' ? `
               <a href="/pairing/${session.id}" class="p-1.5 text-gh-text-secondary hover:text-gh-success hover:bg-gh-bg-tertiary rounded-gh transition-colors" title="Continue Pairing">
                 <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
                   <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm4.879-2.773 4.264 2.559a.25.25 0 0 1 0 .428l-4.264 2.559A.25.25 0 0 1 6 10.559V5.442a.25.25 0 0 1 .379-.215Z"/>
                 </svg>
               </a>
-            ` : ''}
+            ` : `
+              <button class="p-1.5 text-gh-text-secondary hover:text-gh-success hover:bg-gh-bg-tertiary rounded-gh transition-colors" data-resume-session="${session.id}" title="Resume Session">
+                <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm4.879-2.773 4.264 2.559a.25.25 0 0 1 0 .428l-4.264 2.559A.25.25 0 0 1 6 10.559V5.442a.25.25 0 0 1 .379-.215Z"/>
+                </svg>
+              </button>
+            `}
             <button class="p-1.5 text-gh-text-secondary hover:text-gh-danger hover:bg-gh-danger-subtle rounded-gh transition-colors" data-delete-session="${session.id}" title="Delete">
               <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
                 <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.675l.66 6.6a.25.25 0 0 0 .249.225h5.19a.25.25 0 0 0 .249-.225l.66-6.6a.75.75 0 0 1 1.492.149l-.66 6.6A1.748 1.748 0 0 1 10.595 15h-5.19a1.75 1.75 0 0 1-1.741-1.575l-.66-6.6a.75.75 0 1 1 1.492-.15ZM6.5 1.75V3h3V1.75a.25.25 0 0 0-.25-.25h-2.5a.25.25 0 0 0-.25.25Z"/>
@@ -662,6 +680,26 @@ import Layout from '../layouts/Layout.astro';
         const sessionId = target.getAttribute('data-delete-session');
         if (sessionId) {
           deleteSession(sessionId);
+        }
+      });
+    });
+    
+    sessionsList.querySelectorAll('[data-pause-session]').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const sessionId = target.getAttribute('data-pause-session');
+        if (sessionId) {
+          console.log('[Whatsaly] Pause not yet implemented for session:', sessionId);
+        }
+      });
+    });
+    
+    sessionsList.querySelectorAll('[data-resume-session]').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const sessionId = target.getAttribute('data-resume-session');
+        if (sessionId) {
+          console.log('[Whatsaly] Resume not yet implemented for session:', sessionId);
         }
       });
     });
