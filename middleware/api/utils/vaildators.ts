@@ -1,4 +1,4 @@
-import { sessionManager } from "../../../lib";
+import { sessionManager } from "../../../core";
 import type { ApiResponse } from "../../types";
 
 export function validateSessionId(

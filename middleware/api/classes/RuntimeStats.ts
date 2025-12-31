@@ -1,5 +1,5 @@
 import config from "../../../config";
-import { getMessagesCount, sessionManager } from "../../../lib";
+import { getMessagesCount, sessionManager } from "../../../core";
 import { formatUptime } from "../utils";
 import type { OverallStatsData } from "../../types";
 

@@ -38,13 +38,13 @@ bun install
 
 Create a `.env` file or use environment variables:
 
-| Variable       | Description                            | Default      |
-| -------------- | -------------------------------------- | ------------ |
-| `PHONE_NUMBER` | Phone number for auto-session creation | -            |
-| `BOT_NAME`     | Display name for the bot               | `Whatsaly`   |
-| `API_PORT`     | Backend API port                       | `3000`       |
-| `API_HOST`     | Backend API host                       | `0.0.0.0`    |
-| `DEBUG`        | Enable debug logging                   | `false`      |
+| Variable       | Description                            | Default    |
+| -------------- | -------------------------------------- | ---------- |
+| `PHONE_NUMBER` | Phone number for auto-session creation | -          |
+| `BOT_NAME`     | Display name for the bot               | `Whatsaly` |
+| `API_PORT`     | Backend API port                       | `3000`     |
+| `API_HOST`     | Backend API host                       | `0.0.0.0`  |
+| `DEBUG`        | Enable debug logging                   | `false`    |
 
 Example `.env` file:
 
@@ -80,6 +80,7 @@ Access the dashboard at `http://localhost:4321` during development.
 Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting pull requests.
 
 All contributions should:
+
 - Be focused on a single change
 - Include tests when applicable
 - Pass existing tests and checks

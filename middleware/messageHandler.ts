@@ -6,7 +6,7 @@ import {
   jidNormalizedUser,
 } from "baileys";
 import type { WASocket, WAMessage, WAMessageContent } from "baileys";
-import { getAlternateId, isSudo } from "../lib/sql";
+import { getAlternateId, isSudo } from "../core/sql";
 import type {
   NormalizedMessage,
   MessageClassification,

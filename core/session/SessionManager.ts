@@ -459,7 +459,7 @@ class SessionManager {
               }
 
               const cmd = new Plugins(msg, sock);
-              await cmd.load("./lib/modules");
+              await cmd.load("./core/modules");
               await Promise.allSettled([cmd.text(), cmd.eventUser(type)]);
             } catch (error) {
               log.error(

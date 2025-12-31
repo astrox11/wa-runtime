@@ -2,7 +2,7 @@ import { EventEmitter } from "events";
 import type { WASocket, WAMessage, proto } from "baileys";
 import { DisconnectReason } from "baileys";
 import { Boom } from "@hapi/boom";
-import { log } from "../lib/util";
+import { log } from "../core/util";
 
 import {
   normalizeMessage,

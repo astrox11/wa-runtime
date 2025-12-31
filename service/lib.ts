@@ -1,4 +1,4 @@
 /**
  * Re-export lib module from root for service layer
  */
-export * from "../lib";
+export * from "../core";

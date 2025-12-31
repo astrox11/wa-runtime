@@ -1,4 +1,4 @@
-import { getAllMessages, getMessagesCount } from "../../../lib";
+import { getAllMessages, getMessagesCount } from "../../../core";
 import type { ApiResponse } from "../../types";
 import { validateSessionId } from "./vaildators";
 

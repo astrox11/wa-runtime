@@ -1,4 +1,4 @@
-import { getAllGroups } from "../../../lib";
+import { getAllGroups } from "../../../core";
 import type { ApiResponse } from "../../types";
 import { validateSessionId } from "./vaildators";
 

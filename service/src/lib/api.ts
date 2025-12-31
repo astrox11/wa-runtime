@@ -421,7 +421,10 @@ export const api = {
   },
 
   // Generic action sender (for custom actions)
-  async sendAction(action: WsAction, params?: Record<string, unknown>): Promise<WsResponse> {
+  async sendAction(
+    action: WsAction,
+    params?: Record<string, unknown>,
+  ): Promise<WsResponse> {
     return getApiClient().send(action, params);
   },
 

@@ -1,5 +1,5 @@
 import config from "../../../config";
-import { sessionManager } from "../../../lib";
+import { sessionManager } from "../../../core";
 import type { ApiResponse } from "../../types";
 import { runtimeStats } from "../classes";
 import {

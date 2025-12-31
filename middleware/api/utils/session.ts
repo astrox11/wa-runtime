@@ -1,4 +1,4 @@
-import { log, sessionManager } from "../../../lib";
+import { log, sessionManager } from "../../../core";
 import type { ApiResponse } from "../../types";
 import { runtimeStats } from "../classes";
 import { formatPairingCode } from "./system";

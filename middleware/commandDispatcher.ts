@@ -1,6 +1,6 @@
 import type { WASocket } from "baileys";
-import { log } from "../lib/util";
-import { isAdmin } from "../lib/sql";
+import { log } from "../core/util";
+import { isAdmin } from "../core/sql";
 import type {
   NormalizedMessage,
   DispatchResult,

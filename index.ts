@@ -13,7 +13,7 @@ if (wsListener) {
   if (WebSocket.prototype.addListener) WebSocket.prototype.addListener = patch;
 }
 
-import { log, sessionManager } from "./lib";
+import { log, sessionManager } from "./core";
 import {
   isSessionCommand,
   getSessionArgs,

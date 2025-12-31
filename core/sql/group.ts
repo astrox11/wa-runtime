@@ -160,18 +160,20 @@ export const syncGroupMetadata = async (
   return;
 };
 
-export const getAllGroups = function (sessionId: string): Array<{id: string; subject: string; participantCount: number}> {
+export const getAllGroups = function (
+  sessionId: string,
+): Array<{ id: string; subject: string; participantCount: number }> {
   const tableName = getGroupsTable(sessionId);
   const rows = bunql.query<{ id: string; data: string }>(
     `SELECT id, data FROM "${tableName}"`,
   );
-  
-  return rows.map(row => {
+
+  return rows.map((row) => {
     const metadata = JSON.parse(row.data) as GroupMetadata;
     return {
       id: row.id,
-      subject: metadata.subject || 'Unknown Group',
-      participantCount: metadata.participants?.length || 0
+      subject: metadata.subject || "Unknown Group",
+      participantCount: metadata.participants?.length || 0,
     };
   });
 };

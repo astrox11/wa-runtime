@@ -258,7 +258,7 @@ const hashedId = hashSessionId(id || '');
 </Layout>
 
 <script>
-  import { api } from '../../lib/api';
+  import { api } from '../../core/api';
   
   // Get session ID from URL
   const sessionId = window.location.pathname.split('/').pop() || '';
