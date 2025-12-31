@@ -23,7 +23,9 @@ export type WsAction =
   | "getMessages"
   | "getConfig"
   | "getNetworkState"
-  | "getGroups";
+  | "getGroups"
+  | "pauseSession"
+  | "resumeSession";
 
 export interface WsRequest {
   action: WsAction;
@@ -316,6 +318,38 @@ export async function handleWsAction(request: WsRequest): Promise<WsResponse> {
               success: false,
               error: "Failed to retrieve groups",
             };
+          }
+        }
+        break;
+
+      case "pauseSession":
+        if (!params.id) {
+          result = { success: false, error: "Session ID is required" };
+        } else {
+          log.debug("Pausing session:", params.id);
+          const pauseResult = await sessionManager.pause(params.id as string);
+          if (pauseResult.success) {
+            log.info("Session paused:", params.id);
+            result = { success: true, data: { message: "Session paused" } };
+          } else {
+            log.error("Failed to pause session:", pauseResult.error);
+            result = { success: false, error: pauseResult.error };
+          }
+        }
+        break;
+
+      case "resumeSession":
+        if (!params.id) {
+          result = { success: false, error: "Session ID is required" };
+        } else {
+          log.debug("Resuming session:", params.id);
+          const resumeResult = await sessionManager.resume(params.id as string);
+          if (resumeResult.success) {
+            log.info("Session resumed:", params.id);
+            result = { success: true, data: { message: "Session resumed" } };
+          } else {
+            log.error("Failed to resume session:", resumeResult.error);
+            result = { success: false, error: resumeResult.error };
           }
         }
         break;

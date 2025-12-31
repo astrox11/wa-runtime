@@ -44,7 +44,7 @@ interface ActiveSession {
   phoneNumber: string;
   socket: WASocket | null;
   msgRetryCounterCache: CacheStore;
-  status: "connecting" | "connected" | "disconnected" | "pairing";
+  status: "connecting" | "connected" | "disconnected" | "pairing" | "paused";
   pushNameInterval?: ReturnType<typeof setInterval>;
 }
 
@@ -588,6 +588,109 @@ class SessionManager {
   }
 
   /**
+   * Pause a session (disconnect but keep in memory for quick resume)
+   */
+  async pause(
+    idOrPhone: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    const sessionId = this.resolveSessionId(idOrPhone);
+    if (!sessionId) {
+      return { success: false, error: "Session not found" };
+    }
+
+    const activeSession = this.sessions.get(sessionId);
+    if (!activeSession) {
+      return { success: false, error: "Session not active" };
+    }
+
+    if (activeSession.status === "paused") {
+      return { success: false, error: "Session already paused" };
+    }
+
+    log.debug(`Pausing session ${sessionId}...`);
+
+    if (activeSession.socket) {
+      try {
+        await activeSession.socket.end(undefined);
+      } catch (error) {
+        log.debug(`Error ending socket for session ${sessionId}:`, error);
+      }
+      activeSession.socket = null;
+    }
+
+    if (activeSession.pushNameInterval) {
+      clearInterval(activeSession.pushNameInterval);
+      activeSession.pushNameInterval = undefined;
+    }
+
+    activeSession.status = "paused";
+    updateSessionStatus(sessionId, "inactive");
+
+    log.info(`Session ${sessionId} paused`);
+    return { success: true };
+  }
+
+  /**
+   * Resume a paused session
+   */
+  async resume(
+    idOrPhone: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    const sessionId = this.resolveSessionId(idOrPhone);
+    if (!sessionId) {
+      return { success: false, error: "Session not found" };
+    }
+
+    let activeSession = this.sessions.get(sessionId);
+    
+    if (!activeSession) {
+      const dbSession = getSession(sessionId);
+      if (!dbSession) {
+        return { success: false, error: "Session not found" };
+      }
+
+      activeSession = {
+        id: sessionId,
+        phoneNumber: dbSession.phone_number,
+        socket: null,
+        msgRetryCounterCache: new NodeCache() as CacheStore,
+        status: "connecting",
+      };
+      this.sessions.set(sessionId, activeSession);
+    }
+
+    if (activeSession.status === "connected" || activeSession.status === "connecting") {
+      return { success: false, error: "Session already active" };
+    }
+
+    log.debug(`Resuming session ${sessionId}...`);
+
+    activeSession.status = "connecting";
+    
+    try {
+      await this.initializeSession(activeSession, false);
+      log.info(`Session ${sessionId} resumed`);
+      return { success: true };
+    } catch (error) {
+      log.error(`Failed to resume session ${sessionId}:`, error);
+      activeSession.status = "paused";
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to resume session",
+      };
+    }
+  }
+
+  /**
+   * Helper to resolve session ID from ID or phone number
+   */
+  private resolveSessionId(idOrPhone: string): string | null {
+    const sanitized = this.sanitizePhoneNumber(idOrPhone);
+    const record = getSession(sanitized || idOrPhone);
+    return record?.id || null;
+  }
+
+  /**
    * Restore all sessions from database on startup
    */
   async restoreAllSessions(): Promise<void> {
@@ -654,14 +757,18 @@ class SessionManager {
   }
 
   /**
-   * List all sessions with extended info (including pushName)
+   * List all sessions with extended info (including pushName and actual status)
    */
   listExtended(): Array<SessionRecord & { pushName?: string }> {
     const sessions = getAllSessions();
-    return sessions.map((session) => ({
-      ...session,
-      pushName: this.getPushName(session.id) || session.push_name,
-    }));
+    return sessions.map((session) => {
+      const activeSession = this.sessions.get(session.id);
+      return {
+        ...session,
+        status: activeSession?.status === "paused" ? "inactive" : session.status,
+        pushName: this.getPushName(session.id) || session.push_name,
+      };
+    });
   }
 }
 

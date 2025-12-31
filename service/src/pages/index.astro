@@ -685,21 +685,53 @@ import Layout from '../layouts/Layout.astro';
     });
     
     sessionsList.querySelectorAll('[data-pause-session]').forEach(button => {
-      button.addEventListener('click', (e) => {
+      button.addEventListener('click', async (e) => {
         const target = e.currentTarget as HTMLElement;
         const sessionId = target.getAttribute('data-pause-session');
         if (sessionId) {
-          console.log('[Whatsaly] Pause not yet implemented for session:', sessionId);
+          console.log('[Whatsaly] Pausing session:', sessionId);
+          target.setAttribute('disabled', 'true');
+          
+          try {
+            const result = await api.sendAction('pauseSession', { id: sessionId });
+            if (result.success) {
+              console.log('[Whatsaly] Session paused successfully');
+            } else {
+              console.error('[Whatsaly] Failed to pause session:', result.error);
+              alert(`Failed to pause session: ${result.error}`);
+            }
+          } catch (error) {
+            console.error('[Whatsaly] Error pausing session:', error);
+            alert('Failed to pause session');
+          } finally {
+            target.removeAttribute('disabled');
+          }
         }
       });
     });
     
     sessionsList.querySelectorAll('[data-resume-session]').forEach(button => {
-      button.addEventListener('click', (e) => {
+      button.addEventListener('click', async (e) => {
         const target = e.currentTarget as HTMLElement;
         const sessionId = target.getAttribute('data-resume-session');
         if (sessionId) {
-          console.log('[Whatsaly] Resume not yet implemented for session:', sessionId);
+          console.log('[Whatsaly] Resuming session:', sessionId);
+          target.setAttribute('disabled', 'true');
+          
+          try {
+            const result = await api.sendAction('resumeSession', { id: sessionId });
+            if (result.success) {
+              console.log('[Whatsaly] Session resumed successfully');
+            } else {
+              console.error('[Whatsaly] Failed to resume session:', result.error);
+              alert(`Failed to resume session: ${result.error}`);
+            }
+          } catch (error) {
+            console.error('[Whatsaly] Error resuming session:', error);
+            alert('Failed to resume session');
+          } finally {
+            target.removeAttribute('disabled');
+          }
         }
       });
     });

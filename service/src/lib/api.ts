@@ -17,7 +17,9 @@ type WsAction =
   | "getMessages"
   | "getConfig"
   | "getNetworkState"
-  | "getGroups";
+  | "getGroups"
+  | "pauseSession"
+  | "resumeSession";
 
 interface WsRequest {
   action: WsAction;
