@@ -376,6 +376,8 @@ class SessionManager {
 
     log.debug(`Pausing session ${sessionId}...`);
 
+    updateSessionStatus(sessionId, StatusType.PausedUser);
+
     const runtime = this.runtimeData.get(sessionId);
     if (runtime?.client) {
       try {
@@ -385,8 +387,6 @@ class SessionManager {
       }
       runtime.client = null;
     }
-
-    updateSessionStatus(sessionId, StatusType.PausedUser);
 
     log.info(`Session ${sessionId} paused`);
     return { success: true };
