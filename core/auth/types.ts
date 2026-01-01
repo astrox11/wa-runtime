@@ -1,12 +1,10 @@
-import type { CacheStore, Contact, WASocket } from "baileys";
+import type { Contact } from "baileys";
 
 export interface Session {
   id: string;
   phone_number: string;
   status: StatusType;
-  client?: WASocket | null;
   user_info?: Contact | null;
-  msgRetryCounterCache?: CacheStore;
   created_at?: number;
 }
 
