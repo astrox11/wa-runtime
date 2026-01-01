@@ -18,7 +18,7 @@ if (wsListener) {
 import { log, sessionManager } from "./core";
 import config from "./config";
 import { handleApiRequest, handleWsAction } from "./service/api";
-import { runtimeStats, type ApiResponse } from "./middleware";
+import { runtimeStats, type ApiResponse } from "./service";
 import type { WsRequest } from "./service/types";
 
 const wsClients: Set<any> = new Set();

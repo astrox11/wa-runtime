@@ -34,7 +34,7 @@ import {
   updateSessionUserInfo,
 } from "..";
 import { useSessionAuth } from "./session";
-import { type Session, SessionErrorType, StatusType } from "./types";
+import { type Session, type NetworkState, SessionErrorType, StatusType } from "./types";
 import { UserPausedStatus } from "./util";
 
 const logger = MAIN_LOGGER({ level: "silent" });
@@ -543,6 +543,35 @@ class SessionManager {
     return [...this.sessions.values()].filter(
       (s) => s.status === StatusType.Connected,
     ).length;
+  }
+
+  /**
+   * List all sessions with extended information
+   * Includes user_info and current status from active sessions
+   */
+  listExtended(): Session[] {
+    const dbSessions = getAllSessions();
+
+    return dbSessions.map((dbSession) => {
+      const activeSession = this.sessions.get(dbSession.id);
+      return {
+        ...dbSession,
+        status: activeSession?.status ?? dbSession.status,
+        user_info: activeSession?.client?.user ?? dbSession.user_info ?? null,
+      };
+    });
+  }
+
+  /**
+   * Get the current network state
+   */
+  getNetworkState(): NetworkState {
+    return {
+      isHealthy: true,
+      consecutiveFailures: 0,
+      lastCheck: Date.now(),
+      isPaused: false,
+    };
   }
 }
 

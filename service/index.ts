@@ -2,14 +2,39 @@
  * Service Layer
  *
  * Provides HTTP API and WebSocket request handling for the Whatsaly dashboard.
- * Consistent with the middleware layer structure.
+ * Uses core module directly for session management.
  */
 
-// Re-export middleware for service access
-export * from "./middleware";
+// Re-export middleware functions for service access
+export {
+  runtimeStats,
+  getSessions,
+  getSession,
+  createSession,
+  deleteSession,
+  pauseSession,
+  resumeSession,
+  getAuthStatus,
+  getOverallStats,
+  getSessionStats,
+  getMessages,
+  getConfig,
+  getNetworkState,
+  getGroups,
+} from "./middleware";
 
-// Export service-specific types (types that re-export from middleware won't conflict)
+// Export all types
 export type {
+  ApiResponse,
+  SessionData,
+  SessionCreateResult,
+  AuthStatusData,
+  SessionStatsData,
+  OverallStatsData,
+  MessagesData,
+  ConfigData,
+  GroupData,
+  GroupsData,
   SessionCreateRequest,
   WsAction,
   WsRequest,

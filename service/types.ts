@@ -1,21 +1,90 @@
 /**
  * Service layer type definitions
- * Consistent with middleware/types.ts pattern
+ * Types for API responses and WebSocket communication
  */
 
-// Re-export shared types from middleware
-export type {
-  ApiResponse,
-  SessionData,
-  SessionCreateResult,
-  AuthStatusData,
-  SessionStatsData,
-  OverallStatsData,
-  MessagesData,
-  ConfigData,
-  GroupData,
-  GroupsData,
-} from "./middleware";
+/** Generic API response structure */
+export interface ApiResponse<T = unknown> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
+
+/** Session data returned from API */
+export interface SessionData {
+  id: string;
+  phone_number: string;
+  status: number;
+  user_info?: {
+    id?: string;
+    name?: string;
+    lid?: string;
+  } | null;
+  created_at?: number;
+}
+
+/** Result of session creation */
+export interface SessionCreateResult {
+  id: string;
+  code?: string;
+}
+
+/** Auth status data */
+export interface AuthStatusData {
+  isAuthenticated: boolean;
+  qrCode?: string;
+  pairingCode?: string;
+}
+
+/** Session stats data */
+export interface SessionStatsData {
+  messagesReceived: number;
+  messagesSent: number;
+  uptime: number;
+}
+
+/** Overall runtime stats data */
+export interface OverallStatsData {
+  totalSessions: number;
+  activeSessions: number;
+  totalMessagesReceived: number;
+  totalMessagesSent: number;
+  uptime: number;
+  memoryUsage: {
+    heapUsed: number;
+    heapTotal: number;
+    rss: number;
+  };
+}
+
+/** Messages data returned from API */
+export interface MessagesData {
+  messages: Array<{
+    id: string;
+    message: unknown;
+  }>;
+  total: number;
+}
+
+/** Configuration data */
+export interface ConfigData {
+  version: string;
+  botName: string;
+  debug: boolean;
+}
+
+/** Group data */
+export interface GroupData {
+  id: string;
+  subject: string;
+  participantCount: number;
+}
+
+/** Groups data returned from API */
+export interface GroupsData {
+  groups: GroupData[];
+  total: number;
+}
 
 /** Session creation request parameters */
 export interface SessionCreateRequest {
@@ -57,17 +126,17 @@ export interface WsResponse {
 
 /** Known WebSocket response types for type-safe handling */
 export interface WsResponsePayloads {
-  getSessions: import("./middleware").SessionData[];
-  getSession: import("./middleware").SessionData;
-  createSession: import("./middleware").SessionCreateResult;
+  getSessions: SessionData[];
+  getSession: SessionData;
+  createSession: SessionCreateResult;
   deleteSession: MessageResult;
-  getAuthStatus: import("./middleware").AuthStatusData;
-  getStats: import("./middleware").OverallStatsData;
-  getSessionStats: import("./middleware").SessionStatsData;
-  getMessages: import("./middleware").MessagesData;
-  getConfig: import("./middleware").ConfigData;
+  getAuthStatus: AuthStatusData;
+  getStats: OverallStatsData;
+  getSessionStats: SessionStatsData;
+  getMessages: MessagesData;
+  getConfig: ConfigData;
   getNetworkState: NetworkStateData;
-  getGroups: import("./middleware").GroupsData;
+  getGroups: GroupsData;
   pauseSession: MessageResult;
   resumeSession: MessageResult;
 }
@@ -89,10 +158,10 @@ export interface NetworkStateData {
 export interface StatsUpdate {
   type: "stats";
   data: {
-    overall: import("./middleware").OverallStatsData;
+    overall: OverallStatsData;
     sessions: Array<
-      import("./middleware").SessionData & {
-        stats: import("./middleware").SessionStatsData;
+      SessionData & {
+        stats: SessionStatsData;
       }
     >;
     network: NetworkStateData;
@@ -103,4 +172,4 @@ export interface StatsUpdate {
 export type RouteHandler = (
   req: Request,
   params?: Record<string, string>,
-) => Promise<import("./middleware").ApiResponse>;
+) => Promise<ApiResponse>;
