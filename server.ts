@@ -23,10 +23,10 @@ import type { WsRequest } from "./service/types";
 
 const wsClients: Set<any> = new Set();
 
-function broadcastStats() {
+function BroadCast() {
   if (wsClients.size === 0) return;
 
-  log.debug("Broadcasting stats to", wsClients.size, "WebSocket clients");
+  log.debug("Connected Clients:", wsClients.size);
 
   const overallStats = runtimeStats.getOverallStats();
   const sessions = sessionManager.listExtended();
@@ -54,7 +54,7 @@ function broadcastStats() {
 }
 
 const BROADCAST_INTERVAL_MS = 500;
-setInterval(broadcastStats, BROADCAST_INTERVAL_MS);
+setInterval(BroadCast, BROADCAST_INTERVAL_MS);
 
 const STATIC_DIR = join(import.meta.dir, "service", "dist", "client");
 const ASTRO_SERVER_URL = "http://localhost:4321";
@@ -114,7 +114,7 @@ async function serveStaticFile(filePath: string): Promise<Response | null> {
         },
       });
     }
-  } catch {}
+  } catch { }
   return null;
 }
 

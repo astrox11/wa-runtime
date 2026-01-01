@@ -1,11 +1,3 @@
-/**
- * API Client for communicating with Whatsaly backend
- * Uses WebSocket for real-time bidirectional communication
- */
-
-/**
- * WebSocket Action Types
- */
 type WsAction =
   | "getSessions"
   | "getSession"
@@ -39,7 +31,7 @@ interface Session {
   id: string;
   phone_number: string;
   created_at: number;
-  status: "active" | "inactive" | "pairing";
+  status: "active" | "inactive" | "pairing" | "paused_user";
   pushName?: string;
   push_name?: string;
 }
@@ -126,7 +118,7 @@ class WsApiClient {
   private connectionPromise: Promise<void> | null = null;
   private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
   private isReconnecting = false;
-  private lastStatsData: StatsUpdate | null = null; // Store last stats for late subscribers
+  private lastStatsData: StatsUpdate | null = null;
 
   constructor() {
     if (typeof window !== "undefined") {
@@ -183,7 +175,7 @@ class WsApiClient {
         if (data?.type === "stats") {
           this.lastStatsData = data;
           console.log(
-            "[Whatsaly] Broadcasting stats to",
+            "[Whatsaly] Stats",
             this.statsCallbacks.size,
             "callbacks",
           );
