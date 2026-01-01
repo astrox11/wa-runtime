@@ -10,7 +10,7 @@ export interface SessionData {
   id: string;
   phone_number: string;
   created_at: number;
-  status: "active" | "inactive" | "pairing" | "paused_user";
+  status: "active" | "inactive" | "pairing" | "paused_user" | "connecting";
   user_info?: {
     id: string;
     lid: string;

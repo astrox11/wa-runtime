@@ -29,6 +29,8 @@ function getStatusString(status: number): string {
     case StatusType.Connected:
     case StatusType.Active:
       return "active";
+    case StatusType.Connecting:
+      return "connecting";
     case StatusType.Pairing:
       return "pairing";
     case StatusType.PausedUser:

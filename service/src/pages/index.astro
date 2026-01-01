@@ -769,7 +769,7 @@ import Layout from "../layouts/Layout.astro";
           statusIcon = `<svg class="w-4 h-4 text-gh-success" viewBox="0 0 16 16" fill="currentColor">
             <path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16Zm3.78-9.72a.751.751 0 0 0-.018-1.042.751.751 0 0 0-1.042-.018L6.75 9.19 5.28 7.72a.751.751 0 0 0-1.042.018.751.751 0 0 0-.018 1.042l2 2a.75.75 0 0 0 1.06 0Z"/>
           </svg>`;
-        } else if (session.status === "pairing") {
+        } else if (session.status === "pairing" || session.status === "connecting") {
           statusIcon = `<svg class="w-4 h-4 text-amber-600 animate-spin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
             <circle cx="8" cy="8" r="6" stroke-dasharray="28" stroke-dashoffset="7"/>
           </svg>`;
@@ -812,7 +812,15 @@ import Layout from "../layouts/Layout.astro";
                 </svg>
               </a>
             `
-                  : `
+                  : session.status === "connecting"
+                    ? `
+              <span class="p-1.5 text-gh-text-muted" title="Connecting...">
+                <svg class="w-4 h-4 animate-spin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <circle cx="8" cy="8" r="6" stroke-dasharray="28" stroke-dashoffset="7"/>
+                </svg>
+              </span>
+            `
+                    : `
               <button class="p-1.5 text-gh-text-secondary hover:text-gh-success hover:bg-gh-bg-tertiary rounded-gh transition-colors" data-resume-session="${session.id}" title="Resume Session">
                 <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
                   <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm4.879-2.773 4.264 2.559a.25.25 0 0 1 0 .428l-4.264 2.559A.25.25 0 0 1 6 10.559V5.442a.25.25 0 0 1 .379-.215Z"/>
