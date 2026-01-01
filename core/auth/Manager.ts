@@ -122,6 +122,13 @@ class SessionManager {
       return undefined;
     }
 
+    if (runtime.client) {
+      log.info(
+        `Session ${sessionId} initialization skipped - client already exists`,
+      );
+      return undefined;
+    }
+
     log.debug("Initializing session:", sessionId);
 
     const { state, saveCreds } = await useSessionAuth(sessionId);
@@ -192,6 +199,8 @@ class SessionManager {
             `Session ${sessionId} disconnected with status code:`,
             statusCode,
           );
+
+          runtime.client = null;
 
           if (statusCode !== DisconnectReason.loggedOut) {
             const dbSession = getSession(sessionId);
@@ -412,7 +421,16 @@ class SessionManager {
       this.runtimeData.set(sessionId, runtime);
     }
 
-    updateSessionStatus(sessionId, StatusType.Active);
+    if (runtime.client) {
+      try {
+        runtime.client.end(undefined);
+      } catch (error) {
+        log.debug(`Error ending existing client for session ${sessionId}:`, error);
+      }
+      runtime.client = null;
+    }
+
+    updateSessionStatus(sessionId, StatusType.Connecting);
 
     try {
       await this.initializeSession(
