@@ -1,3 +1,5 @@
+import type { SessionStats } from "./src/lib/api";
+
 export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
@@ -7,13 +9,14 @@ export interface ApiResponse<T = unknown> {
 export interface SessionData {
   id: string;
   phone_number: string;
-  status: number;
+  created_at: number;
+  status: "active" | "inactive" | "pairing" | "paused_user";
   user_info?: {
-    id?: string;
-    name?: string;
-    lid?: string;
-  } | null;
-  created_at?: number;
+    id: string;
+    lid: string;
+    name: string;
+  };
+  stats: SessionStats;
 }
 
 export interface SessionCreateResult {

@@ -31,8 +31,12 @@ export interface Session {
   phone_number: string;
   created_at: number;
   status: "active" | "inactive" | "pairing" | "paused_user";
-  pushName?: string;
-  push_name?: string;
+  user_info: {
+    id: string;
+    lid: string;
+    name: string;
+  };
+  stats: SessionStats;
 }
 
 export interface SessionCreateResponse {

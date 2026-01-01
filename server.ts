@@ -232,7 +232,7 @@ const server = Bun.serve({
               id: s.id,
               phone_number: s.phone_number,
               status: getStatusString(s.status),
-              user_info: s.user_info ?? null,
+              user_info: s.user_info,
               created_at: s.created_at,
               pushName: s.user_info?.name,
               stats: runtimeStats.getStats(s.id),

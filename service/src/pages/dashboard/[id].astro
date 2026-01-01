@@ -432,6 +432,7 @@ const hashedId = hashSessionId(id || "");
 </Layout>
 
 <script>
+  import { date } from "astro:schema";
   import { api } from "../../lib/api";
 
   const sessionId = window.location.pathname.split("/").pop() || "";
@@ -442,12 +443,16 @@ const hashedId = hashSessionId(id || "");
   }
 
   interface SessionData {
-    pushName?: string;
-    push_name?: string;
+    id: string;
     phone_number: string;
-    stats?: SessionStats;
-    status: string;
-    created_at?: number;
+    created_at: number;
+    status: "active" | "inactive" | "pairing" | "paused_user";
+    user_info: {
+      id: string;
+      lid: string;
+      name: string;
+    };
+    stats: SessionStats;
   }
 
   function formatRelativeTime(timestamp: number): string {
@@ -467,11 +472,13 @@ const hashedId = hashSessionId(id || "");
     }
   }
 
-  function updateSessionDisplay(sessionData: SessionData) {
+  function updateSessionDisplay(
+    sessionData: SessionData & {
+      stats: SessionStats;
+    }
+  ) {
     const displayName =
-      sessionData.pushName ||
-      sessionData.push_name ||
-      `+${sessionData.phone_number}`;
+      sessionData.user_info.name || `+${sessionData.phone_number}`;
     const userNameEl = document.getElementById("user-name");
     if (userNameEl) userNameEl.textContent = displayName;
 
@@ -602,7 +609,8 @@ const hashedId = hashSessionId(id || "");
           (s: { id: string }) => s.id === sessionId
         );
         if (sessionData) {
-          updateSessionDisplay(sessionData);
+          const data = sessionData;
+          updateSessionDisplay(data);
         }
       }
     }

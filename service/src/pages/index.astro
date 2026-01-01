@@ -727,8 +727,11 @@ import Layout from "../layouts/Layout.astro";
       phone_number: string;
       created_at: number;
       status: string;
-      pushName?: string;
-      push_name?: string;
+      user_info: {
+        id: string;
+        lid: string;
+        name: string;
+      };
     }>
   ) {
     console.log(sessions.length, "sessions");
@@ -758,7 +761,7 @@ import Layout from "../layouts/Layout.astro";
     sessionsList.innerHTML = sessions
       .map((session) => {
         const displayName =
-          session.pushName || session.push_name || `+${session.phone_number}`;
+          session?.user_info?.name || `+${session.phone_number}`;
 
         let statusIcon = "";
 
@@ -925,7 +928,7 @@ import Layout from "../layouts/Layout.astro";
             phone_number: s.phone_number,
             created_at: s.created_at,
             status: s.status,
-            push_name: s.push_name,
+            user_info: s.user_info,
           }))
         );
       }
