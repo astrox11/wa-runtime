@@ -1061,9 +1061,7 @@ import Layout from "../layouts/Layout.astro";
         typeof arg === "object" ? JSON.stringify(arg) : String(arg)
       )
       .join(" ");
-    if (message.includes("[Whatsaly]")) {
-      addLog(message);
-    }
+    addLog(message);
   };
 
   sidebarConsole?.addEventListener("click", () => {
