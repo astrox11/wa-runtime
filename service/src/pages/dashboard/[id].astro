@@ -573,66 +573,31 @@ const hashedId = hashSessionId(id || "");
     }
   }
 
-  function renderActivityChart(hourlyData: number[]) {
-    const container = document.getElementById("activity-chart");
-    const peakEl = document.getElementById("peak-hour");
-    const avgEl = document.getElementById("avg-hour");
-
-    if (!container) return;
-
-    const maxValue = Math.max(...hourlyData, 1);
-    const total = hourlyData.reduce((a, b) => a + b, 0);
-    const avg = total / 24;
-    const peakHour = hourlyData.indexOf(maxValue);
-
-    if (peakEl) {
-      const peakTime =
-        peakHour < 12
-          ? `${peakHour || 12}am`
-          : `${peakHour === 12 ? 12 : peakHour - 12}pm`;
-      peakEl.textContent = `${peakTime} (${maxValue})`;
-    }
-    if (avgEl) avgEl.textContent = avg.toFixed(1);
-
-    const currentHour = new Date().getHours();
-    let html = "";
-
-    for (let i = 0; i < 24; i++) {
-      const value = hourlyData[i] || 0;
-      const height = Math.max((value / maxValue) * 100, 4);
-      const isCurrentHour = i === currentHour;
-      const barColor = isCurrentHour ? "bg-gh-accent" : "bg-gh-accent/60";
-      const tooltipText = `${i < 12 ? (i || 12) + "am" : (i === 12 ? 12 : i - 12) + "pm"}: ${value} msgs`;
-
-      html += `
-        <div class="flex-1 h-full flex items-end group relative" title="${tooltipText}">
-          <div class="w-full rounded-t ${barColor} transition-all hover:bg-gh-accent" style="height: ${height}%"></div>
-        </div>
-      `;
-    }
-
-    container.innerHTML = html;
+  function escapeHtml(text: string): string {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   api.onStats((data) => {
     if (data.type === "stats") {
-      if (data.data.overall) {
+      if (data.data?.overall) {
         const totalSessionsEl = document.getElementById("total-sessions");
         const activeSessionsEl = document.getElementById("active-sessions");
         const totalMessagesEl = document.getElementById("total-messages");
 
         if (totalSessionsEl)
           totalSessionsEl.textContent =
-            data?.data?.overall.totalSessions?.toString();
+            data.data.overall.totalSessions?.toString() ?? "0";
         if (activeSessionsEl)
           activeSessionsEl.textContent =
-            data?.data?.overall.activeSessions?.toString();
+            data.data.overall.activeSessions?.toString() ?? "0";
         if (totalMessagesEl)
           totalMessagesEl.textContent =
-            data?.data?.overall.totalMessages?.toLocaleString();
+            data.data.overall.totalMessages?.toLocaleString() ?? "0";
       }
 
-      if (data.data.sessions) {
+      if (data.data?.sessions) {
         const sessionData = data.data.sessions.find(
           (s: { id: string }) => s.id === sessionId
         );
@@ -650,7 +615,6 @@ const hashedId = hashSessionId(id || "");
     }
   });
 
-  // Load groups for this session
   function loadGroups() {
     api.sendAction("getGroups", { sessionId }).then((result) => {
       const groupsList = document.getElementById("groups-list");
@@ -685,7 +649,7 @@ const hashedId = hashSessionId(id || "");
                   <path d="M5.5 3.5A2 2 0 0 1 7.5 1.5h1A2 2 0 0 1 10.5 3.5v1A2 2 0 0 1 8.5 6.5h-1A2 2 0 0 1 5.5 4.5ZM7.5 3a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5ZM2 10.5A2 2 0 0 1 4 8.5h1a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2Zm2-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5Zm5.5 0a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2Zm2-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5Z"/>
                 </svg>
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm font-medium text-gh-text truncate">${group.subject}</p>
+                  <p class="text-sm font-medium text-gh-text truncate">${escapeHtml(group.subject)}</p>
                   <p class="text-xs text-gh-text-muted">${group.participantCount} member${group.participantCount !== 1 ? "s" : ""}</p>
                 </div>
               </div>
@@ -705,17 +669,14 @@ const hashedId = hashSessionId(id || "");
     });
   }
 
-  // Load groups on page load
   loadGroups();
 
-  // Button event handlers
   const refreshBtn = document.getElementById(
     "refresh-btn"
   ) as HTMLButtonElement | null;
   if (refreshBtn) {
     refreshBtn.addEventListener("click", async () => {
       refreshBtn.disabled = true;
-      // Data will refresh automatically via WebSocket
       setTimeout(() => {
         refreshBtn.disabled = false;
       }, 1000);

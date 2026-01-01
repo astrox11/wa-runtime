@@ -4,7 +4,6 @@ import {
   getMessagesCount,
   getAllGroups,
   StatusType,
-  log,
 } from "../core";
 import config from "../config";
 import type { SessionStatsData, OverallStatsData } from "./types";

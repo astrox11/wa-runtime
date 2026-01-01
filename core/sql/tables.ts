@@ -1,11 +1,6 @@
-/**
- * Dynamic per-user table management
- * Creates and manages tables with format: user_<phoneNumber>_<tableName>
- */
 import { bunql } from "./_sql";
-import { log } from "../";
+import { log } from "../util/main";
 
-// Allowed table suffixes - whitelist approach for security
 const ALLOWED_TABLE_SUFFIXES = [
   "auth",
   "messages",
@@ -27,33 +22,20 @@ const ALLOWED_TABLE_SUFFIXES = [
 
 type TableSuffix = (typeof ALLOWED_TABLE_SUFFIXES)[number];
 
-/**
- * Validate table suffix against whitelist
- */
 function isValidTableSuffix(suffix: string): suffix is TableSuffix {
   return ALLOWED_TABLE_SUFFIXES.includes(suffix as TableSuffix);
 }
 
-/**
- * Sanitize phone number to contain only digits
- */
 function sanitizePhoneNumber(phoneNumber: string): string {
   return phoneNumber.replace(/\D/g, "");
 }
 
-/**
- * Generate a table name for a specific user session
- * Format: user_<phoneNumber>_<tableName>
- * Both phone number and table name are validated/sanitized
- */
 export function getUserTableName(
   phoneNumber: string,
   tableName: TableSuffix,
 ): string {
-  // Sanitize phone number (remove any non-digit characters)
   const sanitizedPhone = sanitizePhoneNumber(phoneNumber);
 
-  // Validate table name is in the whitelist
   if (!isValidTableSuffix(tableName)) {
     throw new Error(`Invalid table suffix: ${tableName}`);
   }
@@ -61,20 +43,13 @@ export function getUserTableName(
   return `user_${sanitizedPhone}_${tableName}`;
 }
 
-/**
- * Extract phone number from a session ID (format: session_<phoneNumber>)
- */
 export function getPhoneFromSessionId(sessionId: string): string {
   if (!sessionId) return "";
   return sessionId.replace(/^session_/, "");
 }
 
-// Table definitions cache to avoid recreating tables
 const createdTables = new Set<string>();
 
-/**
- * Create auth table for a specific user session
- */
 export function createUserAuthTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "auth");
 
@@ -95,9 +70,6 @@ export function createUserAuthTable(phoneNumber: string): string {
   return tableName;
 }
 
-/**
- * Create messages table for a specific user session
- */
 export function createUserMessagesTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "messages");
 
@@ -118,9 +90,6 @@ export function createUserMessagesTable(phoneNumber: string): string {
   return tableName;
 }
 
-/**
- * Create contacts table for a specific user session
- */
 export function createUserContactsTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "contacts");
 
@@ -141,9 +110,6 @@ export function createUserContactsTable(phoneNumber: string): string {
   return tableName;
 }
 
-/**
- * Create groups table for a specific user session
- */
 export function createUserGroupsTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "groups");
 
@@ -164,9 +130,6 @@ export function createUserGroupsTable(phoneNumber: string): string {
   return tableName;
 }
 
-/**
- * Create sudo table for a specific user session
- */
 export function createUserSudoTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "sudo");
 
@@ -187,9 +150,6 @@ export function createUserSudoTable(phoneNumber: string): string {
   return tableName;
 }
 
-/**
- * Create ban table for a specific user session
- */
 export function createUserBanTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "ban");
 
@@ -210,9 +170,6 @@ export function createUserBanTable(phoneNumber: string): string {
   return tableName;
 }
 
-/**
- * Create mode table for a specific user session
- */
 export function createUserModeTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "mode");
 
@@ -233,9 +190,6 @@ export function createUserModeTable(phoneNumber: string): string {
   return tableName;
 }
 
-/**
- * Create prefix table for a specific user session
- */
 export function createUserPrefixTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "prefix");
 
@@ -256,9 +210,6 @@ export function createUserPrefixTable(phoneNumber: string): string {
   return tableName;
 }
 
-/**
- * Create antidelete table for a specific user session
- */
 export function createUserAntideleteTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "antidelete");
 
@@ -280,9 +231,6 @@ export function createUserAntideleteTable(phoneNumber: string): string {
   return tableName;
 }
 
-/**
- * Create alive table for a specific user session
- */
 export function createUserAliveTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "alive");
 
@@ -303,9 +251,6 @@ export function createUserAliveTable(phoneNumber: string): string {
   return tableName;
 }
 
-/**
- * Create mention table for a specific user session
- */
 export function createUserMentionTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "mention");
 
@@ -327,9 +272,6 @@ export function createUserMentionTable(phoneNumber: string): string {
   return tableName;
 }
 
-/**
- * Create filter table for a specific user session
- */
 export function createUserFilterTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "filter");
 
@@ -351,9 +293,6 @@ export function createUserFilterTable(phoneNumber: string): string {
   return tableName;
 }
 
-/**
- * Create afk table for a specific user session
- */
 export function createUserAfkTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "afk");
 
@@ -383,9 +322,6 @@ export function createUserAfkTable(phoneNumber: string): string {
   return tableName;
 }
 
-/**
- * Create group_event table for a specific user session
- */
 export function createUserGroupEventTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "group_event");
 
@@ -406,9 +342,6 @@ export function createUserGroupEventTable(phoneNumber: string): string {
   return tableName;
 }
 
-/**
- * Create sticker table for a specific user session
- */
 export function createUserStickerTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "sticker");
 
@@ -429,9 +362,6 @@ export function createUserStickerTable(phoneNumber: string): string {
   return tableName;
 }
 
-/**
- * Create bgm table for a specific user session
- */
 export function createUserBgmTable(phoneNumber: string): string {
   const tableName = getUserTableName(phoneNumber, "bgm");
 
@@ -452,9 +382,6 @@ export function createUserBgmTable(phoneNumber: string): string {
   return tableName;
 }
 
-/**
- * Initialize all tables for a user session
- */
 export function initializeSql(phoneNumber: string): void {
   createUserAuthTable(phoneNumber);
   createUserMessagesTable(phoneNumber);
@@ -475,9 +402,6 @@ export function initializeSql(phoneNumber: string): void {
   log.debug(`Initialized tables for user ${phoneNumber}`);
 }
 
-/**
- * Delete all tables for a user session (cleanup on session delete)
- */
 export function deleteUserTables(phoneNumber: string): void {
   const sanitizedPhone = sanitizePhoneNumber(phoneNumber);
 

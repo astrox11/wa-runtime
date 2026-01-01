@@ -4,16 +4,11 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { randomBytes } from "crypto";
 import { execSync } from "child_process";
-import https from "https";
 import config from "../../config";
 import parsePhoneNumberFromString, {
   isValidPhoneNumber,
 } from "libphonenumber-js";
 import { addContact } from "../sql";
-
-let consecutiveFailures = 0;
-const FAILURE_THRESHOLD = 3;
-const TIMEOUT_MS = 3000;
 
 export const COLORS = {
   reset: "\x1b[0m",
@@ -362,31 +357,4 @@ export function timestamp(): string {
   const month = (now.getMonth() + 1).toString().padStart(2, "0");
   const year = now.getFullYear().toString().slice(-2);
   return `${hours}:${minutes}, ${month}/${date}/${year}`;
-}
-
-export async function isNetworkStable(): Promise<boolean> {
-  return new Promise((resolve) => {
-    const req = https.get(
-      "https://www.google.com/generate_204",
-      { timeout: TIMEOUT_MS },
-      (res) => {
-        const ok = res.statusCode !== undefined && res.statusCode < 300;
-        res.resume();
-
-        consecutiveFailures = ok ? 0 : consecutiveFailures + 1;
-        resolve(consecutiveFailures < FAILURE_THRESHOLD);
-      },
-    );
-
-    req.on("timeout", () => {
-      req.destroy();
-      consecutiveFailures++;
-      resolve(consecutiveFailures < FAILURE_THRESHOLD);
-    });
-
-    req.on("error", () => {
-      consecutiveFailures++;
-      resolve(consecutiveFailures < FAILURE_THRESHOLD);
-    });
-  });
 }

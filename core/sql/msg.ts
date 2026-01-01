@@ -7,9 +7,6 @@ import {
   getUserTableName,
 } from "./tables";
 
-/**
- * Get the appropriate messages table for a session
- */
 function getMessagesTable(sessionId: string) {
   const phoneNumber = getPhoneFromSessionId(sessionId);
   createUserMessagesTable(phoneNumber);
@@ -59,24 +56,19 @@ export const saveMessage = (
   }
 };
 
-/**
- * Get all messages for a session from the database
- * Returns messages with their IDs and parsed content
- */
 export const getAllMessages = (
   sessionId: string,
-  limit: number = 100,
-  offset: number = 0,
+  limit: number | null = 100,
+  offset: number | null = 0,
 ): Array<{ id: string; message: WAMessage }> => {
   const tableName = getMessagesTable(sessionId);
 
-  // Ensure limit and offset are numbers
-  const safeLimit = Number(limit) || 100;
-  const safeOffset = Number(offset) || 0;
+  const safeLimit = Math.max(1, Math.min(Number(limit) || 100, 1000));
+  const safeOffset = Math.max(0, Number(offset) || 0);
 
-  // SQLite prefers literal numbers in some cases
   const results = bunql.query<{ id: string; msg: string }>(
-    `SELECT id, msg FROM "${tableName}" ORDER BY rowid DESC LIMIT ${safeLimit} OFFSET ${safeOffset}`,
+    `SELECT id, msg FROM "${tableName}" ORDER BY rowid DESC LIMIT ? OFFSET ?`,
+    [safeLimit, safeOffset],
   );
 
   return results.map((row) => ({
@@ -85,9 +77,6 @@ export const getAllMessages = (
   }));
 };
 
-/**
- * Get the total count of messages for a session
- */
 export const getMessagesCount = (sessionId: string): number => {
   const tableName = getMessagesTable(sessionId);
   const result = bunql.query<{ count: number }>(
