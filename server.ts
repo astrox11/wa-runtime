@@ -37,10 +37,15 @@ function getStatusString(status: number): string {
   }
 }
 
-function BroadCast() {
-  if (wsClients.size === 0) return;
+let wsSize = 0;
 
-  log.debug("Connected Clients:", wsClients.size);
+function BroadCast() {
+  if (wsClients.size === wsSize) return;
+
+  if (wsClients.size !== wsSize) {
+    wsSize = wsClients.size;
+    log.info(`WebSocket clients connected: ${wsSize}`);
+  }
 
   const overallStats = runtimeStats.getOverallStats();
   const sessions = sessionManager.listExtended();
