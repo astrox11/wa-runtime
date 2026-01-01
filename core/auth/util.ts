@@ -13,4 +13,6 @@ export const VALID_STATUSES: StatusType[] = [
   StatusType.Pairing,
   StatusType.PausedUser,
   StatusType.PausedNetwork,
+  StatusType.Active,
+  StatusType.Inactive,
 ];
