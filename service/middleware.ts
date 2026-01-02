@@ -187,6 +187,27 @@ export function getOverallStats() {
   };
 }
 
+export function getFullStats() {
+  const overallStats = runtimeStats.getOverallStats();
+  const sessions = sessionManager.listExtended();
+
+  return {
+    success: true,
+    data: {
+      overall: overallStats,
+      sessions: sessions.map((s) => ({
+        id: s.id,
+        phone_number: s.phone_number,
+        status: getStatusString(s.status),
+        user_info: s.user_info ?? null,
+        created_at: s.created_at,
+        pushName: s.user_info?.name,
+        stats: runtimeStats.getStats(s.id),
+      })),
+    },
+  };
+}
+
 export function getSessionStats(sessionId: string) {
   if (!sessionId) {
     return { success: false, error: "Session ID is required" };

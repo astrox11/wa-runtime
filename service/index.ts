@@ -8,6 +8,7 @@ export {
   resumeSession,
   getAuthStatus,
   getOverallStats,
+  getFullStats,
   getSessionStats,
   getMessages,
   getConfig,

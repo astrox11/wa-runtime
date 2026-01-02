@@ -107,11 +107,61 @@ class WsApiClient {
   private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
   private isReconnecting = false;
   private lastStatsData: StatsUpdate | null = null;
+  private statsPollingInterval: ReturnType<typeof setInterval> | null = null;
+  private isPollingActive = false;
 
   constructor() {
     if (typeof window !== "undefined") {
       this.connect();
+      this.startStatsPolling();
     }
+  }
+
+  private getApiBaseUrl(): string {
+    let host = window.location.host;
+    if (window.location.port === "4321") {
+      host = `${window.location.hostname}:3000`;
+    }
+    return `${window.location.protocol}//${host}`;
+  }
+
+  private async fetchFullStats(): Promise<void> {
+    try {
+      const response = await fetch(`${this.getApiBaseUrl()}/api/stats/full`);
+      const result = (await response.json()) as ApiResponse<StatsUpdate["data"]>;
+
+      if (result.success && result.data) {
+        const statsUpdate: StatsUpdate = {
+          type: "stats",
+          data: result.data,
+        };
+        this.lastStatsData = statsUpdate;
+        this.statsCallbacks.forEach((cb) => cb(statsUpdate));
+      }
+    } catch (error) {
+      console.error("Failed to fetch stats:", error);
+    }
+  }
+
+  private startStatsPolling(): void {
+    if (this.isPollingActive) return;
+    this.isPollingActive = true;
+
+    // Fetch immediately on start
+    this.fetchFullStats();
+
+    // Then poll every 1 second
+    this.statsPollingInterval = setInterval(() => {
+      this.fetchFullStats();
+    }, 1000);
+  }
+
+  private stopStatsPolling(): void {
+    if (this.statsPollingInterval) {
+      clearInterval(this.statsPollingInterval);
+      this.statsPollingInterval = null;
+    }
+    this.isPollingActive = false;
   }
 
   private connect(): Promise<void> {
@@ -144,18 +194,11 @@ class WsApiClient {
           return;
         }
 
-        console.log(data.type);
-
         if (data.requestId && this.pendingRequests.has(data.requestId)) {
           const pending = this.pendingRequests.get(data.requestId)!;
           this.pendingRequests.delete(data.requestId);
           pending.resolve(data);
           return;
-        }
-
-        if (data?.type === "stats") {
-          this.lastStatsData = data;
-          this.statsCallbacks.forEach((cb) => cb(data));
         }
       };
 
@@ -340,6 +383,7 @@ class WsApiClient {
   }
 
   destroy() {
+    this.stopStatsPolling();
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout);
     }

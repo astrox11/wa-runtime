@@ -15,67 +15,13 @@ if (wsListener) {
   if (WebSocket.prototype.addListener) WebSocket.prototype.addListener = patch;
 }
 
-import { log, sessionManager, StatusType } from "./core";
+import { log, sessionManager } from "./core";
 import config from "./config";
 import { handleApiRequest, handleWsAction } from "./service/api";
-import { runtimeStats, type ApiResponse } from "./service";
+import type { ApiResponse } from "./service";
 import type { WsRequest } from "./service/types";
 
 const wsClients: Set<any> = new Set();
-
-function getStatusString(status: number): string {
-  log.debug("Converting status:", status);
-  switch (status) {
-    case StatusType.Connected:
-    case StatusType.Active:
-      return "active";
-    case StatusType.Connecting:
-      return "connecting";
-    case StatusType.Pairing:
-      return "pairing";
-    case StatusType.PausedUser:
-      return "paused_user";
-    default:
-      return "active";
-  }
-}
-
-function BroadCast() {
-  if (wsClients.size === 0) return;
-
-  const overallStats = runtimeStats.getOverallStats();
-  const sessions = sessionManager.listExtended();
-  log.debug(
-    "Sessions:",
-    sessions.map((s) => ({ id: s.id, status: s.status })),
-  );
-  const message = JSON.stringify({
-    type: "stats",
-    data: {
-      overall: overallStats,
-      sessions: sessions.map((s) => ({
-        id: s.id,
-        phone_number: s.phone_number,
-        status: getStatusString(s.status),
-        user_info: s.user_info ?? null,
-        created_at: s.created_at,
-        pushName: s.user_info?.name,
-        stats: runtimeStats.getStats(s.id),
-      })),
-    },
-  });
-
-  for (const client of wsClients) {
-    try {
-      client.send(message);
-    } catch {
-      wsClients.delete(client);
-    }
-  }
-}
-
-const BROADCAST_INTERVAL_MS = 500;
-setInterval(BroadCast, BROADCAST_INTERVAL_MS);
 
 const STATIC_DIR = join(import.meta.dir, "service", "dist", "client");
 const ASTRO_SERVER_URL = "http://localhost:4321";
@@ -214,27 +160,6 @@ const server = Bun.serve({
   websocket: {
     open(ws) {
       wsClients.add(ws);
-
-      const overallStats = runtimeStats.getOverallStats();
-      const sessions = sessionManager.listExtended();
-
-      ws.send(
-        JSON.stringify({
-          type: "stats",
-          data: {
-            overall: overallStats,
-            sessions: sessions.map((s) => ({
-              id: s.id,
-              phone_number: s.phone_number,
-              status: getStatusString(s.status),
-              user_info: s.user_info,
-              created_at: s.created_at,
-              pushName: s.user_info?.name,
-              stats: runtimeStats.getStats(s.id),
-            })),
-          },
-        }),
-      );
     },
     async message(ws, message) {
       try {

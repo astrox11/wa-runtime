@@ -6,6 +6,7 @@ import {
   deleteSession,
   getAuthStatus,
   getOverallStats,
+  getFullStats,
   getSessionStats,
   getMessages,
   getConfig,
@@ -60,6 +61,10 @@ const routes: Record<
 
   "GET /api/stats": async () => {
     return getOverallStats();
+  },
+
+  "GET /api/stats/full": async () => {
+    return getFullStats();
   },
 
   "GET /api/stats/:sessionId": async (_req, params) => {
