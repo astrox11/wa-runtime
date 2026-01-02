@@ -66,6 +66,9 @@ function createResponse(data: ApiResponse): Response {
     status: getHttpStatusCode(data),
     headers: {
       "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
     },
   });
 }
@@ -139,6 +142,17 @@ const server = Bun.serve({
     }
 
     if (path.startsWith("/api/")) {
+      // Handle CORS preflight requests
+      if (req.method === "OPTIONS") {
+        return new Response(null, {
+          status: 204,
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+          },
+        });
+      }
       log.debug("API request:", path);
       const result = await handleApiRequest(req);
       return createResponse(result);
