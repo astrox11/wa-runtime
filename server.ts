@@ -29,8 +29,12 @@ const ASTRO_PORT = 4321;
 const ASTRO_SERVER_URL = `http://localhost:${ASTRO_PORT}`;
 
 // Start Astro SSR server as a child process (internal port only)
+let astroProcess: ReturnType<typeof spawn> | null = null;
+
 function startAstroServer(): void {
-  const astroProcess = spawn("node", ["./dist/server/entry.mjs"], {
+  const entryPath = join(import.meta.dir, "service", "dist", "server", "entry.mjs");
+  
+  astroProcess = spawn("node", [entryPath], {
     cwd: join(import.meta.dir, "service"),
     env: {
       ...process.env,
@@ -41,7 +45,12 @@ function startAstroServer(): void {
   });
 
   astroProcess.stdout?.on("data", (data) => {
-    log.debug("[Astro]", data.toString().trim());
+    const msg = data.toString().trim();
+    log.debug("[Astro]", msg);
+    // Log when Astro is ready
+    if (msg.includes("Server listening")) {
+      log.info(`Astro SSR server ready on internal port ${ASTRO_PORT}`);
+    }
   });
 
   astroProcess.stderr?.on("data", (data) => {
@@ -53,28 +62,33 @@ function startAstroServer(): void {
   });
 
   astroProcess.on("exit", (code) => {
-    if (code !== 0) {
+    if (code !== 0 && code !== null) {
       log.error(`Astro server exited with code ${code}`);
     }
-  });
-
-  // Cleanup on process exit
-  process.on("exit", () => {
-    astroProcess.kill();
-  });
-
-  process.on("SIGINT", () => {
-    astroProcess.kill();
-    process.exit(0);
-  });
-
-  process.on("SIGTERM", () => {
-    astroProcess.kill();
-    process.exit(0);
+    astroProcess = null;
   });
 
   log.info(`Starting Astro SSR server on internal port ${ASTRO_PORT}...`);
 }
+
+// Cleanup handler for graceful shutdown
+function cleanup(): void {
+  if (astroProcess) {
+    astroProcess.kill();
+    astroProcess = null;
+  }
+}
+
+// Register cleanup handlers once
+process.on("exit", cleanup);
+process.on("SIGINT", () => {
+  cleanup();
+  process.exit(0);
+});
+process.on("SIGTERM", () => {
+  cleanup();
+  process.exit(0);
+});
 
 // Start Astro server on startup
 startAstroServer();
