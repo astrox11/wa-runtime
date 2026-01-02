@@ -18,10 +18,10 @@
     "typescript": "latest"
   },
   "scripts": {
-    "start": "concurrently --kill-others \"bun run server\" \"bun run web\"",
-    "dev": "concurrently --kill-others \"bun run server\" \"bun run web:dev\"",
-    "web": "cd service && PORT=4321 node ./dist/server/entry.mjs",
-    "web:dev": "cd service && npx astro dev",
+    "start": "bun run server.ts",
+    "dev": "concurrently --kill-others \"bun run server.ts\" \"bun run web:dev\"",
+    "web:dev": "cd service && npx astro dev --port 4321",
+    "build": "cd service && npx astro build",
     "postinstall": "bun run hooks/index.ts",
     "lint": "eslint . --ext .ts --fix",
     "format": "prettier --write ."

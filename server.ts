@@ -21,10 +21,13 @@ import { handleApiRequest, handleWsAction } from "./service/api";
 import type { ApiResponse } from "./service";
 import type { WsRequest } from "./service/types";
 
+// Import Astro SSR handler (middleware mode)
+// @ts-ignore - Dynamic import of Astro build output
+import { handler as astroHandler } from "./service/dist/server/entry.mjs";
+
 const wsClients: Set<any> = new Set();
 
 const STATIC_DIR = join(import.meta.dir, "service", "dist", "client");
-const ASTRO_SERVER_URL = "http://localhost:4321";
 
 const MIME_TYPES: Record<string, string> = {
   ".html": "text/html",
@@ -88,26 +91,17 @@ async function serveStaticFile(filePath: string): Promise<Response | null> {
   return null;
 }
 
-async function proxyToAstro(req: Request): Promise<Response> {
+async function handleAstroRequest(req: Request): Promise<Response> {
   try {
-    log.debug("Proxying request to Astro SSR server:", req.url);
-    const url = new URL(req.url);
-    const astroUrl = new URL(url.pathname + url.search, ASTRO_SERVER_URL);
-
-    const proxyReq = new Request(astroUrl.toString(), {
-      method: req.method,
-      headers: req.headers,
-      body: req.body,
-    });
-
-    const response = await fetch(proxyReq);
+    log.debug("Handling Astro SSR request:", req.url);
+    const response = await astroHandler(req);
     return response;
   } catch (error) {
-    log.error("Failed to proxy to Astro server:", error);
+    log.error("Astro handler error:", error);
     return new Response(
-      "Frontend server unavailable. Make sure to run both servers in production mode: bun run start:all",
+      "Internal server error",
       {
-        status: 503,
+        status: 500,
         headers: { "Content-Type": "text/plain" },
       },
     );
@@ -169,7 +163,7 @@ const server = Bun.serve({
       if (response) return response;
     }
 
-    return proxyToAstro(req);
+    return handleAstroRequest(req);
   },
   websocket: {
     open(ws) {
