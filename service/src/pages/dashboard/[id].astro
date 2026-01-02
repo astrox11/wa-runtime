@@ -399,7 +399,7 @@ const hashedId = hashSessionId(id || "");
         <button
           id="refresh-groups-btn"
           class="p-1.5 text-gh-text-secondary hover:text-gh-text hover:bg-gh-bg-tertiary rounded-gh transition-colors"
-          title="Refresh Groups"
+          data-tooltip="Refresh Groups"
         >
           <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
             <path
@@ -426,7 +426,7 @@ const hashedId = hashSessionId(id || "");
       <button
         id="refresh-btn"
         class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-gh bg-gh-bg-secondary border border-gh-border text-gh-text hover:bg-gh-bg-tertiary transition-colors"
-        title="Refresh"
+        data-tooltip="Refresh"
       >
         <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
           <path
@@ -437,7 +437,7 @@ const hashedId = hashSessionId(id || "");
       <button
         id="disconnect-btn"
         class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-gh border border-gh-danger text-gh-danger hover:bg-gh-danger-subtle transition-colors"
-        title="Disconnect"
+        data-tooltip="Disconnect"
       >
         <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
           <path
@@ -447,6 +447,11 @@ const hashedId = hashSessionId(id || "");
       </button>
     </div>
   </main>
+
+  <!-- Custom Tooltip -->
+  <div id="custom-tooltip" class="fixed z-[100] px-2 py-1 text-xs font-medium text-white bg-gh-bg-tertiary border border-gh-border rounded-md shadow-lg pointer-events-none opacity-0 transition-opacity duration-150 whitespace-nowrap" style="max-width: 250px;">
+    <span id="custom-tooltip-text"></span>
+  </div>
 
   <!-- Group Info Modal -->
   <div id="group-info-modal" class="fixed inset-0 z-50 hidden">
@@ -558,8 +563,8 @@ const hashedId = hashSessionId(id || "");
         </div>
         <!-- Actions List -->
         <div id="group-actions-list" class="space-y-3">
-          <!-- Toggle Actions -->
-          <div class="bg-gh-bg-secondary rounded-gh p-3">
+          <!-- Toggle Actions (hidden for communities) -->
+          <div id="group-settings-section" class="bg-gh-bg-secondary rounded-gh p-3">
             <h3 class="text-xs font-semibold text-gh-text-muted uppercase tracking-wider mb-3">Settings</h3>
             <div class="space-y-2">
               <!-- Mute/Unmute Toggle -->
@@ -601,9 +606,30 @@ const hashedId = hashSessionId(id || "");
             </div>
           </div>
 
+          <!-- Community Actions (only for communities) -->
+          <div id="community-actions-section" class="bg-gh-bg-secondary rounded-gh p-3 hidden">
+            <h3 class="text-xs font-semibold text-gh-text-muted uppercase tracking-wider mb-3">Community</h3>
+            <div class="space-y-2">
+              <button data-param-action="linkGroup" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-gh-text hover:bg-gh-bg-tertiary rounded-gh transition-colors text-left">
+                <svg class="w-4 h-4 text-gh-success flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/>
+                  <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/>
+                </svg>
+                <span>Link Group</span>
+              </button>
+              <button data-param-action="unlinkGroup" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-gh-text hover:bg-gh-bg-tertiary rounded-gh transition-colors text-left">
+                <svg class="w-4 h-4 text-gh-danger flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/>
+                  <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/>
+                </svg>
+                <span>Unlink Group</span>
+              </button>
+            </div>
+          </div>
+
           <!-- Parameter Actions -->
           <div class="bg-gh-bg-secondary rounded-gh p-3">
-            <h3 class="text-xs font-semibold text-gh-text-muted uppercase tracking-wider mb-3">Edit Group</h3>
+            <h3 id="edit-section-title" class="text-xs font-semibold text-gh-text-muted uppercase tracking-wider mb-3">Edit Group</h3>
             <div class="space-y-2">
               <button data-param-action="name" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-gh-text hover:bg-gh-bg-tertiary rounded-gh transition-colors text-left">
                 <svg class="w-4 h-4 text-gh-text-secondary flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
@@ -1102,7 +1128,7 @@ const hashedId = hashSessionId(id || "");
                 <button 
                   class="p-1.5 text-gh-text-secondary hover:text-gh-accent hover:bg-gh-bg-tertiary rounded-gh transition-colors"
                   data-group-info="${escapeHtml(group.id)}"
-                  title="View Info"
+                  data-tooltip="View Info"
                 >
                   <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
                     <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>
@@ -1111,7 +1137,7 @@ const hashedId = hashSessionId(id || "");
                 <button 
                   class="p-1.5 text-gh-text-secondary hover:text-gh-success hover:bg-gh-bg-tertiary rounded-gh transition-colors"
                   data-group-actions="${escapeHtml(group.id)}"
-                  title="Actions"
+                  data-tooltip="Actions"
                 >
                   <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
                     <path d="M8 0a8.2 8.2 0 0 1 .701.031C9.444.095 9.99.645 10.16 1.29l.288 1.107c.018.066.079.158.212.224.231.114.454.243.668.386.123.082.233.09.299.071l1.103-.303c.644-.176 1.392.021 1.82.63.27.385.506.792.704 1.218.315.675.111 1.422-.364 1.891l-.814.806c-.049.048-.098.147-.088.294.016.257.016.515 0 .772-.01.147.04.246.088.294l.814.806c.475.469.679 1.216.364 1.891a7.977 7.977 0 0 1-.704 1.217c-.428.61-1.176.807-1.82.63l-1.102-.302c-.067-.019-.177-.011-.3.071a5.909 5.909 0 0 1-.668.386c-.133.066-.194.158-.212.224l-.288 1.107c-.17.645-.715 1.195-1.458 1.26a8.006 8.006 0 0 1-1.402 0c-.743-.065-1.289-.615-1.458-1.26l-.289-1.106c-.018-.066-.079-.158-.212-.225a5.893 5.893 0 0 1-.668-.386c-.123-.082-.233-.09-.299-.071l-1.103.303c-.644.176-1.392-.021-1.82-.63a8.004 8.004 0 0 1-.704-1.217c-.315-.675-.111-1.422.363-1.891l.815-.806c.05-.048.098-.147.088-.294a6.854 6.854 0 0 1 0-.772c.01-.147-.04-.246-.088-.294l-.815-.806C.635 6.045.431 5.298.746 4.623a7.92 7.92 0 0 1 .704-1.217c.428-.61 1.176-.807 1.82-.63l1.102.302c.067.019.177.011.3-.071.214-.143.437-.272.668-.386.133-.066.194-.158.212-.224l.289-1.106C6.009.645 6.556.095 7.299.03 7.53.01 7.764 0 8 0Zm-.571 1.525c-.036.003-.108.036-.137.146l-.289 1.106c-.1.386-.396.71-.771.9-.31.157-.6.346-.87.562-.262.211-.597.3-.912.214l-1.103-.303c-.109-.03-.175.016-.195.045-.22.312-.412.644-.573.99-.014.031-.021.11.059.19l.815.806c.278.275.41.657.397 1.036-.007.21-.007.42 0 .628.013.379-.119.762-.397 1.037l-.814.806c-.08.08-.073.159-.059.19.161.347.353.678.573.99.02.029.086.074.195.045l1.103-.303c.315-.086.65.003.912.214.27.216.56.405.87.562.375.19.671.514.77.9l.29 1.106c.028.11.1.143.136.146a6.66 6.66 0 0 0 1.142 0c.036-.003.108-.036.137-.146l.289-1.106c.1-.386.396-.71.771-.9.31-.157.6-.346.87-.562.262-.211.597-.3.912-.214l1.103.303c.109.029.175-.016.194-.045.22-.312.413-.644.573-.99.015-.031.022-.11-.058-.19l-.815-.806a1.337 1.337 0 0 1-.397-1.037c.007-.21.007-.42 0-.628-.013-.379.119-.762.397-1.036l.814-.806c.08-.08.073-.159.059-.19a6.964 6.964 0 0 0-.574-.99c-.02-.029-.085-.074-.194-.045l-1.103.303c-.315.086-.65-.003-.912-.214a5.421 5.421 0 0 0-.87-.562c-.375-.19-.67-.514-.77-.9l-.29-1.106c-.028-.11-.1-.143-.136-.146a6.66 6.66 0 0 0-1.142 0ZM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-1.5 0a1.5 1.5 0 1 0-3.001.001A1.5 1.5 0 0 0 9.5 8Z"/>
@@ -1299,6 +1325,12 @@ const hashedId = hashSessionId(id || "");
   const groupActionsTitle = document.getElementById("group-actions-title");
   const groupActionsLoading = document.getElementById("group-actions-loading");
   const groupActionsList = document.getElementById("group-actions-list");
+  const groupSettingsSection = document.getElementById("group-settings-section");
+  const communityActionsSection = document.getElementById("community-actions-section");
+  const editSectionTitle = document.getElementById("edit-section-title");
+
+  // Store all groups for the session (used for linking)
+  let allSessionGroups: any[] = [];
 
   function openGroupActionsModal(groupId: string) {
     currentGroupId = groupId;
@@ -1306,19 +1338,45 @@ const hashedId = hashSessionId(id || "");
     groupActionsLoading?.classList.add("hidden");
     groupActionsList?.classList.remove("hidden");
 
-    // Load group metadata to set toggle states
+    // Load group metadata to set toggle states and determine if it's a community
     api.sendAction("getGroupMetadata", { sessionId, groupId }).then((result) => {
       if (result.success && result.data) {
         const metadata = result.data as any;
         currentGroupMetadata = metadata;
+        const isCommunity = metadata.isCommunity || false;
 
         if (groupActionsTitle) {
-          groupActionsTitle.textContent = `Actions: ${escapeHtml(metadata.subject || "Group")}`;
+          groupActionsTitle.textContent = `Actions: ${escapeHtml(metadata.subject || (isCommunity ? "Community" : "Group"))}`;
         }
 
-        // Update toggle states
-        updateToggle("toggle-mute", metadata.announce);
-        updateToggle("toggle-lock", metadata.restrict);
+        // Show/hide sections based on whether it's a community
+        if (isCommunity) {
+          // Hide mute/lock toggles for communities
+          groupSettingsSection?.classList.add("hidden");
+          // Show community actions
+          communityActionsSection?.classList.remove("hidden");
+          // Update title
+          if (editSectionTitle) editSectionTitle.textContent = "Edit Community";
+        } else {
+          // Show mute/lock toggles for regular groups
+          groupSettingsSection?.classList.remove("hidden");
+          // Hide community actions
+          communityActionsSection?.classList.add("hidden");
+          // Update title
+          if (editSectionTitle) editSectionTitle.textContent = "Edit Group";
+          // Update toggle states
+          updateToggle("toggle-mute", metadata.announce);
+          updateToggle("toggle-lock", metadata.restrict);
+        }
+
+        // Load all groups for link/unlink functionality
+        if (isCommunity) {
+          api.sendAction("getGroups", { sessionId }).then((groupsResult) => {
+            if (groupsResult.success && groupsResult.data) {
+              allSessionGroups = groupsResult.data.groups || [];
+            }
+          });
+        }
       }
     });
   }
@@ -1471,8 +1529,11 @@ const hashedId = hashSessionId(id || "");
     currentParamAction = action;
     paramInputError?.classList.add("hidden");
 
+    const isCommunity = currentGroupMetadata?.isCommunity || false;
+    const currentEphemeral = currentGroupMetadata?.ephemeralDuration || 0;
+
     const configs: Record<string, { title: string; label: string; placeholder: string; type: string; options?: { value: string; label: string }[] }> = {
-      name: { title: "Change Group Name", label: "New Name", placeholder: "Enter new group name", type: "text" },
+      name: { title: isCommunity ? "Change Community Name" : "Change Group Name", label: "New Name", placeholder: isCommunity ? "Enter new community name" : "Enter new group name", type: "text" },
       description: { title: "Change Description", label: "New Description", placeholder: "Enter new description", type: "textarea" },
       add: { title: "Add Participant", label: "Phone Number", placeholder: "Search or enter phone number...", type: "participant-search" },
       remove: { title: "Remove Participant", label: "Select Participant", placeholder: "Search by phone number...", type: "participant-search" },
@@ -1490,6 +1551,8 @@ const hashedId = hashSessionId(id || "");
           { value: "7776000", label: "90 days" },
         ],
       },
+      linkGroup: { title: "Link Group to Community", label: "Select Group", placeholder: "Select a group to link...", type: "group-select" },
+      unlinkGroup: { title: "Unlink Group from Community", label: "Select Group", placeholder: "Select a group to unlink...", type: "group-select" },
     };
 
     const config = configs[action];
@@ -1612,14 +1675,44 @@ const hashedId = hashSessionId(id || "");
             });
           }
         }, 0);
-      } else if (config.type === "select" && config.options) {
+      } else if (config.type === "group-select") {
+        // For link/unlink group actions
+        const communityId = currentGroupId;
+        let availableGroups: any[] = [];
+
+        if (action === "linkGroup") {
+          // Show groups that are NOT linked to this community
+          availableGroups = allSessionGroups.filter((g: any) => 
+            !g.isCommunity && g.linkedParent !== communityId && g.id !== communityId
+          );
+        } else if (action === "unlinkGroup") {
+          // Show groups that ARE linked to this community
+          availableGroups = allSessionGroups.filter((g: any) => 
+            !g.isCommunity && g.linkedParent === communityId
+          );
+        }
+
         paramInputField.innerHTML = `
           <label class="block text-sm font-medium text-gh-text mb-1">${config.label}</label>
           <select
             id="param-input-value"
             class="w-full px-3 py-1.5 text-sm bg-gh-bg border border-gh-border rounded-gh text-gh-text focus:outline-none focus:border-gh-accent focus:ring-1 focus:ring-gh-accent"
           >
-            ${config.options.map((opt) => `<option value="${opt.value}">${opt.label}</option>`).join("")}
+            <option value="">-- Select a group --</option>
+            ${availableGroups.map((g: any) => `<option value="${escapeHtml(g.id)}">${escapeHtml(g.subject)} (${g.participantCount} members)</option>`).join("")}
+          </select>
+          <p class="text-xs text-gh-text-muted mt-1">${availableGroups.length} group${availableGroups.length !== 1 ? 's' : ''} available</p>
+        `;
+      } else if (config.type === "select" && config.options) {
+        // For ephemeral, default to current value
+        const defaultValue = action === "ephemeral" ? String(currentEphemeral) : "";
+        paramInputField.innerHTML = `
+          <label class="block text-sm font-medium text-gh-text mb-1">${config.label}</label>
+          <select
+            id="param-input-value"
+            class="w-full px-3 py-1.5 text-sm bg-gh-bg border border-gh-border rounded-gh text-gh-text focus:outline-none focus:border-gh-accent focus:ring-1 focus:ring-gh-accent"
+          >
+            ${config.options.map((opt) => `<option value="${opt.value}"${opt.value === defaultValue ? ' selected' : ''}>${opt.label}</option>`).join("")}
           </select>
         `;
       } else if (config.type === "textarea") {
@@ -1692,6 +1785,8 @@ const hashedId = hashSessionId(id || "");
       promote: { participant: value },
       demote: { participant: value },
       ephemeral: { duration: parseInt(value || "0", 10) },
+      linkGroup: { targetGroupId: value },
+      unlinkGroup: { targetGroupId: value },
     };
 
     await executeGroupAction(currentParamAction, paramMap[currentParamAction]);
@@ -1717,7 +1812,7 @@ const hashedId = hashSessionId(id || "");
             <button
               id="copy-invite-link-btn"
               class="p-1.5 text-gh-text-secondary hover:text-gh-text hover:bg-gh-bg-tertiary rounded-gh transition-colors flex-shrink-0"
-              title="Copy Link"
+              data-tooltip="Copy Link"
               data-link="${escapeHtml(data)}"
             >
               <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
@@ -1754,11 +1849,11 @@ const hashedId = hashSessionId(id || "");
                 document.body.removeChild(textArea);
               }
               // Show success feedback
-              const originalTitle = copyBtn.getAttribute("title");
-              copyBtn.setAttribute("title", "Copied!");
+              const originalTooltip = copyBtn.getAttribute("data-tooltip");
+              copyBtn.setAttribute("data-tooltip", "Copied!");
               copyBtn.classList.add("text-gh-success");
               setTimeout(() => {
-                copyBtn.setAttribute("title", originalTitle || "Copy Link");
+                copyBtn.setAttribute("data-tooltip", originalTooltip || "Copy Link");
                 copyBtn.classList.remove("text-gh-success");
               }, 2000);
             } catch (err) {
@@ -1775,10 +1870,10 @@ const hashedId = hashSessionId(id || "");
                 textArea.select();
                 document.execCommand("copy");
                 document.body.removeChild(textArea);
-                copyBtn.setAttribute("title", "Copied!");
+                copyBtn.setAttribute("data-tooltip", "Copied!");
                 copyBtn.classList.add("text-gh-success");
                 setTimeout(() => {
-                  copyBtn.setAttribute("title", "Copy Link");
+                  copyBtn.setAttribute("data-tooltip", "Copy Link");
                   copyBtn.classList.remove("text-gh-success");
                 }, 2000);
               } catch (fallbackErr) {
@@ -1843,4 +1938,65 @@ const hashedId = hashSessionId(id || "");
       }
     });
   }
+
+  // Custom Tooltip Handler
+  const customTooltip = document.getElementById("custom-tooltip");
+  const customTooltipText = document.getElementById("custom-tooltip-text");
+
+  function showCustomTooltip(element: HTMLElement) {
+    const tooltipContent = element.getAttribute("data-tooltip");
+    if (!tooltipContent || !customTooltip || !customTooltipText) return;
+
+    customTooltipText.textContent = tooltipContent;
+    customTooltip.style.opacity = "1";
+
+    // Position the tooltip
+    const rect = element.getBoundingClientRect();
+    const tooltipRect = customTooltip.getBoundingClientRect();
+    
+    // Position above the element by default
+    let top = rect.top - tooltipRect.height - 8;
+    let left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+
+    // If tooltip would go off the top, position below
+    if (top < 8) {
+      top = rect.bottom + 8;
+    }
+
+    // Keep tooltip within viewport horizontally
+    if (left < 8) {
+      left = 8;
+    } else if (left + tooltipRect.width > window.innerWidth - 8) {
+      left = window.innerWidth - tooltipRect.width - 8;
+    }
+
+    customTooltip.style.top = `${top}px`;
+    customTooltip.style.left = `${left}px`;
+  }
+
+  function hideCustomTooltip() {
+    if (customTooltip) {
+      customTooltip.style.opacity = "0";
+    }
+  }
+
+  // Add event listeners using event delegation for dynamic elements
+  document.addEventListener("mouseenter", (e) => {
+    const target = e.target as HTMLElement;
+    const tooltipElement = target.closest("[data-tooltip]") as HTMLElement | null;
+    if (tooltipElement) {
+      showCustomTooltip(tooltipElement);
+    }
+  }, true);
+
+  document.addEventListener("mouseleave", (e) => {
+    const target = e.target as HTMLElement;
+    const tooltipElement = target.closest("[data-tooltip]") as HTMLElement | null;
+    if (tooltipElement) {
+      hideCustomTooltip();
+    }
+  }, true);
+
+  // Hide tooltip on scroll
+  document.addEventListener("scroll", hideCustomTooltip, true);
 </script>

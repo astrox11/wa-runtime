@@ -1,3 +1,4 @@
+export * from "./Community";
 export * from "./Group";
 export * from "./Message";
 export * from "./Newsletter";

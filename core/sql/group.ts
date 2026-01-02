@@ -162,7 +162,7 @@ export const syncGroupMetadata = async (
 
 export const getAllGroups = function (
   sessionId: string,
-): Array<{ id: string; subject: string; participantCount: number }> {
+): Array<{ id: string; subject: string; participantCount: number; isCommunity?: boolean; linkedParent?: string }> {
   const tableName = getGroupsTable(sessionId);
   const rows = bunql.query<{ id: string; data: string }>(
     `SELECT id, data FROM "${tableName}"`,
@@ -174,6 +174,8 @@ export const getAllGroups = function (
       id: row.id,
       subject: metadata.subject || "Unknown Group",
       participantCount: metadata.participants?.length || 0,
+      isCommunity: metadata.isCommunity || false,
+      linkedParent: metadata.linkedParent,
     };
   });
 };

@@ -8,6 +8,7 @@ import {
   setActivitySettings as setActivitySettingsInDb,
   GetGroupMeta,
   Group,
+  Community,
 } from "../core";
 import config from "../config";
 import type { SessionStatsData, OverallStatsData, ActivitySettingsData, HourlyActivityData, GroupActionType } from "./types";
@@ -488,13 +489,24 @@ export async function executeGroupAction(
 
   try {
     const group = new Group(sessionId, groupId, client);
+    const metadata = GetGroupMeta(sessionId, groupId);
+    const isCommunity = metadata?.isCommunity || false;
+    
+    // For community-specific actions, use the Community class
+    const community = isCommunity ? new Community(sessionId, groupId, client) : null;
+    
     let result: unknown;
     let message = "Action completed successfully";
 
     switch (action) {
       case "leave":
-        result = await group.Leave();
-        message = "Left the group";
+        if (isCommunity && community) {
+          result = await community.leave();
+          message = "Left the community";
+        } else {
+          result = await group.Leave();
+          message = "Left the group";
+        }
         break;
 
       case "kickAll":
@@ -622,7 +634,11 @@ export async function executeGroupAction(
             error: "Invalid duration. Accepted values: 0 (off), 86400 (1 day), 604800 (7 days), 7776000 (90 days)",
           };
         }
-        result = await group.EphermalSetting(duration);
+        if (isCommunity && community) {
+          result = await community.changeDisappearMsgTimer(duration);
+        } else {
+          result = await group.EphermalSetting(duration);
+        }
         if (result === null) {
           return { success: false, error: "Already set to this duration" };
         }
@@ -649,6 +665,34 @@ export async function executeGroupAction(
           return { success: false, error: "Already set to this mode" };
         }
         message = `Join mode set to ${params.mode}`;
+        break;
+
+      case "linkGroup":
+        if (!isCommunity || !community) {
+          return { success: false, error: "This action is only available for communities" };
+        }
+        if (!params?.targetGroupId || typeof params.targetGroupId !== "string") {
+          return { success: false, error: "Target group ID is required" };
+        }
+        result = await community.LinkGroup(params.targetGroupId);
+        if (result === null) {
+          return { success: false, error: "Failed to link group - not an admin or group already linked" };
+        }
+        message = "Group linked to community";
+        break;
+
+      case "unlinkGroup":
+        if (!isCommunity || !community) {
+          return { success: false, error: "This action is only available for communities" };
+        }
+        if (!params?.targetGroupId || typeof params.targetGroupId !== "string") {
+          return { success: false, error: "Target group ID is required" };
+        }
+        result = await community.UnlinkGroup(params.targetGroupId);
+        if (result === null) {
+          return { success: false, error: "Failed to unlink group - not an admin or group not linked" };
+        }
+        message = "Group unlinked from community";
         break;
 
       default:

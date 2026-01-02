@@ -115,7 +115,9 @@ export type GroupActionType =
   | "demote"
   | "ephemeral"
   | "addMode"
-  | "joinMode";
+  | "joinMode"
+  | "linkGroup"
+  | "unlinkGroup";
 
 export interface GroupActionRequest {
   sessionId: string;
