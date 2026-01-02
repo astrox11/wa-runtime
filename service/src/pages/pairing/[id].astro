@@ -1,5 +1,5 @@
 ---
-import Layout from '../../layouts/Layout.astro';
+import Layout from "../../layouts/Layout.astro";
 
 const { id } = Astro.params;
 ---
@@ -8,9 +8,14 @@ const { id } = Astro.params;
   <main class="max-w-lg mx-auto px-4 py-8">
     <div class="bg-gh-bg border border-gh-border rounded-gh">
       <div class="p-4 border-b border-gh-border">
-        <a href="/" class="inline-flex items-center gap-1 text-sm text-gh-link hover:underline mb-2">
+        <a
+          href="/"
+          class="inline-flex items-center gap-1 text-sm text-gh-link hover:underline mb-2"
+        >
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            <path
+              d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"
+            ></path>
           </svg>
           Back
         </a>
@@ -19,21 +24,40 @@ const { id } = Astro.params;
 
       <div id="pairing-content" class="p-6">
         <div class="flex flex-col items-center">
-          <div class="w-5 h-5 border-2 border-gh-accent border-t-transparent rounded-full animate-spin"></div>
-          <p class="text-sm text-gh-text-secondary mt-3">Loading pairing code...</p>
+          <div
+            class="w-5 h-5 border-2 border-gh-accent border-t-transparent rounded-full animate-spin"
+          >
+          </div>
+          <p class="text-sm text-gh-text-secondary mt-3">
+            Loading pairing code...
+          </p>
         </div>
       </div>
 
       <div id="success-content" class="p-6 hidden">
         <div class="flex flex-col items-center">
-          <div class="w-12 h-12 rounded-full bg-gh-success-subtle flex items-center justify-center mb-3">
-            <svg class="w-6 h-6 text-gh-success" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+          <div
+            class="w-12 h-12 rounded-full bg-gh-success-subtle flex items-center justify-center mb-3"
+          >
+            <svg
+              class="w-6 h-6 text-gh-success"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"
+              ></path>
             </svg>
           </div>
-          <h2 class="text-lg font-semibold text-gh-text mb-1">Successfully Paired</h2>
-          <p class="text-sm text-gh-text-secondary mb-4">Your WhatsApp session is now active.</p>
-          <a href={`/dashboard/${id}`} class="px-4 py-1.5 text-sm font-medium rounded-gh bg-gh-success text-white hover:bg-green-700">
+          <h2 class="text-lg font-semibold text-gh-text mb-1">
+            Successfully Paired
+          </h2>
+          <p class="text-sm text-gh-text-secondary mb-4">
+            Your WhatsApp session is now active.
+          </p>
+          <a
+            href={`/dashboard/${id}`}
+            class="px-4 py-1. 5 text-sm font-medium rounded-gh bg-gh-success text-white hover:bg-green-700"
+          >
             Go to Dashboard
           </a>
         </div>
@@ -41,14 +65,31 @@ const { id } = Astro.params;
 
       <div id="error-content" class="p-6 hidden">
         <div class="flex flex-col items-center">
-          <div class="w-12 h-12 rounded-full bg-gh-danger-subtle flex items-center justify-center mb-3">
-            <svg class="w-6 h-6 text-gh-danger" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          <div
+            class="w-12 h-12 rounded-full bg-gh-danger-subtle flex items-center justify-center mb-3"
+          >
+            <svg
+              class="w-6 h-6 text-gh-danger"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path
+                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+              ></path>
             </svg>
           </div>
-          <h2 class="text-lg font-semibold text-gh-text mb-1">Pairing Failed</h2>
-          <p id="error-message" class="text-sm text-gh-text-secondary mb-4 text-center"></p>
-          <a href="/" class="px-4 py-1.5 text-sm font-medium rounded-gh bg-gh-bg-secondary border border-gh-border text-gh-text hover:bg-gh-bg-tertiary">
+          <h2 class="text-lg font-semibold text-gh-text mb-1">
+            Pairing Failed
+          </h2>
+          <p
+            id="error-message"
+            class="text-sm text-gh-text-secondary mb-4 text-center"
+          >
+          </p>
+          <a
+            href="/"
+            class="px-4 py-1.5 text-sm font-medium rounded-gh bg-gh-bg-secondary border border-gh-border text-gh-text hover:bg-gh-bg-tertiary"
+          >
             Try Again
           </a>
         </div>
@@ -58,13 +99,15 @@ const { id } = Astro.params;
 </Layout>
 
 <script define:vars={{ sessionId: id }}>
-  const pairingContent = document.getElementById('pairing-content');
-  const successContent = document.getElementById('success-content');
-  const errorContent = document.getElementById('error-content');
-  const errorMessage = document.getElementById('error-message');
+  const pairingContent = document.getElementById("pairing-content");
+  const successContent = document.getElementById("success-content");
+  const errorContent = document.getElementById("error-content");
+  const errorMessage = document.getElementById("error-message");
+
+  let mainWs = null;
 
   const urlParams = new URLSearchParams(window.location.search);
-  const pairingCode = urlParams.get('code');
+  const pairingCode = urlParams.get("code");
 
   if (pairingCode) {
     showPairingCode(pairingCode);
@@ -72,7 +115,7 @@ const { id } = Astro.params;
 
   function showPairingCode(code) {
     const formattedCode = `${code.slice(0, 4)}-${code.slice(4)}`;
-    
+
     pairingContent.innerHTML = `
       <div class="flex flex-col items-center">
         <div class="mb-4">
@@ -93,84 +136,140 @@ const { id } = Astro.params;
 
         <div class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-gh-warning animate-pulse"></span>
-          <span class="text-sm text-gh-text-secondary">Waiting for pairing...</span>
+          <span class="text-sm text-gh-text-secondary">Waiting for pairing... </span>
         </div>
       </div>
     `;
 
-    // Use WebSocket for instant pairing status updates
     connectAndWatchPairing();
   }
 
+  async function deleteSessionViaWebSocket(sessionId) {
+    return new Promise((resolve, reject) => {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      let wsHost = window.location.host;
+
+      if (window.location.port === "4321") {
+        wsHost = `${window.location.hostname}:3000`;
+      }
+
+      const ws = new WebSocket(`${protocol}//${wsHost}/ws/stats`);
+      const requestId = `delete_${Date.now()}`;
+
+      const timeout = setTimeout(() => {
+        ws.close();
+        reject(new Error("Delete request timeout"));
+      }, 5000);
+
+      ws.onopen = () => {
+        ws.send(
+          JSON.stringify({
+            action: "deleteSession",
+            requestId: requestId,
+            params: { id: sessionId },
+          })
+        );
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.requestId === requestId) {
+            clearTimeout(timeout);
+            ws.close();
+            if (data.success) {
+              resolve(data);
+            } else {
+              reject(new Error(data.error || "Failed to delete session"));
+            }
+          }
+        } catch (e) {
+          console.error("Error parsing delete response:", e);
+        }
+      };
+
+      ws.onerror = (error) => {
+        clearTimeout(timeout);
+        reject(error);
+      };
+    });
+  }
+
   function connectAndWatchPairing() {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(`${protocol}//${window.location.host}/ws/stats`);
-    
-    let maxAttempts = 120; // 2 minutes with 1s intervals
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+
+    let wsHost = window.location.host;
+    if (window.location.port === "4321") {
+      wsHost = `${window.location.hostname}:3000`;
+    }
+
+    const ws = new WebSocket(`${protocol}//${wsHost}/ws/stats`);
+    mainWs = ws;
+
+    let maxAttempts = 120;
     let attempts = 0;
-    
+
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        
-        // Check for response to our auth status request
-        if (data.action === 'getAuthStatus' && data.success && data.data) {
+
+        if (data.action === "getAuthStatus" && data.success && data.data) {
           if (data.data.isAuthenticated) {
             ws.close();
             showSuccess();
             return;
           }
-          if (data.data.status === 'inactive') {
+          if (data.data.status === "inactive") {
             ws.close();
-            showError('Session was disconnected or timed out');
+            showError("Session was disconnected or timed out");
             return;
           }
         }
-        
-        // Also check stats broadcasts for session status
-        if (data.type === 'stats' && data.data?.sessions) {
-          const session = data.data.sessions.find(s => s.id === sessionId);
+
+        if (data.type === "stats" && data.data?.sessions) {
+          const session = data.data.sessions.find((s) => s.id === sessionId);
           if (session) {
-            if (session.status === 'active') {
+            if (session.status === "active") {
               ws.close();
               showSuccess();
               return;
             }
-            if (session.status === 'inactive') {
+            if (session.status === "inactive") {
               ws.close();
-              showError('Session was disconnected or timed out');
+              showError("Session was disconnected or timed out");
               return;
             }
           }
         }
-        
+
         attempts++;
         if (attempts >= maxAttempts) {
           ws.close();
-          showError('Pairing timed out. Please try again.');
+          showError("Pairing timed out. Please try again.");
         }
-      } catch {
-        // Ignore parse errors
-      }
+      } catch {}
     };
-    
+
     ws.onopen = () => {
-      // Request auth status
-      ws.send(JSON.stringify({
-        action: 'getAuthStatus',
-        requestId: 'pairing-check',
-        params: { sessionId },
-      }));
+      ws.send(
+        JSON.stringify({
+          action: "getAuthStatus",
+          requestId: "pairing-check",
+          params: { sessionId },
+        })
+      );
     };
-    
+
     ws.onerror = () => {
-      showError('Connection error. Please check your network and try again.');
+      showError("Connection error. Please check your network and try again.");
     };
-    
+
     ws.onclose = () => {
-      // If closed unexpectedly, fall back to polling
-      if (attempts < maxAttempts && successContent.classList.contains('hidden') && errorContent.classList.contains('hidden')) {
-        // Start polling fallback
+      if (
+        attempts < maxAttempts &&
+        successContent.classList.contains("hidden") &&
+        errorContent.classList.contains("hidden")
+      ) {
         pollAuthStatus();
       }
     };
@@ -183,11 +282,11 @@ const { id } = Astro.params;
     const poll = async () => {
       try {
         const response = await fetch(`/api/auth/status/${sessionId}`);
-        
+
         if (!response.ok) {
           throw new Error(`HTTP error: ${response.status}`);
         }
-        
+
         const result = await response.json();
 
         if (result.success && result.data) {
@@ -196,13 +295,13 @@ const { id } = Astro.params;
             return;
           }
 
-          if (result.data.status === 'inactive') {
-            showError('Session was disconnected or timed out');
+          if (result.data.status === "inactive") {
+            showError("Session was disconnected or timed out");
             return;
           }
         } else if (!result.success) {
-          if (result.error?.includes('not found')) {
-            showError('Session not found. It may have been deleted.');
+          if (result.error?.includes("not found")) {
+            showError("Session not found. It may have been deleted.");
             return;
           }
         }
@@ -211,15 +310,17 @@ const { id } = Astro.params;
         if (attempts < maxAttempts) {
           setTimeout(poll, 3000);
         } else {
-          showError('Pairing timed out. Please try again.');
+          showError("Pairing timed out. Please try again.");
         }
       } catch (error) {
-        console.error('Poll error:', error);
+        console.error("Poll error:", error);
         attempts++;
         if (attempts < maxAttempts) {
           setTimeout(poll, 3000);
         } else {
-          showError('Connection error. Please check your network and try again.');
+          showError(
+            "Connection error. Please check your network and try again."
+          );
         }
       }
     };
@@ -228,13 +329,21 @@ const { id } = Astro.params;
   }
 
   function showSuccess() {
-    pairingContent.classList.add('hidden');
-    successContent.classList.remove('hidden');
+    pairingContent.classList.add("hidden");
+    successContent.classList.remove("hidden");
   }
 
-  function showError(message) {
-    pairingContent.classList.add('hidden');
+  async function showError(message) {
+    pairingContent.classList.add("hidden");
     errorMessage.textContent = message;
-    errorContent.classList.remove('hidden');
+    errorContent.classList.remove("hidden");
+
+    try {
+      console.log(`Deleting failed session: ${sessionId}`);
+      await deleteSessionViaWebSocket(sessionId);
+      console.log("Failed session deleted successfully");
+    } catch (error) {
+      console.error("Error deleting failed session:", error);
+    }
   }
 </script>
