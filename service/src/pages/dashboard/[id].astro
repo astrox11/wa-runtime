@@ -1995,7 +1995,8 @@ const hashedId = hashSessionId(id || "");
 
   // Add event listeners using event delegation for dynamic elements
   document.addEventListener("mouseenter", (e) => {
-    const target = e.target as HTMLElement;
+    const target = e.target;
+    if (!(target instanceof Element)) return;
     const tooltipElement = target.closest("[data-tooltip]") as HTMLElement | null;
     if (tooltipElement) {
       showCustomTooltip(tooltipElement);
@@ -2003,7 +2004,8 @@ const hashedId = hashSessionId(id || "");
   }, true);
 
   document.addEventListener("mouseleave", (e) => {
-    const target = e.target as HTMLElement;
+    const target = e.target;
+    if (!(target instanceof Element)) return;
     const tooltipElement = target.closest("[data-tooltip]") as HTMLElement | null;
     if (tooltipElement) {
       hideCustomTooltip();
