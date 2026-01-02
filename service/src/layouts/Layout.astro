@@ -12,6 +12,7 @@ const { title } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Whatsaly Web" />
+    <meta name="color-scheme" content="light dark" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -20,8 +21,40 @@ const { title } = Astro.props;
     />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <title>{title}</title>
+    <script is:inline>
+      // Theme initialization - runs before page renders to prevent flash
+      (function() {
+        const storedTheme = localStorage.getItem('theme');
+        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (storedTheme === 'dark' || (!storedTheme && systemDark)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
   </head>
   <body class="bg-gh-bg font-sans text-gh-text min-h-screen antialiased">
+    <!-- Page transition overlay -->
+    <div id="page-transition" class="fixed inset-0 z-[200] bg-gh-bg pointer-events-none opacity-0 transition-opacity duration-300">
+      <div class="flex items-center justify-center h-full">
+        <div class="space-y-4 w-full max-w-md px-4">
+          <div class="h-8 bg-gh-bg-tertiary rounded-gh animate-ghost-pulse"></div>
+          <div class="h-4 bg-gh-bg-tertiary rounded-gh animate-ghost-pulse w-3/4"></div>
+          <div class="h-4 bg-gh-bg-tertiary rounded-gh animate-ghost-pulse w-1/2"></div>
+          <div class="grid grid-cols-3 gap-4 mt-6">
+            <div class="h-20 bg-gh-bg-tertiary rounded-gh animate-ghost-pulse"></div>
+            <div class="h-20 bg-gh-bg-tertiary rounded-gh animate-ghost-pulse"></div>
+            <div class="h-20 bg-gh-bg-tertiary rounded-gh animate-ghost-pulse"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Custom Tooltip (global) -->
+    <div id="global-tooltip" class="fixed z-[100] px-2 py-1 text-xs font-medium bg-gh-tooltip text-gh-tooltip-text border border-gh-border rounded-md shadow-lg pointer-events-none opacity-0 transition-opacity duration-150 whitespace-nowrap max-w-[250px]">
+      <span id="global-tooltip-text"></span>
+    </div>
+    
     <slot />
   </body>
 </html>
@@ -34,6 +67,54 @@ const { title } = Astro.props;
     font-family: 'Plus Jakarta Sans', sans-serif;
   }
 
+  /* Light mode (default) */
+  :root {
+    --gh-bg: #ffffff;
+    --gh-bg-secondary: #f6f8fa;
+    --gh-bg-tertiary: #eaeef2;
+    --gh-border: #d0d7de;
+    --gh-border-muted: #d8dee4;
+    --gh-text: #1f2328;
+    --gh-text-secondary: #656d76;
+    --gh-text-muted: #8c959f;
+    --gh-link: #0969da;
+    --gh-accent: #0969da;
+    --gh-accent-emphasis: #0550ae;
+    --gh-success: #1a7f37;
+    --gh-success-subtle: #dafbe1;
+    --gh-warning: #9a6700;
+    --gh-warning-subtle: #fff8c5;
+    --gh-danger: #cf222e;
+    --gh-danger-subtle: #ffebe9;
+    --gh-done: #8250df;
+    --gh-tooltip: #1f2328;
+    --gh-tooltip-text: #ffffff;
+  }
+
+  /* Dark mode */
+  .dark {
+    --gh-bg: #0d1117;
+    --gh-bg-secondary: #161b22;
+    --gh-bg-tertiary: #21262d;
+    --gh-border: #30363d;
+    --gh-border-muted: #21262d;
+    --gh-text: #e6edf3;
+    --gh-text-secondary: #8b949e;
+    --gh-text-muted: #6e7681;
+    --gh-link: #58a6ff;
+    --gh-accent: #58a6ff;
+    --gh-accent-emphasis: #79c0ff;
+    --gh-success: #3fb950;
+    --gh-success-subtle: #12261e;
+    --gh-warning: #d29922;
+    --gh-warning-subtle: #2d2413;
+    --gh-danger: #f85149;
+    --gh-danger-subtle: #2d1b1b;
+    --gh-done: #a371f7;
+    --gh-tooltip: #e6edf3;
+    --gh-tooltip-text: #0d1117;
+  }
+
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -44,11 +125,176 @@ const { title } = Astro.props;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #d0d7de;
+    background: var(--gh-border);
     border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #8c959f;
+    background: var(--gh-text-muted);
+  }
+
+  /* Ghost loader animation */
+  @keyframes ghost-pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.4;
+    }
+  }
+
+  .animate-ghost-pulse {
+    animation: ghost-pulse 1.5s ease-in-out infinite;
+  }
+
+  /* Page transition styles */
+  .page-transitioning {
+    overflow: hidden;
+  }
+
+  /* Responsive font sizing for smaller screens */
+  @media (max-width: 640px) {
+    html {
+      font-size: 14px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    html {
+      font-size: 13px;
+    }
+  }
+
+  /* Ensure text doesn't overflow */
+  .truncate-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 </style>
+
+<script>
+  // Page transition handling
+  document.addEventListener('DOMContentLoaded', () => {
+    const pageTransition = document.getElementById('page-transition');
+    
+    // Handle link clicks for page transitions
+    document.addEventListener('click', (e) => {
+      const link = (e.target as HTMLElement).closest('a');
+      if (link && link.href && !link.target && !link.href.startsWith('#') && !link.href.includes('javascript:')) {
+        const url = new URL(link.href);
+        if (url.origin === window.location.origin) {
+          e.preventDefault();
+          if (pageTransition) {
+            pageTransition.classList.remove('opacity-0');
+            pageTransition.classList.add('opacity-100', 'pointer-events-auto');
+            document.body.classList.add('page-transitioning');
+          }
+          setTimeout(() => {
+            window.location.href = link.href;
+          }, 200);
+        }
+      }
+    });
+
+    // Hide transition overlay on page load
+    if (pageTransition) {
+      pageTransition.classList.add('opacity-0');
+      pageTransition.classList.remove('opacity-100', 'pointer-events-auto');
+    }
+  });
+
+  // Global tooltip handler
+  const globalTooltip = document.getElementById('global-tooltip');
+  const globalTooltipText = document.getElementById('global-tooltip-text');
+
+  function showGlobalTooltip(element: HTMLElement) {
+    const tooltipContent = element.getAttribute('data-tooltip');
+    if (!tooltipContent || !globalTooltip || !globalTooltipText) return;
+
+    globalTooltipText.textContent = tooltipContent;
+    globalTooltip.style.opacity = '1';
+
+    // Position the tooltip
+    const rect = element.getBoundingClientRect();
+    const tooltipRect = globalTooltip.getBoundingClientRect();
+    
+    // Position above the element by default
+    let top = rect.top - tooltipRect.height - 8;
+    let left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+
+    // If tooltip would go off the top, position below
+    if (top < 8) {
+      top = rect.bottom + 8;
+    }
+
+    // Keep tooltip within viewport horizontally
+    if (left < 8) {
+      left = 8;
+    } else if (left + tooltipRect.width > window.innerWidth - 8) {
+      left = window.innerWidth - tooltipRect.width - 8;
+    }
+
+    globalTooltip.style.top = `${top}px`;
+    globalTooltip.style.left = `${left}px`;
+  }
+
+  function hideGlobalTooltip() {
+    if (globalTooltip) {
+      globalTooltip.style.opacity = '0';
+    }
+  }
+
+  // Add event listeners using event delegation for dynamic elements
+  document.addEventListener('mouseenter', (e) => {
+    const target = e.target;
+    if (!(target instanceof Element)) return;
+    const tooltipElement = target.closest('[data-tooltip]') as HTMLElement | null;
+    if (tooltipElement) {
+      showGlobalTooltip(tooltipElement);
+    }
+  }, true);
+
+  document.addEventListener('mouseleave', (e) => {
+    const target = e.target;
+    if (!(target instanceof Element)) return;
+    const tooltipElement = target.closest('[data-tooltip]') as HTMLElement | null;
+    if (tooltipElement) {
+      hideGlobalTooltip();
+    }
+  }, true);
+
+  // Hide tooltip on scroll
+  document.addEventListener('scroll', hideGlobalTooltip, true);
+
+  // Theme management
+  function getTheme(): 'light' | 'dark' | 'auto' {
+    return (localStorage.getItem('theme') as 'light' | 'dark' | 'auto') || 'auto';
+  }
+
+  function setTheme(theme: 'light' | 'dark' | 'auto') {
+    localStorage.setItem('theme', theme);
+    applyTheme(theme);
+  }
+
+  function applyTheme(theme: 'light' | 'dark' | 'auto') {
+    const isDark = theme === 'dark' || 
+      (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }
+
+  // Listen for system theme changes
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (getTheme() === 'auto') {
+      applyTheme('auto');
+    }
+  });
+
+  // Expose theme functions globally
+  (window as any).themeManager = { getTheme, setTheme, applyTheme };
+</script>

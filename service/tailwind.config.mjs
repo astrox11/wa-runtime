@@ -1,28 +1,31 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}"],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        // GitHub-like color palette
-        "gh-bg": "#ffffff",
-        "gh-bg-secondary": "#f6f8fa",
-        "gh-bg-tertiary": "#eaeef2",
-        "gh-border": "#d0d7de",
-        "gh-border-muted": "#d8dee4",
-        "gh-text": "#1f2328",
-        "gh-text-secondary": "#656d76",
-        "gh-text-muted": "#8c959f",
-        "gh-link": "#0969da",
-        "gh-accent": "#0969da",
-        "gh-accent-emphasis": "#0550ae",
-        "gh-success": "#1a7f37",
-        "gh-success-subtle": "#dafbe1",
-        "gh-warning": "#9a6700",
-        "gh-warning-subtle": "#fff8c5",
-        "gh-danger": "#cf222e",
-        "gh-danger-subtle": "#ffebe9",
-        "gh-done": "#8250df",
+        // GitHub-like color palette using CSS variables for theming
+        "gh-bg": "var(--gh-bg)",
+        "gh-bg-secondary": "var(--gh-bg-secondary)",
+        "gh-bg-tertiary": "var(--gh-bg-tertiary)",
+        "gh-border": "var(--gh-border)",
+        "gh-border-muted": "var(--gh-border-muted)",
+        "gh-text": "var(--gh-text)",
+        "gh-text-secondary": "var(--gh-text-secondary)",
+        "gh-text-muted": "var(--gh-text-muted)",
+        "gh-link": "var(--gh-link)",
+        "gh-accent": "var(--gh-accent)",
+        "gh-accent-emphasis": "var(--gh-accent-emphasis)",
+        "gh-success": "var(--gh-success)",
+        "gh-success-subtle": "var(--gh-success-subtle)",
+        "gh-warning": "var(--gh-warning)",
+        "gh-warning-subtle": "var(--gh-warning-subtle)",
+        "gh-danger": "var(--gh-danger)",
+        "gh-danger-subtle": "var(--gh-danger-subtle)",
+        "gh-done": "var(--gh-done)",
+        "gh-tooltip": "var(--gh-tooltip)",
+        "gh-tooltip-text": "var(--gh-tooltip-text)",
       },
       fontFamily: {
         sans: [
@@ -64,6 +67,15 @@ export default {
       },
       spacing: {
         4.5: "18px",
+      },
+      animation: {
+        'ghost-pulse': 'ghost-pulse 1.5s ease-in-out infinite',
+      },
+      keyframes: {
+        'ghost-pulse': {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.4' },
+        },
       },
     },
   },

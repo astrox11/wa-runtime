@@ -3,6 +3,69 @@ import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout title="Whatsaly">
+  <!-- Top Left Action Icons (Fork, Star, Chat) -->
+  <div
+    id="top-left-actions"
+    class="fixed top-4 left-4 z-50 flex items-center gap-2 bg-gh-bg border border-gh-border rounded-gh p-1.5 shadow-lg"
+  >
+    <a
+      href="https://github.com/astrox11/Whatsaly/fork"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="p-2 text-gh-text-secondary hover:text-gh-accent hover:bg-gh-bg-tertiary rounded-gh transition-colors"
+      data-tooltip="Fork Repository"
+    >
+      <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 16 16" fill="currentColor">
+        <path
+          d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Z"
+        ></path>
+      </svg>
+    </a>
+    <a
+      href="https://github.com/astrox11/Whatsaly"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="p-2 text-gh-text-secondary hover:text-gh-warning hover:bg-gh-bg-tertiary rounded-gh transition-colors"
+      data-tooltip="Star Repository"
+    >
+      <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 16 16" fill="currentColor">
+        <path
+          d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Zm0 2.445L6.615 5.5a.75.75 0 0 1-.564.41l-3.097.45 2.24 2.184a.75.75 0 0 1 .216.664l-.528 3.084 2.769-1.456a.75.75 0 0 1 .698 0l2.77 1.456-.53-3.084a.75.75 0 0 1 .216-.664l2.24-2.183-3.096-.45a.75.75 0 0 1-.564-.41L8 2.694Z"
+        ></path>
+      </svg>
+    </a>
+    <a
+      href="https://wa.me/2348060595602"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="p-2 text-gh-text-secondary hover:text-gh-success hover:bg-gh-bg-tertiary rounded-gh transition-colors"
+      data-tooltip="Chat on WhatsApp"
+    >
+      <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 16 16" fill="currentColor">
+        <path
+          d="M1.75 1h8.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 10.25 10H7.061l-2.574 2.573A1.458 1.458 0 0 1 2 11.543V10h-.25A1.75 1.75 0 0 1 0 8.25v-5.5C0 1.784.784 1 1.75 1ZM1.5 2.75v5.5c0 .138.112.25.25.25h1a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h3.5a.25.25 0 0 0 .25-.25v-5.5a.25.25 0 0 0-.25-.25h-8.5a.25.25 0 0 0-.25.25Zm13 2a.25.25 0 0 0-.25-.25h-.5a.75.75 0 0 1 0-1.5h.5c.966 0 1.75.784 1.75 1.75v5.5a1.75 1.75 0 0 1-1.75 1.75H14v1.543a1.458 1.458 0 0 1-2.487 1.03L9.22 12.28a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l2.22 2.22v-2.19a.75.75 0 0 1 .75-.75h1a.25.25 0 0 0 .25-.25Z"
+        ></path>
+      </svg>
+    </a>
+    <div class="w-px h-5 bg-gh-border mx-0.5"></div>
+    <!-- Theme Switcher -->
+    <button
+      id="theme-toggle"
+      class="p-2 text-gh-text-secondary hover:text-gh-accent hover:bg-gh-bg-tertiary rounded-gh transition-colors"
+      data-tooltip="Toggle Theme"
+    >
+      <svg id="theme-icon-light" class="w-4 h-4 sm:w-5 sm:h-5 hidden" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 1.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11ZM8 0a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V.75A.75.75 0 0 1 8 0Zm0 13a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 13ZM2.343 2.343a.75.75 0 0 1 1.061 0l1.06 1.061a.75.75 0 0 1-1.06 1.06l-1.06-1.06a.75.75 0 0 1 0-1.06Zm9.193 9.193a.75.75 0 0 1 1.06 0l1.061 1.06a.75.75 0 0 1-1.06 1.061l-1.061-1.06a.75.75 0 0 1 0-1.061ZM0 8a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H.75A.75.75 0 0 1 0 8Zm13 0a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5A.75.75 0 0 1 13 8ZM2.343 13.657a.75.75 0 0 1 0-1.061l1.06-1.06a.75.75 0 0 1 1.061 1.06l-1.06 1.06a.75.75 0 0 1-1.06 0Zm9.193-9.193a.75.75 0 0 1 0-1.06l1.061-1.061a.75.75 0 1 1 1.06 1.06l-1.06 1.061a.75.75 0 0 1-1.06 0Z"></path>
+      </svg>
+      <svg id="theme-icon-dark" class="w-4 h-4 sm:w-5 sm:h-5 hidden" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M9.598 1.591a.749.749 0 0 1 .785-.175 7.001 7.001 0 1 1-8.967 8.967.75.75 0 0 1 .961-.96 5.5 5.5 0 0 0 7.046-7.046.75.75 0 0 1 .175-.786Zm1.616 1.945a7 7 0 0 1-7.678 7.678 5.499 5.499 0 1 0 7.678-7.678Z"></path>
+      </svg>
+      <svg id="theme-icon-auto" class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M14.064 0a8.75 8.75 0 0 0-6.187 2.563l-.459.458c-.314.314-.616.641-.904.979H3.31a1.75 1.75 0 0 0-1.49.833L.11 7.607a.75.75 0 0 0 .418 1.11l3.102.954c.037.051.079.1.124.145l2.429 2.428c.046.046.094.088.145.125l.954 3.102a.75.75 0 0 0 1.11.418l2.774-1.707a1.75 1.75 0 0 0 .833-1.49V9.485c.338-.288.665-.59.979-.904l.458-.459A8.75 8.75 0 0 0 16 1.936V1.75A1.75 1.75 0 0 0 14.25 0ZM3.09 8.854a10.575 10.575 0 0 1 2.835-4.333l.459-.458a7.25 7.25 0 0 1 7.587-1.65v.186a7.25 7.25 0 0 1-2.127 5.126l-.459.458a10.575 10.575 0 0 1-4.333 2.835L3.09 8.854Zm1.086 2.56 2.41 2.41-.402 1.308-3.316-3.316ZM14.5 1.936a7.278 7.278 0 0 1-.753 2.338 7.278 7.278 0 0 1 2.338-.753V1.936ZM5 6.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"></path>
+      </svg>
+    </button>
+  </div>
+
   <!-- Desktop Sidebar (hidden on mobile) -->
   <aside
     id="desktop-sidebar"
@@ -11,7 +74,7 @@ import Layout from "../layouts/Layout.astro";
     <button
       id="sidebar-info"
       class="p-2 text-gh-text-secondary hover:text-gh-accent hover:bg-gh-bg-tertiary rounded-gh transition-colors"
-      title="Info"
+      data-tooltip="Info"
     >
       <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
         <path
@@ -22,7 +85,7 @@ import Layout from "../layouts/Layout.astro";
     <button
       id="sidebar-settings"
       class="p-2 text-gh-text-secondary hover:text-gh-accent hover:bg-gh-bg-tertiary rounded-gh transition-colors"
-      title="Settings"
+      data-tooltip="Settings"
     >
       <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
         <path
@@ -33,7 +96,7 @@ import Layout from "../layouts/Layout.astro";
     <button
       id="sidebar-console"
       class="p-2 text-gh-text-secondary hover:text-gh-text hover:bg-gh-bg-tertiary rounded-gh transition-colors"
-      title="View Logs"
+      data-tooltip="View Logs"
     >
       <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
         <path
@@ -45,7 +108,7 @@ import Layout from "../layouts/Layout.astro";
     <button
       id="sidebar-report"
       class="p-2 text-gh-text-secondary hover:text-gh-warning hover:bg-gh-bg-tertiary rounded-gh transition-colors"
-      title="Report"
+      data-tooltip="Report"
     >
       <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
         <path
@@ -54,11 +117,11 @@ import Layout from "../layouts/Layout.astro";
       </svg>
     </button>
     <a
-      href="https://github.com/astrox11/wa-runtime/pulls"
+      href="https://github.com/astrox11/Whatsaly/pulls"
       target="_blank"
       rel="noopener noreferrer"
       class="p-2 text-gh-text-secondary hover:text-gh-success hover:bg-gh-bg-tertiary rounded-gh transition-colors"
-      title="Contribute"
+      data-tooltip="Contribute"
     >
       <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
         <path
@@ -73,68 +136,68 @@ import Layout from "../layouts/Layout.astro";
     id="mobile-sidebar"
     class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-gh-bg border-t border-gh-border shadow-lg"
   >
-    <div class="flex items-center justify-around py-2 px-4">
+    <div class="flex items-center justify-around py-2 px-2 sm:px-4">
       <button
         id="mobile-info"
-        class="flex flex-col items-center p-2 text-gh-text-secondary hover:text-gh-accent transition-colors"
-        title="Info"
+        class="flex flex-col items-center p-1.5 sm:p-2 text-gh-text-secondary hover:text-gh-accent transition-colors"
+        data-tooltip="Info"
       >
-        <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
+        <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 16 16" fill="currentColor">
           <path
             d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"
           ></path>
         </svg>
-        <span class="text-[10px] mt-0.5">Info</span>
+        <span class="text-[9px] sm:text-[10px] mt-0.5">Info</span>
       </button>
       <button
         id="mobile-settings"
-        class="flex flex-col items-center p-2 text-gh-text-secondary hover:text-gh-accent transition-colors"
-        title="Settings"
+        class="flex flex-col items-center p-1.5 sm:p-2 text-gh-text-secondary hover:text-gh-accent transition-colors"
+        data-tooltip="Settings"
       >
-        <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
+        <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 16 16" fill="currentColor">
           <path
             d="M8 0a8.2 8.2 0 0 1 .701.031C9.444.095 9.99.645 10.16 1.29l.288 1.107c.018.066.079.158.212.224.231.114.454.243.668.386.123.082.233.09.299.071l1.103-.303c.644-.176 1.392.021 1.82.63.27.385.506.792.704 1.218.315.675.111 1.422-.364 1.891l-.814.806c-.049.048-.098.147-.088.294.016.257.016.515 0 .772-.01.147.04.246.088.294l.814.806c.475.469.679 1.216.364 1.891a7.977 7.977 0 0 1-.704 1.217c-.428.61-1.176.807-1.82.63l-1.102-.302c-.067-.019-.177-.011-.3.071a5.909 5.909 0 0 1-.668.386c-.133.066-.194.158-.212.224l-.288 1.107c-.17.645-.715 1.195-1.458 1.26a8.006 8.006 0 0 1-1.402 0c-.743-.065-1.289-.615-1.458-1.26l-.289-1.106c-.018-.066-.079-.158-.212-.225a5.893 5.893 0 0 1-.668-.386c-.123-.082-.233-.09-.299-.071l-1.103.303c-.644.176-1.392-.021-1.82-.63a8.004 8.004 0 0 1-.704-1.217c-.315-.675-.111-1.422.363-1.891l.815-.806c.05-.048.098-.147.088-.294a6.854 6.854 0 0 1 0-.772c.01-.147-.04-.246-.088-.294l-.815-.806C.635 6.045.431 5.298.746 4.623a7.92 7.92 0 0 1 .704-1.217c.428-.61 1.176-.807 1.82-.63l1.102.302c.067.019.177.011.3-.071.214-.143.437-.272.668-.386.133-.066.194-.158.212-.224l.289-1.106C6.009.645 6.556.095 7.299.03 7.53.01 7.764 0 8 0Zm-.571 1.525c-.036.003-.108.036-.137.146l-.289 1.106c-.1.386-.396.71-.771.9-.31.157-.6.346-.87.562-.262.211-.597.3-.912.214l-1.103-.303c-.109-.03-.175.016-.195.045-.22.312-.412.644-.573.99-.014.031-.021.11.059.19l.815.806c.278.275.41.657.397 1.036-.007.21-.007.42 0 .628.013.379-.119.762-.397 1.037l-.814.806c-.08.08-.073.159-.059.19.161.347.353.678.573.99.02.029.086.074.195.045l1.103-.303c.315-.086.65.003.912.214.27.216.56.405.87.562.375.19.671.514.77.9l.29 1.106c.028.11.1.143.136.146a6.66 6.66 0 0 0 1.142 0c.036-.003.108-.036.137-.146l.289-1.106c.1-.386.396-.71.771-.9.31-.157.6-.346.87-.562.262-.211.597-.3.912-.214l1.103.303c.109.029.175-.016.194-.045.22-.312.413-.644.573-.99.015-.031.022-.11-.058-.19l-.815-.806a1.337 1.337 0 0 1-.397-1.037c.007-.21.007-.42 0-.628-.013-.379.119-.762.397-1.036l.814-.806c.08-.08.073-.159.059-.19a6.964 6.964 0 0 0-.574-.99c-.02-.029-.085-.074-.194-.045l-1.103.303c-.315.086-.65-.003-.912-.214a5.421 5.421 0 0 0-.87-.562c-.375-.19-.67-.514-.77-.9l-.29-1.106c-.028-.11-.1-.143-.136-.146a6.66 6.66 0 0 0-1.142 0ZM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-1.5 0a1.5 1.5 0 1 0-3.001.001A1.5 1.5 0 0 0 9.5 8Z"
           ></path>
         </svg>
-        <span class="text-[10px] mt-0.5">Settings</span>
+        <span class="text-[9px] sm:text-[10px] mt-0.5">Settings</span>
       </button>
       <button
         id="mobile-console"
-        class="flex flex-col items-center p-2 text-gh-text-secondary hover:text-gh-text transition-colors"
-        title="Logs"
+        class="flex flex-col items-center p-1.5 sm:p-2 text-gh-text-secondary hover:text-gh-text transition-colors"
+        data-tooltip="Logs"
       >
-        <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
+        <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 16 16" fill="currentColor">
           <path
             d="M0 2.75C0 1.784.784 1 1.75 1h12.5c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 14.25 15H1.75A1.75 1.75 0 0 1 0 13.25Zm1.75-.25a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25Zm7.25 2a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5ZM4.78 6.72a.75.75 0 0 0-1.06 1.06l1.22 1.22-1.22 1.22a.75.75 0 1 0 1.06 1.06l1.75-1.75a.75.75 0 0 0 0-1.06Z"
           ></path>
         </svg>
-        <span class="text-[10px] mt-0.5">Logs</span>
+        <span class="text-[9px] sm:text-[10px] mt-0.5">Logs</span>
       </button>
       <button
         id="mobile-report"
-        class="flex flex-col items-center p-2 text-gh-text-secondary hover:text-gh-warning transition-colors"
-        title="Report"
+        class="flex flex-col items-center p-1.5 sm:p-2 text-gh-text-secondary hover:text-gh-warning transition-colors"
+        data-tooltip="Report"
       >
-        <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
+        <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 16 16" fill="currentColor">
           <path
             d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"
           ></path>
         </svg>
-        <span class="text-[10px] mt-0.5">Report</span>
+        <span class="text-[9px] sm:text-[10px] mt-0.5">Report</span>
       </button>
       <a
-        href="https://github.com/astrox11/wa-runtime/pulls"
+        href="https://github.com/astrox11/Whatsaly/pulls"
         target="_blank"
         rel="noopener noreferrer"
-        class="flex flex-col items-center p-2 text-gh-text-secondary hover:text-gh-success transition-colors"
-        title="Contribute"
+        class="flex flex-col items-center p-1.5 sm:p-2 text-gh-text-secondary hover:text-gh-success transition-colors"
+        data-tooltip="Contribute"
       >
-        <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor">
+        <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 16 16" fill="currentColor">
           <path
             d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"
           ></path>
         </svg>
-        <span class="text-[10px] mt-0.5">Contribute</span>
+        <span class="text-[9px] sm:text-[10px] mt-0.5">Contribute</span>
       </a>
     </div>
   </nav>
@@ -553,21 +616,12 @@ import Layout from "../layouts/Layout.astro";
 
         <!-- Loading State -->
         <div id="settings-loading" class="hidden text-center py-8">
-          <svg
-            class="w-8 h-8 mx-auto text-gh-text-muted animate-spin"
-            viewBox="0 0 16 16"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-          >
-            <circle
-              cx="8"
-              cy="8"
-              r="6"
-              stroke-dasharray="28"
-              stroke-dashoffset="7"></circle>
-          </svg>
-          <p class="text-sm text-gh-text-muted mt-2">Loading settings...</p>
+          <div class="space-y-3 max-w-xs mx-auto">
+            <div class="h-6 bg-gh-bg-tertiary rounded-gh animate-ghost-pulse"></div>
+            <div class="h-6 bg-gh-bg-tertiary rounded-gh animate-ghost-pulse w-4/5 mx-auto"></div>
+            <div class="h-6 bg-gh-bg-tertiary rounded-gh animate-ghost-pulse w-3/5 mx-auto"></div>
+          </div>
+          <p class="text-sm text-gh-text-muted mt-4">Loading settings...</p>
         </div>
       </div>
     </div>
@@ -1106,7 +1160,7 @@ import Layout from "../layouts/Layout.astro";
                   type="button"
                   id="clear-botname"
                   class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gh-text-muted hover:text-gh-danger transition-colors hidden"
-                  title="Clear"
+                  data-tooltip="Clear"
                 >
                   <svg
                     class="w-3.5 h-3.5"
@@ -1221,25 +1275,25 @@ import Layout from "../layouts/Layout.astro";
         </div>
       </div>
       <div id="sessions-list" class="divide-y divide-gh-border">
-        <!-- Skeleton loaders -->
+        <!-- Ghost loaders -->
         <div class="flex items-center justify-between p-3">
           <div class="flex items-center gap-3">
-            <div class="w-4 h-4 bg-gh-bg-tertiary rounded animate-pulse"></div>
-            <div class="w-32 h-4 bg-gh-bg-tertiary rounded animate-pulse"></div>
+            <div class="w-4 h-4 bg-gh-bg-tertiary rounded animate-ghost-pulse"></div>
+            <div class="w-32 h-4 bg-gh-bg-tertiary rounded animate-ghost-pulse"></div>
           </div>
           <div class="flex items-center gap-1">
-            <div class="w-8 h-8 bg-gh-bg-tertiary rounded animate-pulse"></div>
-            <div class="w-8 h-8 bg-gh-bg-tertiary rounded animate-pulse"></div>
+            <div class="w-8 h-8 bg-gh-bg-tertiary rounded animate-ghost-pulse"></div>
+            <div class="w-8 h-8 bg-gh-bg-tertiary rounded animate-ghost-pulse"></div>
           </div>
         </div>
         <div class="flex items-center justify-between p-3">
           <div class="flex items-center gap-3">
-            <div class="w-4 h-4 bg-gh-bg-tertiary rounded animate-pulse"></div>
-            <div class="w-24 h-4 bg-gh-bg-tertiary rounded animate-pulse"></div>
+            <div class="w-4 h-4 bg-gh-bg-tertiary rounded animate-ghost-pulse"></div>
+            <div class="w-24 h-4 bg-gh-bg-tertiary rounded animate-ghost-pulse"></div>
           </div>
           <div class="flex items-center gap-1">
-            <div class="w-8 h-8 bg-gh-bg-tertiary rounded animate-pulse"></div>
-            <div class="w-8 h-8 bg-gh-bg-tertiary rounded animate-pulse"></div>
+            <div class="w-8 h-8 bg-gh-bg-tertiary rounded animate-ghost-pulse"></div>
+            <div class="w-8 h-8 bg-gh-bg-tertiary rounded animate-ghost-pulse"></div>
           </div>
         </div>
       </div>
@@ -1339,7 +1393,7 @@ import Layout from "../layouts/Layout.astro";
           class="flex-1 px-3 py-1.5 text-sm bg-gh-bg border border-gh-border rounded-gh text-gh-text placeholder-gh-text-muted focus:outline-none focus:border-gh-accent focus:ring-1 focus:ring-gh-accent"
           data-var-value="${varId}"
         />
-        <button type="button" class="p-1.5 text-gh-text-muted hover:text-gh-danger transition-colors" data-remove-var="${varId}" title="Remove">
+        <button type="button" class="p-1.5 text-gh-text-muted hover:text-gh-danger transition-colors" data-remove-var="${varId}" data-tooltip="Remove">
           <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
             <path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"/>
           </svg>
@@ -1472,9 +1526,7 @@ import Layout from "../layouts/Layout.astro";
           session.status === "pairing" ||
           session.status === "connecting"
         ) {
-          statusIcon = `<svg class="w-4 h-4 text-amber-600 animate-spin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-            <circle cx="8" cy="8" r="6" stroke-dasharray="28" stroke-dashoffset="7"/>
-          </svg>`;
+          statusIcon = `<div class="w-4 h-4 rounded-full bg-amber-500 animate-ghost-pulse"></div>`;
         } else if (session.status === "paused_user") {
           statusIcon = `<svg class="w-4 h-4 text-amber-500" viewBox="0 0 16 16" fill="currentColor">
             <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM5.5 4.5A1.5 1.5 0 0 0 4 6v4a1.5 1.5 0 0 0 3 0V6a1.5 1.5 0 0 0-1.5-1.5Zm5 0A1.5 1.5 0 0 0 9 6v4a1.5 1.5 0 0 0 3 0V6a1.5 1.5 0 0 0-1.5-1.5Z"/>
@@ -1495,12 +1547,12 @@ import Layout from "../layouts/Layout.astro";
             ${
               session.status === "active"
                 ? `
-              <a href="/dashboard/${session.id}" class="p-1.5 text-gh-text-secondary hover:text-gh-success hover:bg-gh-bg-tertiary rounded-gh transition-colors" title="View Dashboard">
+              <a href="/dashboard/${session.id}" class="p-1.5 text-gh-text-secondary hover:text-gh-success hover:bg-gh-bg-tertiary rounded-gh transition-colors" data-tooltip="View Dashboard">
                 <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
                   <path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16Zm3.78-9.72a.751.751 0 0 0-.018-1.042.751.751 0 0 0-1.042-.018L6.75 9.19 5.28 7.72a.751.751 0 0 0-1.042.018.751.751 0 0 0-.018 1.042l2 2a.75.75 0 0 0 1.06 0Z"/>
                 </svg>
               </a>
-              <button class="p-1.5 text-gh-text-secondary hover:text-amber-600 hover:bg-gh-bg-tertiary rounded-gh transition-colors" data-pause-session="${session.id}" title="Pause Session">
+              <button class="p-1.5 text-gh-text-secondary hover:text-amber-600 hover:bg-gh-bg-tertiary rounded-gh transition-colors" data-pause-session="${session.id}" data-tooltip="Pause Session">
                 <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
                   <path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5Zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5Z"/>
                 </svg>
@@ -1508,7 +1560,7 @@ import Layout from "../layouts/Layout.astro";
             `
                 : session.status === "pairing"
                   ? `
-              <a href="/pairing/${session.id}" class="p-1.5 text-gh-text-secondary hover:text-gh-success hover:bg-gh-bg-tertiary rounded-gh transition-colors" title="Continue Pairing">
+              <a href="/pairing/${session.id}" class="p-1.5 text-gh-text-secondary hover:text-gh-success hover:bg-gh-bg-tertiary rounded-gh transition-colors" data-tooltip="Continue Pairing">
                 <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
                   <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm4.879-2.773 4.264 2.559a.25.25 0 0 1 0 .428l-4.264 2.559A.25.25 0 0 1 6 10.559V5.442a.25.25 0 0 1 .379-.215Z"/>
                 </svg>
@@ -1516,21 +1568,19 @@ import Layout from "../layouts/Layout.astro";
             `
                   : session.status === "connecting"
                     ? `
-              <span class="p-1.5 text-gh-text-muted" title="Connecting...">
-                <svg class="w-4 h-4 animate-spin" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <circle cx="8" cy="8" r="6" stroke-dasharray="28" stroke-dashoffset="7"/>
-                </svg>
+              <span class="p-1.5 text-gh-text-muted" data-tooltip="Connecting...">
+                <div class="w-4 h-4 rounded-full bg-amber-500 animate-ghost-pulse"></div>
               </span>
             `
                     : `
-              <button class="p-1.5 text-gh-text-secondary hover:text-gh-success hover:bg-gh-bg-tertiary rounded-gh transition-colors" data-resume-session="${session.id}" title="Resume Session">
+              <button class="p-1.5 text-gh-text-secondary hover:text-gh-success hover:bg-gh-bg-tertiary rounded-gh transition-colors" data-resume-session="${session.id}" data-tooltip="Resume Session">
                 <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
                   <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm4.879-2.773 4.264 2.559a.25.25 0 0 1 0 .428l-4.264 2.559A.25.25 0 0 1 6 10.559V5.442a.25.25 0 0 1 .379-.215Z"/>
                 </svg>
               </button>
             `
             }
-            <button class="p-1.5 text-gh-text-secondary hover:text-gh-danger hover:bg-gh-danger-subtle rounded-gh transition-colors" data-delete-session="${session.id}" title="Delete">
+            <button class="p-1.5 text-gh-text-secondary hover:text-gh-danger hover:bg-gh-danger-subtle rounded-gh transition-colors" data-delete-session="${session.id}" data-tooltip="Delete">
               <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
                 <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.675l.66 6.6a.25.25 0 0 0 .249.225h5.19a.25.25 0 0 0 .249-.225l.66-6.6a.75.75 0 0 1 1.492.149l-.66 6.6A1.748 1.748 0 0 1 10.595 15h-5.19a1.75 1.75 0 0 1-1.741-1.575l-.66-6.6a.75.75 0 1 1 1.492-.15ZM6.5 1.75V3h3V1.75a.25.25 0 0 0-.25-.25h-2.5a.25.25 0 0 0-.25.25Z"/>
               </svg>
@@ -2266,4 +2316,64 @@ import Layout from "../layouts/Layout.astro";
       updateWordCount();
     }, 500);
   });
+
+  // Theme Toggle functionality
+  const themeToggle = document.getElementById("theme-toggle");
+  const themeIconLight = document.getElementById("theme-icon-light");
+  const themeIconDark = document.getElementById("theme-icon-dark");
+  const themeIconAuto = document.getElementById("theme-icon-auto");
+
+  type ThemeMode = 'light' | 'dark' | 'auto';
+
+  function updateThemeIcon(theme: ThemeMode) {
+    themeIconLight?.classList.add('hidden');
+    themeIconDark?.classList.add('hidden');
+    themeIconAuto?.classList.add('hidden');
+
+    if (theme === 'light') {
+      themeIconLight?.classList.remove('hidden');
+    } else if (theme === 'dark') {
+      themeIconDark?.classList.remove('hidden');
+    } else {
+      themeIconAuto?.classList.remove('hidden');
+    }
+  }
+
+  function cycleTheme() {
+    const themeManager = (window as any).themeManager;
+    if (!themeManager) return;
+
+    const currentTheme = themeManager.getTheme() as ThemeMode;
+    let nextTheme: ThemeMode;
+
+    if (currentTheme === 'auto') {
+      nextTheme = 'light';
+    } else if (currentTheme === 'light') {
+      nextTheme = 'dark';
+    } else {
+      nextTheme = 'auto';
+    }
+
+    themeManager.setTheme(nextTheme);
+    updateThemeIcon(nextTheme);
+    
+    // Update tooltip
+    const tooltipText = nextTheme === 'auto' ? 'Auto Theme' : nextTheme === 'light' ? 'Light Mode' : 'Dark Mode';
+    themeToggle?.setAttribute('data-tooltip', tooltipText);
+  }
+
+  // Initialize theme icon on page load
+  const initTheme = () => {
+    const themeManager = (window as any).themeManager;
+    if (themeManager) {
+      const currentTheme = themeManager.getTheme() as ThemeMode;
+      updateThemeIcon(currentTheme);
+      const tooltipText = currentTheme === 'auto' ? 'Auto Theme' : currentTheme === 'light' ? 'Light Mode' : 'Dark Mode';
+      themeToggle?.setAttribute('data-tooltip', tooltipText);
+    }
+  };
+
+  initTheme();
+
+  themeToggle?.addEventListener("click", cycleTheme);
 </script>

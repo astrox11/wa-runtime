@@ -24,11 +24,11 @@ const { id } = Astro.params;
 
       <div id="pairing-content" class="p-6">
         <div class="flex flex-col items-center">
-          <div
-            class="w-5 h-5 border-2 border-gh-accent border-t-transparent rounded-full animate-spin"
-          >
+          <div class="space-y-3 w-full max-w-xs">
+            <div class="h-8 bg-gh-bg-tertiary rounded-gh animate-ghost-pulse mx-auto w-32"></div>
+            <div class="h-4 bg-gh-bg-tertiary rounded-gh animate-ghost-pulse w-3/4 mx-auto"></div>
           </div>
-          <p class="text-sm text-gh-text-secondary mt-3">
+          <p class="text-sm text-gh-text-secondary mt-4">
             Loading pairing code...
           </p>
         </div>
