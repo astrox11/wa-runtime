@@ -181,18 +181,28 @@ const { title } = Astro.props;
     // Handle link clicks for page transitions
     document.addEventListener('click', (e) => {
       const link = (e.target as HTMLElement).closest('a');
-      if (link && link.href && !link.target && !link.href.startsWith('#') && !link.href.includes('javascript:')) {
-        const url = new URL(link.href);
-        if (url.origin === window.location.origin) {
-          e.preventDefault();
-          if (pageTransition) {
-            pageTransition.classList.remove('opacity-0');
-            pageTransition.classList.add('opacity-100', 'pointer-events-auto');
-            document.body.classList.add('page-transitioning');
+      if (link && link.href && !link.target && !link.href.startsWith('#')) {
+        // Validate URL safely
+        try {
+          const url = new URL(link.href, window.location.origin);
+          // Block javascript:, data:, and other potentially unsafe URLs
+          if (!['http:', 'https:'].includes(url.protocol)) {
+            return;
           }
-          setTimeout(() => {
-            window.location.href = link.href;
-          }, 200);
+          if (url.origin === window.location.origin) {
+            e.preventDefault();
+            if (pageTransition) {
+              pageTransition.classList.remove('opacity-0');
+              pageTransition.classList.add('opacity-100', 'pointer-events-auto');
+              document.body.classList.add('page-transitioning');
+            }
+            setTimeout(() => {
+              window.location.href = link.href;
+            }, 200);
+          }
+        } catch {
+          // Invalid URL, let the browser handle it
+          return;
         }
       }
     });
@@ -264,8 +274,12 @@ const { title } = Astro.props;
     }
   }, true);
 
-  // Hide tooltip on scroll
-  document.addEventListener('scroll', hideGlobalTooltip, true);
+  // Hide tooltip on scroll (debounced for performance)
+  let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
+  document.addEventListener('scroll', () => {
+    if (scrollTimeout) clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(hideGlobalTooltip, 50);
+  }, true);
 
   // Theme management
   function getTheme(): 'light' | 'dark' | 'auto' {
