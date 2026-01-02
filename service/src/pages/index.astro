@@ -985,7 +985,9 @@ import Layout from "../layouts/Layout.astro";
       "Are you sure you want to delete this session? This action cannot be undone.",
       async () => {
         const result = await api.deleteSession(id);
-        if (!result.success) {
+        if (result.success) {
+          console.log("Session deleted successfully");
+        } else {
           console.error(result.error || "Failed to delete session");
         }
       }
@@ -1439,10 +1441,8 @@ import Layout from "../layouts/Layout.astro";
   function loadSessionsIntoSelect() {
     if (!settingsSessionSelect) return;
 
-    // Clear existing options (except the first one)
-    while (settingsSessionSelect.options.length > 1) {
-      settingsSessionSelect.remove(1);
-    }
+    // Clear existing options (except the first placeholder)
+    settingsSessionSelect.length = 1;
 
     if (availableSessions.length === 0) {
       settingsNoSessions?.classList.remove("hidden");
@@ -1583,7 +1583,7 @@ import Layout from "../layouts/Layout.astro";
   // Store sessions from stats updates
   api.onStats((data) => {
     if (data && data.type === "stats" && data.data && data.data.sessions) {
-      availableSessions = data.data.sessions.map((s: any) => ({
+      availableSessions = data.data.sessions.map((s) => ({
         id: s.id,
         phone_number: s.phone_number,
         status: s.status,
