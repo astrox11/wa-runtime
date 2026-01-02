@@ -34,34 +34,6 @@ const { id } = Astro.params;
         </div>
       </div>
 
-      <div id="success-content" class="p-6 hidden">
-        <div class="flex flex-col items-center">
-          <div
-            class="w-12 h-12 rounded-full bg-gh-success-subtle flex items-center justify-center mb-3"
-          >
-            <svg
-              class="w-6 h-6 text-gh-success"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"
-              ></path>
-            </svg>
-          </div>
-          <h2 class="text-lg font-semibold text-gh-text mb-1">
-            Successfully Paired
-          </h2>
-          <p class="text-sm text-gh-text-secondary mb-4">
-            Your WhatsApp session is now active.
-          </p>
-          <a
-            href={`/dashboard/${id}`}
-            class="px-4 py-1. 5 text-sm font-medium rounded-gh bg-gh-success text-white hover:bg-green-700"
-          >
-            Go to Dashboard
-          </a>
-        </div>
-      </div>
 
       <div id="error-content" class="p-6 hidden">
         <div class="flex flex-col items-center">
@@ -100,7 +72,6 @@ const { id } = Astro.params;
 
 <script define:vars={{ sessionId: id }}>
   const pairingContent = document.getElementById("pairing-content");
-  const successContent = document.getElementById("success-content");
   const errorContent = document.getElementById("error-content");
   const errorMessage = document.getElementById("error-message");
 
@@ -267,7 +238,6 @@ const { id } = Astro.params;
     ws.onclose = () => {
       if (
         attempts < maxAttempts &&
-        successContent.classList.contains("hidden") &&
         errorContent.classList.contains("hidden")
       ) {
         pollAuthStatus();
@@ -329,8 +299,8 @@ const { id } = Astro.params;
   }
 
   function showSuccess() {
-    pairingContent.classList.add("hidden");
-    successContent.classList.remove("hidden");
+    // Automatically redirect to dashboard on successful pairing
+    window.location.href = `/dashboard/${sessionId}`;
   }
 
   async function showError(message) {
