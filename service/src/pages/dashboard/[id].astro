@@ -442,6 +442,12 @@ const hashedId = hashSessionId(id || "");
     messagesSent: number;
   }
 
+  interface HourlyActivity {
+    hourlyData: number[];
+    peakHour: string;
+    average: number;
+  }
+
   interface SessionData {
     id: string;
     phone_number: string;
@@ -453,6 +459,7 @@ const hashedId = hashSessionId(id || "");
       name: string;
     };
     stats: SessionStats;
+    hourlyActivity?: HourlyActivity;
   }
 
   function formatRelativeTime(timestamp: number): string {
@@ -475,6 +482,7 @@ const hashedId = hashSessionId(id || "");
   function updateSessionDisplay(
     sessionData: SessionData & {
       stats: SessionStats;
+      hourlyActivity?: HourlyActivity;
     }
   ) {
     const displayName =
@@ -503,6 +511,10 @@ const hashedId = hashSessionId(id || "");
       const createdEl = document.getElementById("created-date");
       if (createdEl)
         createdEl.textContent = formatRelativeTime(sessionData.created_at);
+    }
+
+    if (sessionData.hourlyActivity) {
+      updateActivityChart(sessionData.hourlyActivity);
     }
 
     updateHealthStatus(sessionData.status);
@@ -584,6 +596,49 @@ const hashedId = hashSessionId(id || "");
     const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  function updateActivityChart(hourlyActivity: HourlyActivity) {
+    const chartEl = document.getElementById("activity-chart");
+    const peakHourEl = document.getElementById("peak-hour");
+    const avgHourEl = document.getElementById("avg-hour");
+
+    if (!chartEl) return;
+
+    // Update stats
+    if (peakHourEl) peakHourEl.textContent = hourlyActivity.peakHour;
+    if (avgHourEl) avgHourEl.textContent = hourlyActivity.average.toString();
+
+    // Find max value for scaling
+    const maxValue = Math.max(...hourlyActivity.hourlyData, 1);
+
+    // Generate chart bars
+    const bars = hourlyActivity.hourlyData.map((count, index) => {
+      const heightPercent = (count / maxValue) * 100;
+      const minHeight = count > 0 ? 4 : 2; // Minimum height for visibility
+      const height = Math.max(heightPercent, minHeight);
+
+      // Color intensity based on value
+      const intensity = count / maxValue;
+      let bgClass = "bg-gh-bg-tertiary";
+      if (count > 0) {
+        if (intensity > 0.7) {
+          bgClass = "bg-gh-success";
+        } else if (intensity > 0.4) {
+          bgClass = "bg-gh-success/70";
+        } else {
+          bgClass = "bg-gh-success/40";
+        }
+      }
+
+      return `<div 
+        class="flex-1 ${bgClass} rounded-t transition-all duration-300" 
+        style="height: ${height}%"
+        title="${count} message${count !== 1 ? 's' : ''}"
+      ></div>`;
+    }).join("");
+
+    chartEl.innerHTML = bars;
   }
 
   api.onStats((data) => {

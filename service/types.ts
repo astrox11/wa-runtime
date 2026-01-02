@@ -35,6 +35,12 @@ export interface SessionStatsData {
   messagesSent: number;
 }
 
+export interface HourlyActivityData {
+  hourlyData: number[];
+  peakHour: string;
+  average: number;
+}
+
 export interface OverallStatsData {
   totalSessions: number;
   activeSessions: number;
@@ -140,7 +146,7 @@ export interface StatsUpdate {
   type: "stats";
   data: {
     overall: OverallStatsData;
-    sessions: Array<SessionData & { stats: SessionStatsData }>;
+    sessions: Array<SessionData & { stats: SessionStatsData; hourlyActivity: HourlyActivityData }>;
   };
 }
 

@@ -64,6 +64,12 @@ export interface SessionStats {
   messagesSent: number;
 }
 
+export interface HourlyActivity {
+  hourlyData: number[];
+  peakHour: string;
+  average: number;
+}
+
 export interface Config {
   version: string;
   botName: string;
@@ -73,7 +79,7 @@ export interface StatsUpdate {
   type: "stats";
   data: {
     overall: RuntimeStats;
-    sessions: Array<Session & { stats: SessionStats }>;
+    sessions: Array<Session & { stats: SessionStats; hourlyActivity: HourlyActivity }>;
   };
 }
 
