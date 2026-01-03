@@ -4,41 +4,65 @@ import {
   setActivitySettings,
   isAdmin,
   Group,
+  log,
 } from "..";
 import { jidNormalizedUser } from "baileys";
 
-// Spam tracking: Map<sessionId, Map<sender, { timestamps: number[], warned: boolean }>>
+// Spam tracking: Map<sessionId, Map<sender, { timestamps: number[], warned: boolean, lastActivity: number }>>
 const spamTracker: Map<
   string,
-  Map<string, { timestamps: number[]; warned: boolean }>
+  Map<string, { timestamps: number[]; warned: boolean; lastActivity: number }>
 > = new Map();
 
 // Spam detection settings
 const SPAM_WINDOW_MS = 3000; // 3 seconds
 const SPAM_MESSAGE_THRESHOLD = 2; // More than 1 message per window (i.e., 2+)
+const CLEANUP_INTERVAL_MS = 60000; // Cleanup every 60 seconds
+const ENTRY_EXPIRY_MS = 300000; // Remove entries older than 5 minutes
+
+// Cleanup function to prevent memory leaks
+function cleanupSpamTracker(): void {
+  const now = Date.now();
+  for (const [sessionId, sessionMap] of spamTracker) {
+    for (const [sender, entry] of sessionMap) {
+      if (now - entry.lastActivity > ENTRY_EXPIRY_MS) {
+        sessionMap.delete(sender);
+      }
+    }
+    // Remove empty session maps
+    if (sessionMap.size === 0) {
+      spamTracker.delete(sessionId);
+    }
+  }
+}
+
+// Run cleanup periodically
+setInterval(cleanupSpamTracker, CLEANUP_INTERVAL_MS);
 
 function getOrCreateSpamEntry(
   sessionId: string,
   sender: string,
-): { timestamps: number[]; warned: boolean } {
+): { timestamps: number[]; warned: boolean; lastActivity: number } {
   if (!spamTracker.has(sessionId)) {
     spamTracker.set(sessionId, new Map());
   }
   const sessionMap = spamTracker.get(sessionId)!;
   if (!sessionMap.has(sender)) {
-    sessionMap.set(sender, { timestamps: [], warned: false });
+    sessionMap.set(sender, { timestamps: [], warned: false, lastActivity: Date.now() });
   }
-  return sessionMap.get(sender)!;
+  const entry = sessionMap.get(sender)!;
+  entry.lastActivity = Date.now();
+  return entry;
 }
 
 function resetSpamEntry(sessionId: string, sender: string): void {
   const sessionMap = spamTracker.get(sessionId);
   if (sessionMap) {
-    sessionMap.set(sender, { timestamps: [], warned: false });
+    sessionMap.set(sender, { timestamps: [], warned: false, lastActivity: Date.now() });
   }
 }
 
-function isSpamming(entry: { timestamps: number[]; warned: boolean }): boolean {
+function isSpamming(entry: { timestamps: number[]; warned: boolean; lastActivity: number }): boolean {
   const now = Date.now();
   // Filter to only keep timestamps within the window
   entry.timestamps = entry.timestamps.filter(
@@ -395,7 +419,10 @@ export default [
                 const group = new Group(msg.sessionId, msg.chat, sock);
                 await group.Remove(sender);
               } catch (error) {
-                // Failed to kick, might not have permissions
+                log.error(
+                  `[antispam] Failed to kick ${sender} from ${msg.chat}:`,
+                  error,
+                );
               }
             } else {
               await msg.reply(
