@@ -201,6 +201,28 @@ export function isUrl(input: string | URL): boolean {
   }
 }
 
+/**
+ * Check if text contains any URL (for antilink detection)
+ * Detects: http://, https://, www., wa.me, t.me, chat.whatsapp.com, and common domains
+ */
+export function containsUrl(text: string): boolean {
+  const urlPatterns = [
+    /https?:\/\/[^\s]+/i,
+    /www\.[^\s]+/i,
+    /wa\.me\/[^\s]*/i,
+    /chat\.whatsapp\.com\/[^\s]*/i,
+    /t\.me\/[^\s]*/i,
+    /[a-zA-Z0-9-]+\.(com|net|org|io|co|id|xyz|me|info|biz|us|tv|gg|link|site|online|store|app|dev|tech|pro|cc|ws|to|ly|gl|gd|bit\.ly)[^\s]*/i,
+  ];
+
+  for (const pattern of urlPatterns) {
+    if (pattern.test(text)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export function isPath(input: string | URL): boolean {
   try {
     if (input instanceof URL) return input.pathname.length > 0;

@@ -19,6 +19,7 @@ const ALLOWED_TABLE_SUFFIXES = [
   "sticker",
   "bgm",
   "activity_settings",
+  "antilink",
 ] as const;
 
 type TableSuffix = (typeof ALLOWED_TABLE_SUFFIXES)[number];
@@ -409,6 +410,26 @@ export function createUserActivitySettingsTable(phoneNumber: string): string {
   return tableName;
 }
 
+export function createUserAntilinkTable(phoneNumber: string): string {
+  const tableName = getUserTableName(phoneNumber, "antilink");
+
+  if (!createdTables.has(tableName)) {
+    try {
+      bunql.exec(`
+        CREATE TABLE IF NOT EXISTS "${tableName}" (
+          groupId TEXT PRIMARY KEY,
+          mode INTEGER NOT NULL DEFAULT 0
+        )
+      `);
+      createdTables.add(tableName);
+    } catch (error) {
+      log.error(`Failed to create table ${tableName}:`, error);
+    }
+  }
+
+  return tableName;
+}
+
 export function initializeSql(phoneNumber: string): void {
   createUserAuthTable(phoneNumber);
   createUserMessagesTable(phoneNumber);
@@ -427,6 +448,7 @@ export function initializeSql(phoneNumber: string): void {
   createUserStickerTable(phoneNumber);
   createUserBgmTable(phoneNumber);
   createUserActivitySettingsTable(phoneNumber);
+  createUserAntilinkTable(phoneNumber);
   log.debug(`Initialized tables for user ${phoneNumber}`);
 }
 

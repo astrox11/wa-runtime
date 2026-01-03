@@ -3,6 +3,7 @@ export * from "./activity_settings";
 export * from "./afk";
 export * from "./alive";
 export * from "./antidelete";
+export * from "./antilink";
 export * from "./ban";
 export * from "./bgm";
 export * from "./contact";
