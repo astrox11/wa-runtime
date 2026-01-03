@@ -489,7 +489,7 @@ export function getGroupMetadata(sessionId: string, groupId: string) {
             isSuperAdmin?: boolean;
           }) => ({
             id: p.id,
-            phoneNumber: p.phoneNumber || p.id?.split("@")[0],
+            phoneNumber: p.phoneNumber,
             admin: p.admin,
             isAdmin:
               p.isAdmin || p.admin === "admin" || p.admin === "superadmin",
