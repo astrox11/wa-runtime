@@ -137,13 +137,13 @@ export interface SessionCreateRequest {
 }
 
 export interface ActivitySettingsData {
-  readmessages: boolean;
-  antidelete: boolean;
-  antispam: boolean;
-  typing: boolean;
-  recording: boolean;
-  anticall: boolean;
-  online: boolean;
+  auto_read_messages: boolean;
+  auto_recover_deleted_messages: boolean;
+  auto_antispam: boolean;
+  auto_typing: boolean;
+  auto_recording: boolean;
+  auto_reject_calls: boolean;
+  auto_always_online: boolean;
 }
 
 export interface UpdateActivitySettingsRequest {

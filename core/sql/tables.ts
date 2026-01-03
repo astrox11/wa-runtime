@@ -391,13 +391,13 @@ export function createUserActivitySettingsTable(phoneNumber: string): string {
       bunql.exec(`
         CREATE TABLE IF NOT EXISTS "${tableName}" (
           id INTEGER PRIMARY KEY CHECK (id = 1),
-          readmessages INTEGER NOT NULL DEFAULT 0,
-          antidelete INTEGER NOT NULL DEFAULT 0,
-          antispam INTEGER NOT NULL DEFAULT 0,
-          typing INTEGER NOT NULL DEFAULT 0,
-          recording INTEGER NOT NULL DEFAULT 0,
-          anticall INTEGER NOT NULL DEFAULT 0,
-          online INTEGER NOT NULL DEFAULT 0
+          auto_read_messages INTEGER NOT NULL DEFAULT 0,
+          auto_recover_deleted_messages INTEGER NOT NULL DEFAULT 0,
+          auto_antispam INTEGER NOT NULL DEFAULT 0,
+          auto_typing INTEGER NOT NULL DEFAULT 0,
+          auto_recording INTEGER NOT NULL DEFAULT 0,
+          auto_reject_calls INTEGER NOT NULL DEFAULT 0,
+          auto_always_online INTEGER NOT NULL DEFAULT 0
         )
       `);
       createdTables.add(tableName);

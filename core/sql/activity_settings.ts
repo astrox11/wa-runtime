@@ -15,23 +15,23 @@ function getActivitySettingsTable(sessionId: string) {
 }
 
 export interface ActivitySettings {
-  readmessages: boolean;
-  antidelete: boolean;
-  antispam: boolean;
-  typing: boolean;
-  recording: boolean;
-  anticall: boolean;
-  online: boolean;
+  auto_read_messages: boolean;
+  auto_recover_deleted_messages: boolean;
+  auto_antispam: boolean;
+  auto_typing: boolean;
+  auto_recording: boolean;
+  auto_reject_calls: boolean;
+  auto_always_online: boolean;
 }
 
 const DEFAULT_SETTINGS: ActivitySettings = {
-  readmessages: false,
-  antidelete: false,
-  antispam: false,
-  typing: false,
-  recording: false,
-  anticall: false,
-  online: false,
+  auto_read_messages: false,
+  auto_recover_deleted_messages: false,
+  auto_antispam: false,
+  auto_typing: false,
+  auto_recording: false,
+  auto_reject_calls: false,
+  auto_always_online: false,
 };
 
 /**
@@ -40,13 +40,13 @@ const DEFAULT_SETTINGS: ActivitySettings = {
 export const getActivitySettings = (sessionId: string): ActivitySettings => {
   const tableName = getActivitySettingsTable(sessionId);
   const rows = bunql.query<{
-    readmessages: number;
-    antidelete: number;
-    antispam: number;
-    typing: number;
-    recording: number;
-    anticall: number;
-    online: number;
+    auto_read_messages: number;
+    auto_recover_deleted_messages: number;
+    auto_antispam: number;
+    auto_typing: number;
+    auto_recording: number;
+    auto_reject_calls: number;
+    auto_always_online: number;
   }>(`SELECT * FROM "${tableName}" WHERE id = 1`);
 
   const row = rows[0];
@@ -55,13 +55,13 @@ export const getActivitySettings = (sessionId: string): ActivitySettings => {
   }
 
   return {
-    readmessages: row.readmessages === 1,
-    antidelete: row.antidelete === 1,
-    antispam: row.antispam === 1,
-    typing: row.typing === 1,
-    recording: row.recording === 1,
-    anticall: row.anticall === 1,
-    online: row.online === 1,
+    auto_read_messages: row.auto_read_messages === 1,
+    auto_recover_deleted_messages: row.auto_recover_deleted_messages === 1,
+    auto_antispam: row.auto_antispam === 1,
+    auto_typing: row.auto_typing === 1,
+    auto_recording: row.auto_recording === 1,
+    auto_reject_calls: row.auto_reject_calls === 1,
+    auto_always_online: row.auto_always_online === 1,
   };
 };
 
@@ -87,35 +87,35 @@ export const setActivitySettings = (
   if (rows.length > 0) {
     execWithParams(
       `UPDATE "${tableName}" SET 
-        readmessages = ?,
-        antidelete = ?,
-        antispam = ?,
-        typing = ?,
-        recording = ?,
-        anticall = ?,
-        online = ?
+        auto_read_messages = ?,
+        auto_recover_deleted_messages = ?,
+        auto_antispam = ?,
+        auto_typing = ?,
+        auto_recording = ?,
+        auto_reject_calls = ?,
+        auto_always_online = ?
        WHERE id = 1`,
       [
-        updated.readmessages ? 1 : 0,
-        updated.antidelete ? 1 : 0,
-        updated.antispam ? 1 : 0,
-        updated.typing ? 1 : 0,
-        updated.recording ? 1 : 0,
-        updated.anticall ? 1 : 0,
-        updated.online ? 1 : 0,
+        updated.auto_read_messages ? 1 : 0,
+        updated.auto_recover_deleted_messages ? 1 : 0,
+        updated.auto_antispam ? 1 : 0,
+        updated.auto_typing ? 1 : 0,
+        updated.auto_recording ? 1 : 0,
+        updated.auto_reject_calls ? 1 : 0,
+        updated.auto_always_online ? 1 : 0,
       ],
     );
   } else {
     execWithParams(
-      `INSERT INTO "${tableName}" (id, readmessages, antidelete, antispam, typing, recording, anticall, online) VALUES (1, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO "${tableName}" (id, auto_read_messages, auto_recover_deleted_messages, auto_antispam, auto_typing, auto_recording, auto_reject_calls, auto_always_online) VALUES (1, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        updated.readmessages ? 1 : 0,
-        updated.antidelete ? 1 : 0,
-        updated.antispam ? 1 : 0,
-        updated.typing ? 1 : 0,
-        updated.recording ? 1 : 0,
-        updated.anticall ? 1 : 0,
-        updated.online ? 1 : 0,
+        updated.auto_read_messages ? 1 : 0,
+        updated.auto_recover_deleted_messages ? 1 : 0,
+        updated.auto_antispam ? 1 : 0,
+        updated.auto_typing ? 1 : 0,
+        updated.auto_recording ? 1 : 0,
+        updated.auto_reject_calls ? 1 : 0,
+        updated.auto_always_online ? 1 : 0,
       ],
     );
   }

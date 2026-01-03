@@ -409,11 +409,11 @@ import Layout from "../layouts/Layout.astro";
               >
             </div>
             <button
-              id="toggle-online"
+              id="toggle-auto_always_online"
               class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gh-accent focus:ring-offset-2 bg-gh-bg-tertiary"
               role="switch"
               aria-checked="false"
-              data-setting="online"
+              data-setting="auto_always_online"
             >
               <span
                 class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0"
@@ -440,11 +440,11 @@ import Layout from "../layouts/Layout.astro";
               >
             </div>
             <button
-              id="toggle-typing"
+              id="toggle-auto_typing"
               class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gh-accent focus:ring-offset-2 bg-gh-bg-tertiary"
               role="switch"
               aria-checked="false"
-              data-setting="typing"
+              data-setting="auto_typing"
             >
               <span
                 class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0"
@@ -471,11 +471,11 @@ import Layout from "../layouts/Layout.astro";
               >
             </div>
             <button
-              id="toggle-recording"
+              id="toggle-auto_recording"
               class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gh-accent focus:ring-offset-2 bg-gh-bg-tertiary"
               role="switch"
               aria-checked="false"
-              data-setting="recording"
+              data-setting="auto_recording"
             >
               <span
                 class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0"
@@ -502,11 +502,11 @@ import Layout from "../layouts/Layout.astro";
               >
             </div>
             <button
-              id="toggle-readmessages"
+              id="toggle-auto_read_messages"
               class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gh-accent focus:ring-offset-2 bg-gh-bg-tertiary"
               role="switch"
               aria-checked="false"
-              data-setting="readmessages"
+              data-setting="auto_read_messages"
             >
               <span
                 class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0"
@@ -536,11 +536,11 @@ import Layout from "../layouts/Layout.astro";
               >
             </div>
             <button
-              id="toggle-anticall"
+              id="toggle-auto_reject_calls"
               class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gh-accent focus:ring-offset-2 bg-gh-bg-tertiary"
               role="switch"
               aria-checked="false"
-              data-setting="anticall"
+              data-setting="auto_reject_calls"
             >
               <span
                 class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0"
@@ -570,11 +570,11 @@ import Layout from "../layouts/Layout.astro";
               >
             </div>
             <button
-              id="toggle-antidelete"
+              id="toggle-auto_recover_deleted_messages"
               class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gh-accent focus:ring-offset-2 bg-gh-bg-tertiary"
               role="switch"
               aria-checked="false"
-              data-setting="antidelete"
+              data-setting="auto_recover_deleted_messages"
             >
               <span
                 class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0"
@@ -601,11 +601,11 @@ import Layout from "../layouts/Layout.astro";
               >
             </div>
             <button
-              id="toggle-antispam"
+              id="toggle-auto_antispam"
               class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gh-accent focus:ring-offset-2 bg-gh-bg-tertiary"
               role="switch"
               aria-checked="false"
-              data-setting="antispam"
+              data-setting="auto_antispam"
             >
               <span
                 class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0"
@@ -1908,13 +1908,13 @@ import Layout from "../layouts/Layout.astro";
   const settingsNoSessions = document.getElementById("settings-no-sessions");
 
   interface ActivitySettings {
-    readmessages: boolean;
-    antidelete: boolean;
-    antispam: boolean;
-    typing: boolean;
-    recording: boolean;
-    anticall: boolean;
-    online: boolean;
+    auto_read_messages: boolean;
+    auto_recover_deleted_messages: boolean;
+    auto_antispam: boolean;
+    auto_typing: boolean;
+    auto_recording: boolean;
+    auto_reject_calls: boolean;
+    auto_always_online: boolean;
   }
 
   let currentSettings: ActivitySettings | null = null;
@@ -1983,13 +1983,13 @@ import Layout from "../layouts/Layout.astro";
 
   function updateSettingsUI(settings: ActivitySettings) {
     const settingKeys: (keyof ActivitySettings)[] = [
-      "online",
-      "typing",
-      "recording",
-      "readmessages",
-      "anticall",
-      "antidelete",
-      "antispam",
+      "auto_always_online",
+      "auto_typing",
+      "auto_recording",
+      "auto_read_messages",
+      "auto_reject_calls",
+      "auto_recover_deleted_messages",
+      "auto_antispam",
     ];
 
     settingKeys.forEach((key) => {
