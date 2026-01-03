@@ -25,14 +25,11 @@ export class Plugins {
     let text = this.message.text.trim();
     const prefix = this.message.prefix;
 
-    // If prefix is set, check if message starts with a prefix symbol
     if (prefix && prefix.length > 0) {
       const firstChar = text.charAt(0);
       if (!prefix.includes(firstChar)) {
-        // Message doesn't start with a prefix symbol, ignore it
         return;
       }
-      // Strip all leading prefix symbols from the text
       let prefixCount = 0;
       while (
         prefixCount < text.length &&
@@ -45,7 +42,8 @@ export class Plugins {
 
     if (!text) return;
 
-    const firstWord = text.split(" ")[0].toLowerCase();
+    const firstWord = text.split(" ")[0]?.toLowerCase();
+    if (!firstWord) return;
     const cmd = this.find(firstWord);
 
     if (!cmd) return;

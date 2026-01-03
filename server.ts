@@ -28,7 +28,6 @@ const STATIC_DIR = join(import.meta.dir, "service", "dist", "client");
 const ASTRO_PORT = 4321;
 const ASTRO_SERVER_URL = `http://localhost:${ASTRO_PORT}`;
 
-// Start Astro SSR server as a child process (internal port only)
 let astroProcess: ReturnType<typeof spawn> | null = null;
 
 function startAstroServer(): void {
@@ -45,7 +44,7 @@ function startAstroServer(): void {
     env: {
       ...process.env,
       PORT: String(ASTRO_PORT),
-      HOST: "127.0.0.1", // Only listen on localhost (internal)
+      HOST: "127.0.0.1",
     },
     stdio: "pipe",
   });
@@ -53,7 +52,6 @@ function startAstroServer(): void {
   astroProcess.stdout?.on("data", (data) => {
     const msg = data.toString().trim();
     log.debug("[Astro]", msg);
-    // Log when Astro is ready
     if (msg.includes("Server listening")) {
       log.info(`Astro SSR server ready`);
       log.info(`Visit http://192.168.0.187:8000`);
@@ -78,7 +76,6 @@ function startAstroServer(): void {
   log.info(`Starting Astro SSR server on internal port ${ASTRO_PORT}...`);
 }
 
-// Cleanup handler for graceful shutdown
 function cleanup(): void {
   if (astroProcess) {
     astroProcess.kill();
@@ -86,7 +83,6 @@ function cleanup(): void {
   }
 }
 
-// Register cleanup handlers once
 process.on("exit", cleanup);
 process.on("SIGINT", () => {
   cleanup();
@@ -97,7 +93,6 @@ process.on("SIGTERM", () => {
   process.exit(0);
 });
 
-// Start Astro server on startup
 startAstroServer();
 
 const MIME_TYPES: Record<string, string> = {
@@ -216,7 +211,6 @@ const server = Bun.serve({
     }
 
     if (path.startsWith("/api/")) {
-      // Handle CORS preflight requests
       if (req.method === "OPTIONS") {
         return new Response(null, {
           status: 204,

@@ -11,7 +11,14 @@ export default [
         return await msg.reply("```reply view_once```");
       }
 
-      msg.quoted.message[msg.quoted.type].viewOnce = false;
+      const quotedMessage = msg.quoted.message;
+      const quotedType = msg.quoted.type;
+      if (quotedMessage && quotedType) {
+        const content = (quotedMessage as Record<string, unknown>)[quotedType];
+        if (content && typeof content === "object") {
+          (content as { viewOnce?: boolean }).viewOnce = false;
+        }
+      }
       await msg.forward(msg.chat, msg.quoted);
     },
   },

@@ -6,6 +6,7 @@ export default {
   pattern: "alive",
   category: "util",
   async exec(msg, sock, args) {
+    if (!sock) return;
     if (args) {
       setAliveMessage(msg.sessionId, args);
       return await msg.reply("```Alive message updated```");
@@ -17,7 +18,7 @@ export default {
       const processedMessage = await replacePlaceholders(
         message,
         msg.sender,
-        sock.user.id,
+        sock.user?.id ?? "",
         config.BOT_NAME,
       );
 

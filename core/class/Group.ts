@@ -3,7 +3,7 @@ import { GetGroupMeta, isAdmin, isParticipant } from "../sql";
 
 export class Group {
   client: WASocket;
-  metadata: GroupMetadata;
+  metadata: GroupMetadata | undefined;
   sessionId: string;
 
   constructor(sessionId: string, id: string, client: WASocket) {
@@ -13,7 +13,7 @@ export class Group {
   }
 
   async Promote(participant: string) {
-    if (isParticipant(this.sessionId, this.metadata.id, participant)) {
+    if (this.metadata && isParticipant(this.sessionId, this.metadata.id, participant)) {
       if (isAdmin(this.sessionId, this.metadata.id, participant)) return null;
       await this.client.groupParticipantsUpdate(
         this.metadata.id,
@@ -26,7 +26,7 @@ export class Group {
   }
 
   async Demote(participant: string) {
-    if (isParticipant(this.sessionId, this.metadata.id, participant)) {
+    if (this.metadata && isParticipant(this.sessionId, this.metadata.id, participant)) {
       if (!isAdmin(this.sessionId, this.metadata.id, participant)) return null;
       await this.client.groupParticipantsUpdate(
         this.metadata.id,
@@ -39,7 +39,7 @@ export class Group {
   }
 
   async Remove(participant: string) {
-    if (isParticipant(this.sessionId, this.metadata.id, participant)) {
+    if (this.metadata && isParticipant(this.sessionId, this.metadata.id, participant)) {
       await this.client.groupParticipantsUpdate(
         this.metadata.id,
         [participant],
@@ -51,6 +51,7 @@ export class Group {
   }
 
   async Add(participant: string) {
+    if (!this.metadata) return null;
     return await this.client.groupParticipantsUpdate(
       this.metadata.id,
       [participant],
@@ -59,14 +60,17 @@ export class Group {
   }
 
   async Leave() {
+    if (!this.metadata) return null;
     return await this.client.groupLeave(this.metadata.id);
   }
 
   async Name(name: string) {
+    if (!this.metadata) return null;
     return await this.client.groupUpdateSubject(this.metadata.id, name);
   }
 
   async Description(description: string) {
+    if (!this.metadata) return null;
     return await this.client.groupUpdateDescription(
       this.metadata.id,
       description,
@@ -74,6 +78,7 @@ export class Group {
   }
 
   async MemberJoinMode(mode: "admin_add" | "all_member_add") {
+    if (!this.metadata) return null;
     if (mode === "admin_add" && !this.metadata.memberAddMode) return null;
     if (mode === "all_member_add" && this.metadata.memberAddMode) return null;
     await this.client.groupMemberAddMode(this.metadata.id, mode);
@@ -81,18 +86,20 @@ export class Group {
   }
 
   async EphermalSetting(duration: number) {
+    if (!this.metadata) return null;
     if (this.metadata.ephemeralDuration === duration) return null;
     await this.client.groupToggleEphemeral(this.metadata.id, duration);
     return true;
   }
 
   async KickAll() {
+    if (!this.metadata) return null;
     const participants = this.metadata.participants
       .filter(
         (p) =>
           p.admin == null &&
           p.id !== jidNormalizedUser(this.client.user?.id) &&
-          p.id !== this.metadata.owner,
+          p.id !== this.metadata?.owner,
       )
       .map((p) => p.id);
 
@@ -104,16 +111,19 @@ export class Group {
   }
 
   async InviteCode() {
+    if (!this.metadata) return null;
     const invite = await this.client.groupInviteCode(this.metadata.id);
     return `https://chat.whatsapp.com/${invite}`;
   }
 
   async RevokeInvite() {
+    if (!this.metadata) return null;
     const invite = await this.client.groupRevokeInvite(this.metadata.id);
     return `https://chat.whatsapp.com/${invite}`;
   }
 
   async GroupJoinMode(mode: "on" | "off") {
+    if (!this.metadata) return null;
     if (mode === "on" && this.metadata.joinApprovalMode) return null;
     if (mode === "off" && !this.metadata.joinApprovalMode) return null;
     await this.client.groupJoinApprovalMode(this.metadata.id, mode);
@@ -121,6 +131,7 @@ export class Group {
   }
 
   async SetAnnouncementMode(mode: "announcement" | "not_announcement") {
+    if (!this.metadata) return null;
     if (mode === "announcement" && this.metadata.announce) return null;
     if (mode === "not_announcement" && !this.metadata.announce) return null;
     await this.client.groupSettingUpdate(this.metadata.id, mode);
@@ -128,6 +139,7 @@ export class Group {
   }
 
   async SetRestrictedMode(mode: "locked" | "unlocked") {
+    if (!this.metadata) return null;
     if (mode === "locked" && this.metadata.restrict) return null;
     if (mode === "unlocked" && !this.metadata.restrict) return null;
     await this.client.groupSettingUpdate(this.metadata.id, mode);

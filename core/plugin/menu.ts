@@ -15,6 +15,7 @@ export default [
     pattern: "menu",
     dontAddToCommandList: true,
     async exec(msg, sock) {
+      if (!sock) return;
       const p = new Plugins(msg, sock);
       const commands = p.findAll();
 
@@ -27,15 +28,17 @@ export default [
         if (cmd.dontAddToCommandList === true) continue;
         if (cmd.pattern === "help") continue;
         const cat = cmd.category;
-        if (!categories[cat]) categories[cat] = new Set();
-        categories[cat].add(cmd.pattern);
+        if (cat && cmd.pattern) {
+          if (!categories[cat]) categories[cat] = new Set();
+          categories[cat].add(cmd.pattern);
+        }
       }
 
       if (Object.keys(categories).length === 0)
         return await msg.reply("```No commands available```");
 
       let reply = `\`\`\`┃╭──────────────
-┃│ Owner : ${sock.user.name}
+┃│ Owner : ${sock.user?.name ?? "Unknown"}
 ┃│ User : ${msg.pushName}
 ┃│ Plugins : ${commands.length}
 ┃│ Runtime : ${formatRuntime(process.uptime())}
@@ -48,11 +51,13 @@ export default [
 \`\`\``;
 
       for (const category in categories) {
+        const categoryPlugins = categories[category];
+        if (!categoryPlugins) continue;
         reply += `╭─────────────\n`;
         reply += `│ 「 *${toSmallCaps(category)}* 」 \n`;
         reply += `╰┬────────────\n┌┤\n`;
 
-        for (const plugin of categories[category]) {
+        for (const plugin of categoryPlugins) {
           reply += `││◦ ${toSmallCaps(plugin)}\n`;
         }
 
@@ -84,7 +89,9 @@ export default [
         },
       });
 
-      Reply.set(msg.chat, m.key.id);
+      if (m.key.id) {
+        Reply.set(msg.chat, m.key.id);
+      }
     },
   },
   {
@@ -92,6 +99,7 @@ export default [
     category: "util",
     dontAddToCommandList: true,
     async exec(msg, sock) {
+      if (!sock) return;
       const p = new Plugins(msg, sock);
       const commands = p.findAll();
 
@@ -126,8 +134,9 @@ export default [
       if (msg?.type === "buttonsResponseMessage" && msg?.quoted) {
         if (msg.quoted.key.id && Reply.has(msg.chat)) {
           const m = msg?.quoted?.message;
+          const buttons = m?.buttonsMessage?.buttons;
 
-          if (m?.buttonsMessage?.buttons[0]?.buttonId === "0") {
+          if (buttons && buttons[0]?.buttonId === "0") {
             await msg.reply("```Contact: astrodevwork@gmail.com```");
             Reply.clear();
           }

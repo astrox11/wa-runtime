@@ -19,9 +19,12 @@ export default [
     isSudo: true,
     category: "settings",
     async exec(msg, sock, args) {
+      if (!sock) return;
       args = msg?.quoted?.sender || args?.replace(/[^a-zA-Z0-9]/g, "");
       if (!msg.isGroup && !args) args = msg.chat;
-      const user = parseId(msg.sessionId, msg?.quoted?.sender ?? args);
+      const userArg = msg?.quoted?.sender ?? args;
+      if (!userArg) return await msg.reply("```Please provide or quote a user.```");
+      const user = parseId(msg.sessionId, userArg);
       if (!user)
         return await msg.reply("```Please provide or quote a user.```");
 
@@ -45,9 +48,12 @@ export default [
     isSudo: true,
     category: "settings",
     async exec(msg, sock, args) {
+      if (!sock) return;
       args = msg?.quoted?.sender || args?.replace(/[^a-zA-Z0-9]/g, "");
       if (!msg.isGroup && !args) args = msg.chat;
-      const user = parseId(msg.sessionId, msg?.quoted?.sender ?? args);
+      const userArg = msg?.quoted?.sender ?? args;
+      if (!userArg) return await msg.reply("```Please provide or quote a user.```");
+      const user = parseId(msg.sessionId, userArg);
       if (!user)
         return await msg.reply("```Please provide or quote a user.```");
 
@@ -71,13 +77,14 @@ export default [
     isSudo: true,
     category: "settings",
     async exec(msg, sock) {
+      if (!sock) return;
       const sudos = getSudos(msg.sessionId);
       if (!sudos.length) return await msg.reply("```No sudo users found.```");
 
       let text = "*Sudo Users List*\n\n";
       const mentions: string[] = [];
 
-      sudos.forEach((sudo: any, index: any) => {
+      sudos.forEach((sudo: { pn: string; lid: string }, index: number) => {
         text += `${index + 1}. @${sudo.pn.split("@")[0]}\n`;
         mentions.push(sudo.pn, sudo.lid);
       });
@@ -143,7 +150,6 @@ export default [
         return await msg.reply("```Prefix has been disabled.```");
       }
 
-      // Reject letters, numbers, and whitespace - only allow symbols
       if (/[a-zA-Z0-9\s]/.test(prefix)) {
         return await msg.reply(
           "```Only symbols are allowed as prefix characters. Letters, numbers, and whitespace are not allowed.```",

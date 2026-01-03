@@ -12,6 +12,7 @@ export default [
     pattern: "mp3",
     category: "media",
     async exec(msg, sock) {
+      if (!sock) return;
       if (!msg?.quoted?.video) {
         return await msg.reply("```Reply a video```");
       }
@@ -30,6 +31,7 @@ export default [
     pattern: "mp4",
     category: "media",
     async exec(msg, sock) {
+      if (!sock) return;
       if (!msg?.quoted?.video) {
         return await msg.reply("```Reply a video```");
       }
@@ -48,11 +50,20 @@ export default [
     pattern: "trim",
     category: "media",
     async exec(msg, sock, args) {
+      if (!sock) return;
       if (!msg?.quoted?.video) {
         return await msg.reply("```Reply a video```");
       }
 
-      const [start, end] = args;
+      if (!args) {
+        return await msg.reply(
+          "```Usage: trim <start> <end>\n\nExamples:\ntrim 10 30\ntrim 00:01:00 00:02:00```",
+        );
+      }
+
+      const parts = args.split(" ");
+      const start = parts[0];
+      const end = parts[1];
 
       if (!start || !end) {
         return await msg.reply(
@@ -75,6 +86,7 @@ export default [
     alias: ["opus"],
     category: "media",
     async exec(msg, sock) {
+      if (!sock) return;
       if (!msg?.quoted?.video && !msg?.quoted?.audio) {
         return await msg.reply("```Reply to a video or audio```");
       }

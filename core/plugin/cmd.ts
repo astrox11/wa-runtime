@@ -12,6 +12,7 @@ export default [
     pattern: "setcmd",
     category: "util",
     async exec(msg, sock, args) {
+      if (!sock) return;
       if (!msg?.quoted?.sticker) {
         return await msg.reply("```Reply to a sticker```");
       }
@@ -32,7 +33,6 @@ export default [
       }
 
       try {
-        // Get the sticker's sha256 from the quoted message
         const stickerMessage = msg.quoted.message?.stickerMessage;
         const sha256 = stickerMessage?.fileSha256;
 
@@ -40,12 +40,10 @@ export default [
           return await msg.reply("```Could not get sticker data```");
         }
 
-        // Convert Buffer to hex string if needed
         const sha256Hex = Buffer.isBuffer(sha256)
           ? sha256.toString("hex")
           : sha256.toString();
 
-        // Save the sticker with the command name
         saveSticker(msg.sessionId, commandName, sha256Hex);
 
         await msg.reply(
@@ -68,7 +66,6 @@ export default [
       const commandName = args.trim().toLowerCase();
 
       try {
-        // Check if the sticker exists
         const sticker = getStickerByName(msg.sessionId, commandName);
 
         if (!sticker) {
@@ -77,7 +74,6 @@ export default [
           );
         }
 
-        // Delete the sticker
         deleteSticker(msg.sessionId, commandName);
 
         await msg.reply(
@@ -94,7 +90,6 @@ export default [
     category: "util",
     async exec(msg, _, args) {
       if (!args) {
-        // List all saved sticker commands
         try {
           const stickers = getAllStickers(msg.sessionId);
 
@@ -114,7 +109,6 @@ export default [
           await msg.reply(`\`\`\`Error: ${e}\n\`\`\``);
         }
       } else {
-        // Get specific sticker command
         const commandName = args.trim().toLowerCase();
 
         try {

@@ -27,12 +27,14 @@ export default [
     category: "util",
     isSudo: true,
     async exec(msg, sock, args) {
+      if (!sock) return;
       args = msg?.quoted?.text || args;
       if (!args) return await msg.reply("Provide a group link!");
       const linkRegex = /https?:\/\/chat\.whatsapp\.com\/([0-9A-Za-z]{20,24})/i;
       const match = args.match(linkRegex);
       if (!match) return await msg.reply("Invalid group link!");
       const inviteCode = match[1];
+      if (!inviteCode) return await msg.reply("Invalid group link!");
       const status = await sock.groupAcceptInvite(inviteCode);
       if (status) return await msg.reply("ᴅᴏɴᴇ");
       if (!status)
@@ -47,6 +49,7 @@ export default [
     isSudo: true,
     category: "util",
     async exec(msg, sock, args) {
+      if (!sock) return;
       args = msg?.quoted?.text || args;
       if (!args) {
         return await msg.reply("Provide a WhatsApp group link!");
@@ -61,21 +64,25 @@ export default [
       }
 
       const inviteCode = match[1];
+      if (!inviteCode) {
+        return await msg.reply("Invalid WhatsApp group link");
+      }
 
       try {
         const info = await sock.groupGetInviteInfo(inviteCode);
+        const ownerDisplay = info.owner?.split("@")[0] ?? "Unknown";
 
         return await sock.sendMessage(msg.chat, {
           text:
             "```" +
             [
               `Name: ${info.subject}`,
-              `Owner: @${info.owner.split("@")[0] ?? "Unknown"}`,
+              `Owner: @${ownerDisplay}`,
               `Members: ${info.size}`,
               `Description: ${info.desc ?? "None"}`,
             ].join("\n") +
             "```",
-          mentions: [info.owner],
+          mentions: info.owner ? [info.owner] : [],
         });
       } catch {
         return await msg.reply(
@@ -123,6 +130,7 @@ export default [
     isSudo: true,
     isGroup: true,
     async exec(msg, sock, args) {
+      if (!sock) return;
       if (!args)
         return await msg.reply("```type something to send in the status```");
       await sock.relayMessage(

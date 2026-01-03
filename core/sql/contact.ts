@@ -24,8 +24,8 @@ function escapeLikePattern(value: string): string {
 
 export const addContact = (sessionId: string, pn: string, lid: string) => {
   if (pn && lid) {
-    pn = pn?.split("@")[0];
-    lid = lid?.split("@")[0];
+    pn = pn.split("@")[0] ?? pn;
+    lid = lid.split("@")[0] ?? lid;
     const tableName = getContactsTable(sessionId);
 
     const existing = bunql.query<{ pn: string }>(
@@ -75,7 +75,8 @@ export const getPnByLid = (sessionId: string, lid: string) => {
 };
 
 export const getBothId = (sessionId: string, id: string) => {
-  const cleanId = (id.includes(":") ? id.split(":")[1] : id).split("@")[0];
+  const rawId = id.includes(":") ? id.split(":")[1] : id;
+  const cleanId = (rawId ?? id).split("@")[0] ?? id;
   const tableName = getContactsTable(sessionId);
 
   const rows = bunql.query<{ pn: string; lid: string }>(
@@ -93,7 +94,7 @@ export const getBothId = (sessionId: string, id: string) => {
 };
 
 export const getAlternateId = (sessionId: string, id: string) => {
-  id = id?.split("@")?.[0];
+  id = id?.split("@")?.[0] ?? id;
   const tableName = getContactsTable(sessionId);
 
   const rows = bunql.query<{ pn: string; lid: string }>(
@@ -118,11 +119,13 @@ export const removeContact = (sessionId: string, id: string) => {
 
 export const syncGroupParticipantsToContactList = (
   sessionId: string,
-  participants: GroupParticipant[],
+  participants: GroupParticipant[] | undefined,
 ) => {
   if (!participants) return;
   for (const participant of participants) {
-    addContact(sessionId, participant.phoneNumber, participant.id);
+    if (participant.phoneNumber && participant.id) {
+      addContact(sessionId, participant.phoneNumber, participant.id);
+    }
   }
 };
 
@@ -140,9 +143,9 @@ export function parseId(
 
   if (!input) return null;
 
-  const clean = input.includes(":") ? input.split(":")[1] : input;
+  const clean = input.includes(":") ? input.split(":")[1] ?? input : input;
   const [rawBase, suffix] = clean.split("@");
-  const base = rawBase.replace(/^@+/, "");
+  const base = (rawBase ?? clean).replace(/^@+/, "");
 
   if (suffix === "s.whatsapp.net") return `${base}@s.whatsapp.net`;
   if (suffix === "lid") return `${base}@lid`;

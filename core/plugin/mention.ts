@@ -23,7 +23,7 @@ export default [
       }
 
       if (msg.quoted) {
-        const type = msg.quoted.type;
+        const type = msg.quoted.type ?? "unknown";
         setMentionMessage(msg.sessionId, msg.chat, {
           type: type,
           data: msg.quoted,
@@ -60,11 +60,12 @@ export default [
   {
     event: true,
     async exec(msg, sock) {
+      if (!sock) return;
       if (
         !msg.isGroup ||
         !(
-          msg.mentions?.includes(jidNormalizedUser(sock.user.id)) ||
-          msg.mentions?.includes(jidNormalizedUser(sock.user.lid))
+          (sock.user?.id && msg.mentions?.includes(jidNormalizedUser(sock.user.id))) ||
+          (sock.user?.lid && msg.mentions?.includes(jidNormalizedUser(sock.user.lid)))
         )
       )
         return;
@@ -72,18 +73,18 @@ export default [
       const data = getMentionData(msg.sessionId, msg.chat);
       if (!data) return;
 
-      if (data.type === "text") {
+      if (data.type === "text" && data.message) {
         const processed = await replacePlaceholders(
           data.message,
           msg.sender,
-          sock.user.id,
+          sock.user?.id ?? "",
           config.BOT_NAME,
         );
         await sock.sendMessage(
           msg.chat,
           {
             text: processed,
-            mentions: [msg.sender, sock.user.id],
+            mentions: [msg.sender, sock.user?.id].filter((m): m is string => typeof m === "string"),
           },
           { quoted: msg },
         );

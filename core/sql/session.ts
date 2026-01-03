@@ -23,7 +23,7 @@ export const createSession = (id: string, phoneNumber: string): Session => {
     id: record.id,
     phone_number: record.phone_number,
     status: record.status,
-    user_info: typeof record.user_info === "string" ? record.user_info : null,
+    user_info: typeof record.user_info === "string" ? record.user_info : undefined,
     created_at: record.created_at,
   });
   return record;

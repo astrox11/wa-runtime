@@ -31,7 +31,7 @@ export class Message {
   sessionId: string;
   chat: string;
   key: WAMessageKey;
-  message: WAMessageContent;
+  message: WAMessageContent | undefined;
   isGroup: boolean;
   sender: string;
   pushName: string;
@@ -46,7 +46,7 @@ export class Message {
   quoted: Quoted | undefined;
   text: string | undefined;
   type: string | undefined;
-  sender_alt: string | undefined;
+  sender_alt: string | undefined | null;
   mentions: string[];
   contextInfo: proto.IContextInfo | undefined;
 
@@ -57,37 +57,37 @@ export class Message {
   ) {
     this.client = client;
     this.sessionId = sessionId;
-    this.chat = message.key.remoteJid!;
+    this.chat = message.key.remoteJid ?? "";
     this.key = message.key;
-    this.message = normalizeMessageContent(message.message!);
-    this.isGroup = isJidGroup(message.key.remoteJid!);
-    this.sender = !this.isGroup
+    this.message = normalizeMessageContent(message.message ?? undefined);
+    const remoteJid = message.key.remoteJid ?? "";
+    this.isGroup = isJidGroup(remoteJid) ?? false;
+    const senderFromRemote = !this.isGroup
       ? !this.key.fromMe
         ? this.key.remoteJid
-        : jidNormalizedUser(this.client.user.id)
+        : jidNormalizedUser(this.client.user?.id)
       : this.key.participant;
-    this.sender_alt = getAlternateId(this.sessionId, this.sender);
+    this.sender = senderFromRemote ?? "";
+    this.sender_alt = this.sender ? getAlternateId(this.sessionId, this.sender) : undefined;
     this.type = getContentType(this.message);
     this.image = this.type === "imageMessage";
     this.video = this.type === "videoMessage";
     this.audio = this.type === "audioMessage";
     this.sticker =
       this.type === "stickerMessage" || this.type === "lottieStickerMessage";
-    this.device = getDevice(this.key.id);
+    this.device = getDevice(this.key.id ?? "");
     this.mode = getMode(this.sessionId);
     this.sudo = isSudo(this.sessionId, this.sender);
-    this.pushName = message.pushName;
-    this.prefix = get_prefix(sessionId);
+    this.pushName = message.pushName ?? "";
+    this.prefix = get_prefix(sessionId) ?? null;
 
-    const content = this.message?.[this.type!];
+    const content = this.message && this.type ? (this.message as Record<string, unknown>)[this.type] : undefined;
     this.contextInfo =
       typeof content === "object" && content !== null
-        ? (content as any).contextInfo
+        ? (content as { contextInfo?: proto.IContextInfo }).contextInfo
         : undefined;
 
-    this.mentions = this?.contextInfo?.mentionedJid
-      ? this.contextInfo.mentionedJid
-      : [];
+    this.mentions = this?.contextInfo?.mentionedJid ?? [];
 
     this.quoted =
       this.contextInfo?.stanzaId && this.contextInfo?.quotedMessage
@@ -119,7 +119,7 @@ export class Message {
         documentWithCaptionMessage: { message: { ...message } },
       },
       {
-        messageId: generateMessageIDV2(this.client.user.id),
+        messageId: generateMessageIDV2(this.client.user?.id),
         additionalNodes,
       },
     );
@@ -135,7 +135,7 @@ export class Message {
         },
       },
       {
-        messageId: generateMessageIDV2(this.client.user.id),
+        messageId: generateMessageIDV2(this.client.user?.id),
         additionalNodes,
       },
     );

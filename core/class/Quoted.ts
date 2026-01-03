@@ -10,8 +10,8 @@ import { getAlternateId, isSudo, ExtractTextFromMessage } from "..";
 export class Quoted {
   key: WAMessageKey;
   sender: string;
-  sender_alt: string;
-  message: WAMessageContent;
+  sender_alt: string | null | undefined;
+  message: WAMessageContent | undefined;
   type: string | undefined;
   image: boolean;
   video: boolean;
@@ -35,11 +35,11 @@ export class Quoted {
       remoteJid: quoted.remoteJid,
       id: quoted.stanzaId,
       participant: quoted.participant,
-      participantAlt: getAlternateId(this.sessionId, quoted.participant),
+      participantAlt: quoted.participant ? getAlternateId(this.sessionId, quoted.participant) ?? undefined : undefined,
     };
-    this.sender = quoted.participant!;
+    this.sender = quoted.participant ?? "";
     this.sender_alt = this.key.participantAlt;
-    this.message = normalizeMessageContent(quoted.quotedMessage!);
+    this.message = normalizeMessageContent(quoted.quotedMessage ?? undefined);
     this.type = getContentType(this.message);
     this.image = this.type === "imageMessage";
     this.video = this.type === "videoMessage";
@@ -48,13 +48,14 @@ export class Quoted {
       this.type === "stickerMessage" || this.type === "lottieStickerMessage";
     this.sudo = isSudo(this.sessionId, this.sender);
 
-    this.text = ExtractTextFromMessage(this.message);
+    this.text = this.message ? ExtractTextFromMessage(this.message) : undefined;
     this.client = client;
     this.media = [this.image, this.video, this.audio, this.sticker].includes(
       true,
     );
-    this.viewonce = this.media && this.message?.[this.type!]?.viewOnce === true;
-    this.device = getDevice(this.key.id);
+    const messageContent = this.message && this.type ? (this.message as Record<string, unknown>)[this.type] : undefined;
+    this.viewonce = this.media && typeof messageContent === "object" && messageContent !== null && (messageContent as { viewOnce?: boolean }).viewOnce === true;
+    this.device = getDevice(this.key.id ?? "");
 
     Object.defineProperty(this, "client", { value: client, enumerable: false });
   }

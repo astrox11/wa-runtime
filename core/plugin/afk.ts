@@ -65,11 +65,12 @@ export default [
     event: true,
     dontAddToCommandList: true,
     async exec(msg, sock) {
+      if (!sock) return;
       const afkStatus = getAfk(msg.sessionId);
 
       if (afkStatus && afkStatus.status === 1) {
-        const pn = jidNormalizedUser(sock.user.id);
-        const lid = jidNormalizedUser(sock.user.lid);
+        const pn = jidNormalizedUser(sock.user?.id);
+        const lid = jidNormalizedUser(sock.user?.lid);
         const afkMessage =
           afkStatus.message ||
           "I'm currently AFK\n\n> This is an automated message, no need to reply again.";
@@ -79,13 +80,14 @@ export default [
         const finalMessage = `\`\`\`${afkMessage}\n\nAway for: ${timeAway}\`\`\``;
 
         if (msg.isGroup) {
+          const quotedSender = msg?.quoted?.sender;
           if (
-            msg.mentions.includes(pn) ||
-            msg.mentions.includes(lid) ||
-            [
-              jidNormalizedUser(sock.user.id),
-              jidNormalizedUser(sock.user.lid),
-            ].includes(msg?.quoted?.sender)
+            (pn && msg.mentions.includes(pn)) ||
+            (lid && msg.mentions.includes(lid)) ||
+            (quotedSender && [
+              jidNormalizedUser(sock.user?.id),
+              jidNormalizedUser(sock.user?.lid),
+            ].filter((x): x is string => typeof x === "string").includes(quotedSender))
           ) {
             await msg.reply(finalMessage);
           }

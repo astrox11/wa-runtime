@@ -56,14 +56,14 @@ class Client {
   }
 
   async create(id: string) {
-    id = sanitizePhoneNumber(id);
+    const sanitizedId = sanitizePhoneNumber(id);
 
-    if (!id) {
+    if (!sanitizedId) {
       log.debug("Invalid phone number format:", id);
       return { success: false, error: "Invalid phone number format" };
     }
 
-    const sessionId = generateSessionId(id);
+    const sessionId = generateSessionId(sanitizedId);
 
     log.debug("Creating new session:", sessionId);
 
@@ -75,8 +75,8 @@ class Client {
       };
     }
 
-    initializeSql(id);
-    log.debug("Initialized user tables for:", id);
+    initializeSql(sanitizedId);
+    log.debug("Initialized user tables for:", sanitizedId);
 
     const runtime: RuntimeSession = {
       client: null,
@@ -85,13 +85,13 @@ class Client {
     this.runtimeData.set(sessionId, runtime);
 
     try {
-      const code = await this.init(sessionId, id, runtime, true);
-      createSession(sessionId, id);
+      const code = await this.init(sessionId, sanitizedId, runtime, true);
+      createSession(sessionId, sanitizedId);
       log.debug("Session created:", sessionId);
       return { success: true, code, id: sessionId };
     } catch (error) {
       this.runtimeData.delete(sessionId);
-      deleteUserTables(id);
+      deleteUserTables(sanitizedId);
 
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
@@ -219,10 +219,12 @@ class Client {
           updateSessionStatus(sessionId, StatusType.Active);
           log.info(`Session ${sessionId} connected to WhatsApp`);
 
-          if (!hasSynced) {
+          if (!hasSynced && sock.user) {
             hasSynced = true;
             log.debug(`Syncing groups for session ${sessionId}`);
-            addSudo(sessionId, sock.user.id, sock.user.lid);
+            if (sock.user.id && sock.user.lid) {
+              addSudo(sessionId, sock.user.id, sock.user.lid);
+            }
             await delay(15000);
             await syncGroupMetadata(sessionId, sock);
             updateSessionUserInfo(sessionId, sock.user);
@@ -267,9 +269,12 @@ class Client {
       if (events["group-participants.update"]) {
         const { id, participants, action } =
           events["group-participants.update"];
+        const firstParticipant = participants[0];
         if (
           action === "remove" &&
-          participants[0].id === jidNormalizedUser(sock.user.lid)
+          firstParticipant &&
+          sock.user?.lid &&
+          firstParticipant.id === jidNormalizedUser(sock.user.lid)
         ) {
           return;
         }
@@ -281,8 +286,10 @@ class Client {
         const updates = events["groups.update"];
         for (const update of updates) {
           try {
-            const metadata = await sock.groupMetadata(update.id);
-            cacheGroupMetadata(sessionId, metadata);
+            if (update.id) {
+              const metadata = await sock.groupMetadata(update.id);
+              cacheGroupMetadata(sessionId, metadata);
+            }
           } catch (e) {
             log.error("Group fetch failed:", e);
           }
@@ -313,7 +320,7 @@ class Client {
 
               const message = await getMessageRaw(sessionId, key);
 
-              if (message) {
+              if (message && sock.user?.id) {
                 await sock.sendMessage(sock.user.id, {
                   forward: message,
                   contextInfo: { forwardingScore: 0, isForwarded: false },

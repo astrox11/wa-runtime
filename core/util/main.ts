@@ -153,7 +153,10 @@ export function sanitizePhoneNumber(pn: string): string | null {
 
   if (!isValidPhoneNumber(i)) return null;
 
-  return parsePhoneNumberFromString(i).number.replace("+", "");
+  const parsed = parsePhoneNumberFromString(i);
+  if (!parsed?.number) return null;
+
+  return parsed.number.replace("+", "");
 }
 
 export function handleLidMapping(
@@ -167,12 +170,17 @@ export function handleLidMapping(
     const pnKey = key.split("-")[2];
     const cleanedValue = value.replace(/^"|"$/g, "");
 
-    addContact(sessionId, pnKey, cleanedValue);
+    if (pnKey) {
+      addContact(sessionId, pnKey, cleanedValue);
+    }
   } else {
-    const lidKey = key.split("-")[2].split("_")[0];
+    const keyPart = key.split("-")[2];
+    const lidKey = keyPart?.split("_")[0];
     const cleanedValue = value.replace(/^"|"$/g, "");
 
-    addContact(sessionId, cleanedValue, lidKey);
+    if (lidKey) {
+      addContact(sessionId, cleanedValue, lidKey);
+    }
   }
 }
 
@@ -313,7 +321,10 @@ async function fetchFact(): Promise<string> {
 async function fetchQuote(): Promise<string> {
   return fetch("https://zenquotes.io/api/random")
     .then((res) => res.json())
-    .then((data: { q: string; a: string }[]) => `${data[0].q} - ${data[0].a}`)
+    .then((data: { q: string; a: string }[]) => {
+      const quote = data[0];
+      return quote ? `${quote.q} - ${quote.a}` : "Stay positive!";
+    })
     .catch(() => "Stay positive!");
 }
 
@@ -335,8 +346,8 @@ export async function replacePlaceholders(
   botName: string,
 ): Promise<string> {
   let result = message
-    .replace(/@user/g, sender.split("@")[0])
-    .replace(/@owner/g, ownerId.split("@")[0])
+    .replace(/@user/g, sender.split("@")[0] ?? sender)
+    .replace(/@owner/g, ownerId.split("@")[0] ?? ownerId)
     .replace(/@botname/g, botName);
 
   if (result.includes("@facts"))

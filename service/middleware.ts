@@ -39,41 +39,35 @@ class RuntimeStats {
     const now = Date.now();
     const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000;
 
-    // Initialize array with 24 zeros (one for each hour)
     const hourlyData: number[] = new Array(24).fill(0);
 
     for (const { message } of messages) {
-      // messageTimestamp can be a number (seconds) or Long object
       let timestamp: number;
       const ts = message.messageTimestamp;
       if (typeof ts === "number") {
-        timestamp = ts * 1000; // Convert seconds to milliseconds
+        timestamp = ts * 1000;
       } else if (ts && typeof ts === "object" && "low" in ts) {
-        // Handle Long object from protobuf
         timestamp = (ts as { low: number }).low * 1000;
       } else {
         continue;
       }
 
-      // Only include messages from the last 24 hours
       if (timestamp >= twentyFourHoursAgo && timestamp <= now) {
-        // Calculate which hour bucket this message belongs to (0 = current hour, 23 = 23 hours ago)
         const hoursAgo = Math.floor((now - timestamp) / (60 * 60 * 1000));
         if (hoursAgo >= 0 && hoursAgo < 24) {
-          // Index 0 is the oldest hour (23 hours ago), index 23 is the current hour
           const index = 23 - hoursAgo;
-          hourlyData[index]++;
+          if (hourlyData[index] !== undefined) {
+            hourlyData[index]++;
+          }
         }
       }
     }
 
-    // Calculate peak and average
     const maxCount = Math.max(...hourlyData);
     const peakHourIndex = hourlyData.indexOf(maxCount);
     const total = hourlyData.reduce((sum, count) => sum + count, 0);
     const average = total / 24;
 
-    // Format peak hour as time string (e.g., "2pm", "10am")
     const currentHour = new Date().getHours();
     const peakHour = (currentHour - (23 - peakHourIndex) + 24) % 24;
     const peakHourFormatted = formatHour(peakHour);
@@ -428,7 +422,6 @@ export function getGroupMetadata(sessionId: string, groupId: string) {
     return { success: false, error: "Session not found" };
   }
 
-  // Ensure groupId has proper format with @g.us suffix
   const normalizedGroupId = groupId.includes("@g.us")
     ? groupId
     : `${groupId}@g.us`;
@@ -440,13 +433,11 @@ export function getGroupMetadata(sessionId: string, groupId: string) {
       return { success: false, error: "Group not found" };
     }
 
-    // Get the client to check if bot is admin
     const client = sessionManager.getClient(sessionId);
     const botJid = client?.user?.id
       ? client.user.id.split(":")[0] + "@s.whatsapp.net"
       : null;
 
-    // Check if bot is an admin in the group
     let isBotAdmin = false;
     if (botJid && metadata.participants) {
       const botParticipant = metadata.participants.find(
@@ -533,7 +524,6 @@ export async function executeGroupAction(
     return { success: false, error: "Session not connected" };
   }
 
-  // Ensure groupId has proper format with @g.us suffix
   const normalizedGroupId = groupId.includes("@g.us")
     ? groupId
     : `${groupId}@g.us`;
@@ -543,7 +533,6 @@ export async function executeGroupAction(
     const metadata = GetGroupMeta(sessionId, normalizedGroupId);
     const isCommunity = metadata?.isCommunity || false;
 
-    // Check if bot is admin before admin-only actions
     const adminOnlyActions = [
       "kickAll",
       "mute",
@@ -599,7 +588,6 @@ export async function executeGroupAction(
       }
     }
 
-    // For community-specific actions, use the Community class
     const community = isCommunity
       ? new Community(sessionId, normalizedGroupId, client)
       : null;

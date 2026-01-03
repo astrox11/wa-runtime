@@ -8,6 +8,7 @@ export default [
     isGroup: true,
     isAdmin: true,
     async exec(msg, sock, args) {
+      if (!sock) return;
       if (!args) return await msg.reply("ᴘʀᴏᴠɪᴅᴇ ɴᴜᴍʙᴇʀ");
       const number = args.includes("@s.whatsapp.net")
         ? args
@@ -23,6 +24,7 @@ export default [
     isGroup: true,
     isAdmin: true,
     async exec(msg, sock, args) {
+      if (!sock) return;
       args = msg?.quoted ? msg.quoted.sender : args;
       if (!args) return await msg.reply("ᴘʀᴏᴠɪᴅᴇ ɴᴜᴍʙᴇʀ");
       const number = args.includes("@s.whatsapp.net")
@@ -41,6 +43,7 @@ export default [
     isGroup: true,
     isAdmin: true,
     async exec(msg, sock) {
+      if (!sock) return;
       await new Group(msg.sessionId, msg.chat, sock).KickAll();
       await msg.reply("ᴅᴏɴᴇ");
     },
@@ -51,6 +54,7 @@ export default [
     isGroup: true,
     isAdmin: true,
     async exec(msg, sock, args) {
+      if (!sock) return;
       args = msg?.quoted
         ? msg.quoted.sender
         : args?.replace(/[^a-zA-Z0-9]/g, "");
@@ -72,6 +76,7 @@ export default [
     isGroup: true,
     isAdmin: true,
     async exec(msg, sock, args) {
+      if (!sock) return;
       args = msg?.quoted
         ? msg.quoted.sender
         : args?.replace(/[^a-zA-Z0-9]/g, "");
@@ -93,6 +98,7 @@ export default [
     isGroup: true,
     isAdmin: true,
     async exec(msg, sock, args) {
+      if (!sock) return;
       if (!args) return await msg.reply("ᴘʀᴏᴠɪᴅᴇ ɴᴇᴡ ɴᴀᴍᴇ");
       await new Group(msg.sessionId, msg.chat, sock).Name(args);
       await msg.reply("ᴅᴏɴᴇ");
@@ -105,6 +111,7 @@ export default [
     isGroup: true,
     isAdmin: true,
     async exec(msg, sock, args) {
+      if (!sock) return;
       if (!args) return await msg.reply("ᴘʀᴏᴠɪᴅᴇ ɴᴇᴡ ᴅᴇsᴄʀɪᴘᴛɪᴏɴ");
       await new Group(msg.sessionId, msg.chat, sock).Description(args);
       await msg.reply("ᴅᴏɴᴇ");
@@ -117,6 +124,7 @@ export default [
     isGroup: true,
     isAdmin: true,
     async exec(msg, sock) {
+      if (!sock) return;
       const link = await new Group(msg.sessionId, msg.chat, sock).InviteCode();
       await msg.reply(`ɢʀᴏᴜᴘ ʟɪɴᴋ: ${link}`);
     },
@@ -128,6 +136,7 @@ export default [
     isGroup: true,
     isAdmin: true,
     async exec(msg, sock) {
+      if (!sock) return;
       const link = await new Group(
         msg.sessionId,
         msg.chat,
@@ -141,6 +150,7 @@ export default [
     category: "groups",
     isGroup: true,
     async exec(msg, sock) {
+      if (!sock) return;
       await new Group(msg.sessionId, msg.chat, sock).Leave();
     },
   },
@@ -151,6 +161,7 @@ export default [
     isGroup: true,
     isAdmin: true,
     async exec(msg, sock, args) {
+      if (!sock || !args) return;
       const duration = parseInt(args);
       const acceptedDurations = [0, 86400, 604800, 7776000];
       if (!acceptedDurations.includes(duration))
@@ -178,6 +189,7 @@ export default [
     isGroup: true,
     isAdmin: true,
     async exec(msg, sock, args) {
+      if (!sock || !args) return;
       const mode = args.toLowerCase().trim();
       if (mode !== "admin" && mode !== "member")
         return await msg.reply(
@@ -200,6 +212,7 @@ export default [
     isGroup: true,
     isAdmin: true,
     async exec(msg, sock, args) {
+      if (!sock || !args) return;
       const mode = args.toLowerCase().trim();
       if (mode !== "approval" && mode !== "open")
         return await msg.reply(
@@ -222,6 +235,7 @@ export default [
     isGroup: true,
     isAdmin: true,
     async exec(msg, sock) {
+      if (!sock) return;
       const result = await new Group(
         msg.sessionId,
         msg.chat,
@@ -239,6 +253,7 @@ export default [
     isGroup: true,
     isAdmin: true,
     async exec(msg, sock) {
+      if (!sock) return;
       const result = await new Group(
         msg.sessionId,
         msg.chat,
@@ -256,6 +271,7 @@ export default [
     isGroup: true,
     isAdmin: true,
     async exec(msg, sock) {
+      if (!sock) return;
       const result = await new Group(
         msg.sessionId,
         msg.chat,
@@ -273,6 +289,7 @@ export default [
     isGroup: true,
     isAdmin: true,
     async exec(msg, sock) {
+      if (!sock) return;
       const result = await new Group(
         msg.sessionId,
         msg.chat,
@@ -289,6 +306,7 @@ export default [
     category: "groups",
     isGroup: true,
     async exec(msg, sock, args) {
+      if (!sock) return;
       return await sock.relayMessage(
         msg.chat,
         {

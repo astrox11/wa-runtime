@@ -45,8 +45,8 @@ export default [
         return await msg.reply("```Usage: setfilter <trigger> | <reply>```");
       }
 
-      const trigger = parts[0].trim();
-      const reply = parts[1].trim();
+      const trigger = parts[0]?.trim();
+      const reply = parts[1]?.trim();
 
       if (!trigger || !reply) {
         return await msg.reply("```Usage: setfilter <trigger> | <reply>```");
@@ -96,7 +96,7 @@ export default [
     event: true,
     dontAddToCommandList: true,
     async exec(msg, sock) {
-      if (!msg.text) return;
+      if (!msg.text || !sock) return;
 
       const statusFilter = getFilterByTrigger(msg.sessionId, STATUS_FILTER);
       if (!statusFilter || statusFilter.status === 0) return;
@@ -107,7 +107,7 @@ export default [
       const processedMessage = await replacePlaceholders(
         filter.reply,
         msg.sender,
-        sock.user.id,
+        sock.user?.id ?? "",
         config.BOT_NAME,
       );
 

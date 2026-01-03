@@ -224,10 +224,8 @@ class WsApiClient {
     if (this.isPollingActive) return;
     this.isPollingActive = true;
 
-    // Fetch immediately on start
     this.fetchFullStats();
 
-    // Then poll every 1 second
     this.statsPollingInterval = setInterval(() => {
       this.fetchFullStats();
     }, 1000);

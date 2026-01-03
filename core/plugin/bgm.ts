@@ -77,8 +77,9 @@ export default [
 
       try {
         const bgms = getAllBgms(msg.sessionId);
+        const msgText = msg.text;
         const match = bgms.find(
-          (b) => b.trigger.toLowerCase() === msg.text.toLowerCase().trim(),
+          (b) => b.trigger.toLowerCase() === msgText.toLowerCase().trim(),
         );
         if (match) {
           const audioMsg = JSON.parse(match.audioData) as WAMessage;

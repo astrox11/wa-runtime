@@ -24,7 +24,7 @@ export default [
       if (activeGames.has(msg.chat))
         return await msg.reply("```A game is already running in this chat.```");
 
-      const player = [msg.sender, msg.sender_alt];
+      const player = [msg.sender, msg.sender_alt].filter((p): p is string => typeof p === "string");
       const result = rollDice();
 
       activeGames.set(msg.chat, {
@@ -45,14 +45,14 @@ export default [
     category: "games",
     dontAddToCommandList: true,
     async exec(msg) {
+      const game = activeGames.get(msg.chat);
       if (
-        !activeGames.has(msg.chat) ||
-        !activeGames.get(msg.chat).player.includes(msg.sender) ||
+        !game ||
+        !game.player.includes(msg.sender) ||
         !msg.text
       )
         return;
 
-      const game = activeGames.get(msg.chat);
       const match = extractDiceNumber(msg.text);
       if (!match) return;
 
@@ -74,9 +74,10 @@ export default [
         const finalScore = game.score;
         activeGames.delete(msg.chat);
 
+        const diceEmoji = diceEmojis[finalDice] ?? "?";
         return await msg.reply(
           "```Game over\nThe rolled dice was " +
-            diceEmojis[finalDice] +
+            diceEmoji +
             " (" +
             finalDice +
             ").\nYou scored " +
@@ -92,7 +93,7 @@ function rollDice(exclude?: number) {
   const pool = [1, 2, 3, 4, 5, 6].filter((v) => v !== exclude);
   if (!pool.length) throw new Error("No valid dice values left");
 
-  const value = pool[(Math.random() * pool.length) | 0];
+  const value = pool[(Math.random() * pool.length) | 0] ?? 1;
   return { value, emoji: diceEmojis[value] };
 }
 

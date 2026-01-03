@@ -20,7 +20,7 @@ export default [
 
         let text = "*Sessions*\n\n";
         sessions.forEach((s, i) => {
-          const date = new Date(s.created_at).toLocaleString();
+          const date = new Date(s.created_at ?? Date.now()).toLocaleString();
           text += `${i + 1}. *ID:* ${s.id}\n   *Phone:* ${s.phone_number}\n   *Status:* ${s.status}\n   *Created:* ${date}\n\n`;
         });
         return await msg.reply(text.trim());
@@ -84,7 +84,7 @@ export default [
 
           let text = "*Sessions List*\n\n";
           sessions.forEach((s, i) => {
-            const date = new Date(s.created_at).toLocaleString();
+            const date = new Date(s.created_at ?? Date.now()).toLocaleString();
             text += `${i + 1}. *ID:* ${s.id}\n   *Phone:* ${s.phone_number}\n   *Status:* ${s.status}\n   *Created:* ${date}\n\n`;
           });
 
@@ -105,7 +105,7 @@ export default [
             return await msg.reply("```Session not found```");
           }
 
-          const date = new Date(session.created_at).toLocaleString();
+          const date = new Date(session.created_at ?? Date.now()).toLocaleString();
           return await msg.reply(
             `*Session Info*\n\n*ID:* ${session.id}\n*Phone:* ${session.phone_number}\n*Status:* ${session.status}\n*Created:* ${date}`,
           );
@@ -192,7 +192,7 @@ export default [
 
       let text = "*Sessions List*\n\n";
       sessions.forEach((s, i) => {
-        const date = new Date(s.created_at).toLocaleString();
+        const date = new Date(s.created_at ?? Date.now()).toLocaleString();
         text += `${i + 1}. *ID:* ${s.id}\n   *Phone:* ${s.phone_number}\n   *Status:* ${s.status}\n   *Created:* ${date}\n\n`;
       });
 

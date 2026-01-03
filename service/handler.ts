@@ -183,7 +183,7 @@ export function matchRoute(
 
   for (const [pattern, handler] of Object.entries(routes)) {
     const [routeMethod, routePath] = pattern.split(" ");
-    if (routeMethod !== method) continue;
+    if (routeMethod !== method || !routePath) continue;
 
     const routeParts = routePath.split("/");
     const pathParts = path.split("/");
@@ -194,9 +194,15 @@ export function matchRoute(
     let match = true;
 
     for (let i = 0; i < routeParts.length; i++) {
-      if (routeParts[i].startsWith(":")) {
-        params[routeParts[i].slice(1)] = pathParts[i];
-      } else if (routeParts[i] !== pathParts[i]) {
+      const routePart = routeParts[i];
+      const pathPart = pathParts[i];
+      if (!routePart || !pathPart) {
+        match = false;
+        break;
+      }
+      if (routePart.startsWith(":")) {
+        params[routePart.slice(1)] = pathPart;
+      } else if (routePart !== pathPart) {
         match = false;
         break;
       }

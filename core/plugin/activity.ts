@@ -8,19 +8,16 @@ import {
 } from "..";
 import { jidNormalizedUser } from "baileys";
 
-// Spam tracking: Map<sessionId, Map<sender, { timestamps: number[], warned: boolean, lastActivity: number }>>
 const spamTracker: Map<
   string,
   Map<string, { timestamps: number[]; warned: boolean; lastActivity: number }>
 > = new Map();
 
-// Spam detection settings
-const SPAM_WINDOW_MS = 3000; // 3 seconds
-const SPAM_MESSAGE_THRESHOLD = 2; // 2 or more messages per window triggers spam detection
-const CLEANUP_INTERVAL_MS = 60000; // Cleanup every 60 seconds
-const ENTRY_EXPIRY_MS = 300000; // Remove entries older than 5 minutes
+const SPAM_WINDOW_MS = 3000;
+const SPAM_MESSAGE_THRESHOLD = 2;
+const CLEANUP_INTERVAL_MS = 60000;
+const ENTRY_EXPIRY_MS = 300000;
 
-// Cleanup function to prevent memory leaks
 function cleanupSpamTracker(): void {
   const now = Date.now();
   for (const [sessionId, sessionMap] of spamTracker) {
@@ -29,14 +26,12 @@ function cleanupSpamTracker(): void {
         sessionMap.delete(sender);
       }
     }
-    // Remove empty session maps
     if (sessionMap.size === 0) {
       spamTracker.delete(sessionId);
     }
   }
 }
 
-// Run cleanup periodically
 setInterval(cleanupSpamTracker, CLEANUP_INTERVAL_MS);
 
 function getOrCreateSpamEntry(
@@ -76,7 +71,6 @@ function cleanupAndCheckSpam(entry: {
   lastActivity: number;
 }): boolean {
   const now = Date.now();
-  // Filter to only keep timestamps within the window and update the entry
   const recentTimestamps = entry.timestamps.filter(
     (t) => now - t < SPAM_WINDOW_MS,
   );
@@ -355,6 +349,7 @@ export default [
   {
     event: true,
     async exec(msg, sock) {
+      if (!sock) return;
       const activity = getActivitySettings(msg.sessionId);
       if (activity.auto_read_messages) {
         await sock.readMessages([msg.key]);
@@ -373,41 +368,33 @@ export default [
       }
 
       if (activity.auto_antispam) {
-        // Skip if message is from self
         if (msg.key.fromMe) return;
 
         const sender = msg.sender;
 
-        // Skip if sender is sudo
         if (msg.sudo) return;
 
-        // Get bot's JID
         const botId = jidNormalizedUser(sock.user?.id);
         const botLid = sock.user?.lid
           ? jidNormalizedUser(sock.user.lid)
           : undefined;
 
         if (msg.isGroup) {
-          // Check if bot is admin in the group
           const isBotAdmin =
-            isAdmin(msg.sessionId, msg.chat, botId) ||
+            (botId && isAdmin(msg.sessionId, msg.chat, botId)) ||
             (botLid && isAdmin(msg.sessionId, msg.chat, botLid));
 
-          if (!isBotAdmin) return; // Bot is not admin, skip
+          if (!isBotAdmin) return;
 
-          // Check if sender is admin
           const isSenderAdmin = isAdmin(msg.sessionId, msg.chat, sender);
-          if (isSenderAdmin) return; // Sender is admin, skip
+          if (isSenderAdmin) return;
         }
 
-        // Track message timestamp
         const spamEntry = getOrCreateSpamEntry(msg.sessionId, sender);
         spamEntry.timestamps.push(Date.now());
 
-        // Check if user is spamming
         if (cleanupAndCheckSpam(spamEntry)) {
           if (!spamEntry.warned) {
-            // First time warning
             spamEntry.warned = true;
 
             if (msg.isGroup) {
@@ -420,17 +407,17 @@ export default [
               );
             }
 
-            // Reset the timestamps after warning
             spamEntry.timestamps = [];
           } else {
-            // User was already warned, take action
             if (msg.isGroup) {
               await msg.reply(
                 "```🚫 You have been kicked from this group for spamming.```",
               );
               try {
-                const group = new Group(msg.sessionId, msg.chat, sock);
-                await group.Remove(sender);
+                if (sock) {
+                  const group = new Group(msg.sessionId, msg.chat, sock);
+                  await group.Remove(sender);
+                }
               } catch (error) {
                 log.error(
                   `[antispam] Failed to kick ${sender} from ${msg.chat}:`,
@@ -442,7 +429,6 @@ export default [
               await msg.block(sender);
             }
 
-            // Reset the spam entry after action
             resetSpamEntry(msg.sessionId, sender);
           }
         }

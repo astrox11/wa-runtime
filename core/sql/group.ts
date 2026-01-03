@@ -27,7 +27,7 @@ export const cachedGroupMetadata = async (sessionId: string, id: string) => {
   return row?.data ? JSON.parse(row.data) : undefined;
 };
 
-export const GetGroupMeta = (sessionId: string, id: string): GroupMetadata => {
+export const GetGroupMeta = (sessionId: string, id: string): GroupMetadata | undefined => {
   const tableName = getGroupsTable(sessionId);
   const rows = bunql.query<{ data: string }>(
     `SELECT data FROM "${tableName}" WHERE id = ?`,
@@ -84,13 +84,17 @@ export const cacheGroupMetadata = async (
           ? metadata.participants
           : existingData.participants,
     };
-    syncGroupParticipantsToContactList(sessionId, metadata.participants);
+    if (metadata.participants) {
+      syncGroupParticipantsToContactList(sessionId, metadata.participants);
+    }
     execWithParams(`UPDATE "${tableName}" SET data = ? WHERE id = ?`, [
       JSON.stringify(mergedData),
       metadata.id,
     ]);
   } else {
-    syncGroupParticipantsToContactList(sessionId, metadata.participants);
+    if (metadata.participants) {
+      syncGroupParticipantsToContactList(sessionId, metadata.participants);
+    }
     execWithParams(`INSERT INTO "${tableName}" (id, data) VALUES (?, ?)`, [
       metadata.id,
       JSON.stringify(metadata),
