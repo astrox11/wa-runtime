@@ -8,6 +8,8 @@ import {
   type CommandProperty,
   getMode,
   setMode,
+  set_prefix,
+  del_prefix,
 } from "..";
 
 export default [
@@ -114,6 +116,42 @@ export default [
       return await msg.reply(
         `\`\`\`Mode changed: ${currentMode} ➜ ${targetMode}\`\`\``,
       );
+    },
+  },
+  {
+    pattern: "setprefix",
+    alias: ["prefix"],
+    isSudo: true,
+    category: "settings",
+    async exec(msg, _, args) {
+      const prefix = args?.trim();
+
+      if (!prefix) {
+        const currentPrefix = msg.prefix;
+        if (!currentPrefix) {
+          return await msg.reply(
+            "```No prefix is currently set.\nUsage: setprefix <symbols>\nExample: setprefix !.```",
+          );
+        }
+        return await msg.reply(
+          `\`\`\`Current prefix: ${currentPrefix.join("")}\nUsage: setprefix <symbols> | setprefix off\`\`\``,
+        );
+      }
+
+      if (prefix.toLowerCase() === "off") {
+        del_prefix(msg.sessionId);
+        return await msg.reply("```Prefix has been disabled.```");
+      }
+
+      // Reject letters, numbers, and whitespace - only allow symbols
+      if (/[a-zA-Z0-9\s]/.test(prefix)) {
+        return await msg.reply(
+          "```Only symbols are allowed as prefix characters. Letters, numbers, and whitespace are not allowed.```",
+        );
+      }
+
+      set_prefix(msg.sessionId, prefix);
+      return await msg.reply(`\`\`\`Prefix set to: ${prefix}\`\`\``);
     },
   },
 ] satisfies CommandProperty[];
