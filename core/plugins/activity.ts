@@ -16,7 +16,7 @@ const spamTracker: Map<
 
 // Spam detection settings
 const SPAM_WINDOW_MS = 3000; // 3 seconds
-const SPAM_MESSAGE_THRESHOLD = 2; // More than 1 message per window (i.e., 2+)
+const SPAM_MESSAGE_THRESHOLD = 2; // 2 or more messages per window triggers spam detection
 const CLEANUP_INTERVAL_MS = 60000; // Cleanup every 60 seconds
 const ENTRY_EXPIRY_MS = 300000; // Remove entries older than 5 minutes
 
@@ -62,13 +62,12 @@ function resetSpamEntry(sessionId: string, sender: string): void {
   }
 }
 
-function isSpamming(entry: { timestamps: number[]; warned: boolean; lastActivity: number }): boolean {
+function cleanupAndCheckSpam(entry: { timestamps: number[]; warned: boolean; lastActivity: number }): boolean {
   const now = Date.now();
-  // Filter to only keep timestamps within the window
-  entry.timestamps = entry.timestamps.filter(
-    (t) => now - t < SPAM_WINDOW_MS,
-  );
-  return entry.timestamps.length >= SPAM_MESSAGE_THRESHOLD;
+  // Filter to only keep timestamps within the window and update the entry
+  const recentTimestamps = entry.timestamps.filter((t) => now - t < SPAM_WINDOW_MS);
+  entry.timestamps = recentTimestamps;
+  return recentTimestamps.length >= SPAM_MESSAGE_THRESHOLD;
 }
 
 export default [
@@ -392,7 +391,7 @@ export default [
         spamEntry.timestamps.push(Date.now());
 
         // Check if user is spamming
-        if (isSpamming(spamEntry)) {
+        if (cleanupAndCheckSpam(spamEntry)) {
           if (!spamEntry.warned) {
             // First time warning
             spamEntry.warned = true;
