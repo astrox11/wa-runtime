@@ -1,9 +1,12 @@
-import type { SessionStats } from "./src/lib/api";
-
 export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
+}
+
+export interface SessionStats {
+  messagesReceived: number;
+  messagesSent: number;
 }
 
 export interface SessionData {

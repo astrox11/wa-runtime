@@ -1,4 +1,3 @@
-// Re-export API functionality from the api module
 export {
   runtimeStats,
   getSessions,
@@ -18,7 +17,7 @@ export {
   updateActivitySettings,
   getGroupMetadata,
   executeGroupAction,
-} from "../api";
+} from "./middleware";
 
 export type {
   ApiResponse,
@@ -48,9 +47,9 @@ export type {
   GroupActionResult,
   UpdateActivitySettingsRequest,
   SessionStats,
-} from "../api";
+} from "./types";
 
-export { ApiResponseErrors, WsResponseErrors } from "../api";
+export { ApiResponseErrors, WsResponseErrors } from "./errors";
 
 export {
   validateSessionId,
@@ -63,7 +62,7 @@ export {
   requiresSessionId,
   requiresPhoneNumber,
   validateActionParams,
-} from "../api";
+} from "./predicates";
 
 export {
   parseBody,
@@ -74,6 +73,6 @@ export {
   matchRoute,
   createApiError,
   createApiSuccess,
-} from "../api";
+} from "./handler";
 
-export { handleApiRequest } from "../api";
+export { handleApiRequest } from "./routes";
