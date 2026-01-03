@@ -81,7 +81,7 @@ export default [
         // Mode 1: Delete only
         try {
           await msg.delete();
-          await msg.reply("```Link deleted```");
+          await msg.send("```Link deleted```");
         } catch {
           // Failed to delete (bot might not be admin)
         }
@@ -93,7 +93,7 @@ export default [
 
           // Kick user
           await new Group(msg.sessionId, msg.chat, sock).Remove(msg.sender);
-          await msg.reply("```Link deleted & User kicked```");
+          await msg.send("```Link deleted & User kicked```");
         } catch {
           // Failed to delete or kick
         }

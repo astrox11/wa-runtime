@@ -68,7 +68,9 @@ export class Message {
         : jidNormalizedUser(this.client.user?.id)
       : this.key.participant;
     this.sender = senderFromRemote ?? "";
-    this.sender_alt = this.sender ? getAlternateId(this.sessionId, this.sender) : undefined;
+    this.sender_alt = this.sender
+      ? getAlternateId(this.sessionId, this.sender)
+      : undefined;
     this.type = getContentType(this.message);
     this.image = this.type === "imageMessage";
     this.video = this.type === "videoMessage";
@@ -81,7 +83,10 @@ export class Message {
     this.pushName = message.pushName ?? "";
     this.prefix = get_prefix(sessionId) ?? null;
 
-    const content = this.message && this.type ? (this.message as Record<string, unknown>)[this.type] : undefined;
+    const content =
+      this.message && this.type
+        ? (this.message as Record<string, unknown>)[this.type]
+        : undefined;
     this.contextInfo =
       typeof content === "object" && content !== null
         ? (content as { contextInfo?: proto.IContextInfo }).contextInfo
@@ -148,6 +153,11 @@ export class Message {
       { text },
       { quoted: this },
     );
+    return new Message(this.client, msg!, this.sessionId);
+  }
+
+  async send(text: string) {
+    const msg = await this.client.sendMessage(this.chat, { text });
     return new Message(this.client, msg!, this.sessionId);
   }
 
