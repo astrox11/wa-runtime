@@ -90,13 +90,17 @@ export class Group {
     return true;
   }
 
-  async ephermal(duration: number) {
+  async ephemeral(duration: number) {
     if (!this.metadata) return false;
     if (this.metadata.ephemeralDuration === duration) return false;
     await this.client.groupToggleEphemeral(this.id!, duration);
     return true;
   }
 
+  // Backward-compatible alias with the previous misspelled name.
+  async ephermal(duration: number) {
+    return this.ephemeral(duration);
+  }
   async kickall() {
     if (!this.metadata) return false;
 
