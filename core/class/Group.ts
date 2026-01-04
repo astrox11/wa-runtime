@@ -97,6 +97,10 @@ export class Group {
     return true;
   }
 
+  // Backward-compatible alias with the previous misspelled name.
+  async ephermal(duration: number) {
+    return this.ephemeral(duration);
+  }
   async kickall() {
     if (!this.metadata) return false;
 
