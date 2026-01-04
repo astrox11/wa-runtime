@@ -741,7 +741,7 @@ export async function executeGroupAction(
         if (isCommunity && community) {
           result = await community.changeDisappearMsgTimer(duration);
         } else {
-          result = await group.ephermal(duration);
+          result = await group.ephemeral(duration);
         }
         if (result === null) {
           return { success: false, error: "Already set to this duration" };
