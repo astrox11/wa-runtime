@@ -10,7 +10,11 @@ export default {
 
     let url: string | null;
 
-    url = args!.match(/https?:\/\/(www\.)?tiktok\.com\/[^\s]+/i)![0];
+    const match = (args ?? "").match(/https?:\/\/(www\.)?tiktok\.com\/[^\s]+/i);
+    if (!match) {
+      return await msg.reply("Please provide a valid TikTok URL.");
+    }
+    url = match[0];
     const { tiktok } = await import("core/util/scrapers");
     url = await tiktok(url);
     if (url) {
