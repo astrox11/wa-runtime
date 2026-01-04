@@ -176,4 +176,5 @@ type CommandCategories =
   | "games"
   | "system"
   | "settings"
-  | "media";
+  | "media"
+  | "download";
