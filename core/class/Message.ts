@@ -159,7 +159,7 @@ export class Message {
     return new Message(this.client, msg!, this.sessionId);
   }
 
-  async send(text: string, content?: {mentions?: string[] }) {
+  async send(text: string, content?: { mentions?: string[] }) {
     const msg = await this.client.sendMessage(this.chat, { text, ...content });
     return new Message(this.client, msg!, this.sessionId);
   }

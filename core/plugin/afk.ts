@@ -84,10 +84,13 @@ export default [
           if (
             (pn && msg.mentions.includes(pn)) ||
             (lid && msg.mentions.includes(lid)) ||
-            (quotedSender && [
-              jidNormalizedUser(sock.user?.id),
-              jidNormalizedUser(sock.user?.lid),
-            ].filter((x): x is string => typeof x === "string").includes(quotedSender))
+            (quotedSender &&
+              [
+                jidNormalizedUser(sock.user?.id),
+                jidNormalizedUser(sock.user?.lid),
+              ]
+                .filter((x): x is string => typeof x === "string")
+                .includes(quotedSender))
           ) {
             await msg.reply(finalMessage);
           }

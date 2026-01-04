@@ -35,7 +35,9 @@ export class Quoted {
       remoteJid: quoted.remoteJid,
       id: quoted.stanzaId,
       participant: quoted.participant,
-      participantAlt: quoted.participant ? getAlternateId(this.sessionId, quoted.participant) ?? undefined : undefined,
+      participantAlt: quoted.participant
+        ? (getAlternateId(this.sessionId, quoted.participant) ?? undefined)
+        : undefined,
     };
     this.sender = quoted.participant ?? "";
     this.sender_alt = this.key.participantAlt;
@@ -53,8 +55,15 @@ export class Quoted {
     this.media = [this.image, this.video, this.audio, this.sticker].includes(
       true,
     );
-    const messageContent = this.message && this.type ? (this.message as Record<string, unknown>)[this.type] : undefined;
-    this.viewonce = this.media && typeof messageContent === "object" && messageContent !== null && (messageContent as { viewOnce?: boolean }).viewOnce === true;
+    const messageContent =
+      this.message && this.type
+        ? (this.message as Record<string, unknown>)[this.type]
+        : undefined;
+    this.viewonce =
+      this.media &&
+      typeof messageContent === "object" &&
+      messageContent !== null &&
+      (messageContent as { viewOnce?: boolean }).viewOnce === true;
     this.device = getDevice(this.key.id ?? "");
 
     Object.defineProperty(this, "client", { value: client, enumerable: false });

@@ -27,7 +27,10 @@ export const cachedGroupMetadata = async (sessionId: string, id: string) => {
   return row?.data ? JSON.parse(row.data) : undefined;
 };
 
-export const GetGroupMeta = (sessionId: string, id: string): GroupMetadata | undefined => {
+export const GetGroupMeta = (
+  sessionId: string,
+  id: string,
+): GroupMetadata | undefined => {
   const tableName = getGroupsTable(sessionId);
   const rows = bunql.query<{ data: string }>(
     `SELECT data FROM "${tableName}" WHERE id = ?`,

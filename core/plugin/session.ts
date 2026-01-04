@@ -105,7 +105,9 @@ export default [
             return await msg.reply("```Session not found```");
           }
 
-          const date = new Date(session.created_at ?? Date.now()).toLocaleString();
+          const date = new Date(
+            session.created_at ?? Date.now(),
+          ).toLocaleString();
           return await msg.reply(
             `*Session Info*\n\n*ID:* ${session.id}\n*Phone:* ${session.phone_number}\n*Status:* ${session.status}\n*Created:* ${date}`,
           );

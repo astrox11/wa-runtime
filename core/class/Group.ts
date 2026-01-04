@@ -123,7 +123,14 @@ export class Group {
   }
 
   async revoke() {
-    if (!isAdmin(this.sessionId, this.id!, this.client.user?.id!)) return false;
+    if (
+      !isAdmin(
+        this.sessionId,
+        this.id!,
+        jidNormalizedUser(this.client.user?.id),
+      )
+    )
+      return false;
 
     const code = await this.client.groupRevokeInvite(this.id!);
     if (!code) return false;

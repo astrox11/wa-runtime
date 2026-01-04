@@ -64,8 +64,10 @@ export default [
       if (
         !msg.isGroup ||
         !(
-          (sock.user?.id && msg.mentions?.includes(jidNormalizedUser(sock.user.id))) ||
-          (sock.user?.lid && msg.mentions?.includes(jidNormalizedUser(sock.user.lid)))
+          (sock.user?.id &&
+            msg.mentions?.includes(jidNormalizedUser(sock.user.id))) ||
+          (sock.user?.lid &&
+            msg.mentions?.includes(jidNormalizedUser(sock.user.lid)))
         )
       )
         return;
@@ -84,7 +86,9 @@ export default [
           msg.chat,
           {
             text: processed,
-            mentions: [msg.sender, sock.user?.id].filter((m): m is string => typeof m === "string"),
+            mentions: [msg.sender, sock.user?.id].filter(
+              (m): m is string => typeof m === "string",
+            ),
           },
           { quoted: msg },
         );

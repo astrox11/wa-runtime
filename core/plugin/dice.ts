@@ -24,7 +24,9 @@ export default [
       if (activeGames.has(msg.chat))
         return await msg.reply("```A game is already running in this chat.```");
 
-      const player = [msg.sender, msg.sender_alt].filter((p): p is string => typeof p === "string");
+      const player = [msg.sender, msg.sender_alt].filter(
+        (p): p is string => typeof p === "string",
+      );
       const result = rollDice();
 
       activeGames.set(msg.chat, {
@@ -46,12 +48,7 @@ export default [
     dontAddToCommandList: true,
     async exec(msg) {
       const game = activeGames.get(msg.chat);
-      if (
-        !game ||
-        !game.player.includes(msg.sender) ||
-        !msg.text
-      )
-        return;
+      if (!game || !game.player.includes(msg.sender) || !msg.text) return;
 
       const match = extractDiceNumber(msg.text);
       if (!match) return;

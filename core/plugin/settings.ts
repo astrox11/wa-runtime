@@ -23,7 +23,8 @@ export default [
       args = msg?.quoted?.sender || args?.replace(/[^a-zA-Z0-9]/g, "");
       if (!msg.isGroup && !args) args = msg.chat;
       const userArg = msg?.quoted?.sender ?? args;
-      if (!userArg) return await msg.reply("```Please provide or quote a user.```");
+      if (!userArg)
+        return await msg.reply("```Please provide or quote a user.```");
       const user = parseId(msg.sessionId, userArg);
       if (!user)
         return await msg.reply("```Please provide or quote a user.```");
@@ -52,7 +53,8 @@ export default [
       args = msg?.quoted?.sender || args?.replace(/[^a-zA-Z0-9]/g, "");
       if (!msg.isGroup && !args) args = msg.chat;
       const userArg = msg?.quoted?.sender ?? args;
-      if (!userArg) return await msg.reply("```Please provide or quote a user.```");
+      if (!userArg)
+        return await msg.reply("```Please provide or quote a user.```");
       const user = parseId(msg.sessionId, userArg);
       if (!user)
         return await msg.reply("```Please provide or quote a user.```");

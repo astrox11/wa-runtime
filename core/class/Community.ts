@@ -15,7 +15,11 @@ export class Community {
 
   async changeDisappearMsgTimer(ephemeralExpiration: number) {
     const participant = jidNormalizedUser(this.client.user?.id);
-    if (this.metadata && participant && isParticipant(this.sessionId, this.metadata.id, participant)) {
+    if (
+      this.metadata &&
+      participant &&
+      isParticipant(this.sessionId, this.metadata.id, participant)
+    ) {
       if (isAdmin(this.sessionId, this.metadata.id, participant)) return null;
       await this.client.communityToggleEphemeral(this.id, ephemeralExpiration);
 
@@ -30,7 +34,11 @@ export class Community {
 
   async LinkGroup(groupId: string) {
     const participant = jidNormalizedUser(this.client.user?.id);
-    if (this.metadata && participant && isParticipant(this.sessionId, this.metadata.id, participant)) {
+    if (
+      this.metadata &&
+      participant &&
+      isParticipant(this.sessionId, this.metadata.id, participant)
+    ) {
       if (isAdmin(this.sessionId, this.metadata.id, participant)) return null;
       if (GetGroupMeta(this.sessionId, groupId)?.linkedParent === this.id)
         return null;
@@ -42,7 +50,11 @@ export class Community {
 
   async UnlinkGroup(groupId: string) {
     const participant = jidNormalizedUser(this.client.user?.id);
-    if (this.metadata && participant && isParticipant(this.sessionId, this.metadata.id, participant)) {
+    if (
+      this.metadata &&
+      participant &&
+      isParticipant(this.sessionId, this.metadata.id, participant)
+    ) {
       if (isAdmin(this.sessionId, this.metadata.id, participant)) return null;
       if (GetGroupMeta(this.sessionId, groupId)?.linkedParent !== this.id)
         return null;

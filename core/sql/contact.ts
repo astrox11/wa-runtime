@@ -143,8 +143,8 @@ export function parseId(
 
   if (!input) return null;
 
-  let clean = input.includes(":") ? input.split(":")[1] ?? input : input;
-  if(clean?.startsWith("@")) clean = clean.replace(/^@+/, "");
+  let clean = input.includes(":") ? (input.split(":")[1] ?? input) : input;
+  if (clean?.startsWith("@")) clean = clean.replace(/^@+/, "");
   const [rawBase, suffix] = clean.split("@");
   const base = (rawBase ?? clean).replace(/^@+/, "");
 
