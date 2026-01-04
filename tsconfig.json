@@ -24,6 +24,8 @@
     "paths": {
       "baileys": ["node_modules/baileys/lib"],
       "baileys/*": ["node_modules/baileys/lib/*"]
-    }
+    },
+
+    "rootDirs": ["core"]
   }
 }
