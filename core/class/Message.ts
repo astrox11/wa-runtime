@@ -12,6 +12,7 @@ import type {
   WAMessage,
   WAMessageKey,
   WAMessageContent,
+  AnyMessageContent,
 } from "baileys";
 import { Quoted } from "./Quoted";
 import {
@@ -20,11 +21,9 @@ import {
   getAlternateId,
   additionalNodes,
   ExtractTextFromMessage,
-  isUrl,
-  isPath,
   get_prefix,
+  isAdmin,
 } from "..";
-import { readFile } from "fs/promises";
 
 export class Message {
   client: WASocket;
@@ -33,6 +32,7 @@ export class Message {
   key: WAMessageKey;
   message: WAMessageContent | undefined;
   isGroup: boolean;
+  isAdmin: boolean;
   sender: string;
   pushName: string;
   image: boolean;
@@ -82,6 +82,9 @@ export class Message {
     this.sudo = isSudo(this.sessionId, this.sender);
     this.pushName = message.pushName ?? "";
     this.prefix = get_prefix(sessionId) ?? null;
+    this.isAdmin = this.isGroup
+      ? isAdmin(sessionId, this.chat, this.sender)
+      : false;
 
     const content =
       this.message && this.type
@@ -156,8 +159,8 @@ export class Message {
     return new Message(this.client, msg!, this.sessionId);
   }
 
-  async send(text: string) {
-    const msg = await this.client.sendMessage(this.chat, { text });
+  async send(text: string, content?: {mentions?: string[] }) {
+    const msg = await this.client.sendMessage(this.chat, { text, ...content });
     return new Message(this.client, msg!, this.sessionId);
   }
 

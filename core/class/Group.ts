@@ -38,7 +38,7 @@ export class Group {
     return null;
   }
 
-  async Remove(participant: string) {
+  async remove(participant: string) {
     if (this.metadata && isParticipant(this.sessionId, this.metadata.id, participant)) {
       await this.client.groupParticipantsUpdate(
         this.metadata.id,
@@ -50,7 +50,7 @@ export class Group {
     return null;
   }
 
-  async Add(participant: string) {
+  async add(participant: string) {
     if (!this.metadata) return null;
     return await this.client.groupParticipantsUpdate(
       this.metadata.id,
@@ -59,12 +59,12 @@ export class Group {
     );
   }
 
-  async Leave() {
+  async leave() {
     if (!this.metadata) return null;
     return await this.client.groupLeave(this.metadata.id);
   }
 
-  async Name(name: string) {
+  async name(name: string) {
     if (!this.metadata) return null;
     return await this.client.groupUpdateSubject(this.metadata.id, name);
   }

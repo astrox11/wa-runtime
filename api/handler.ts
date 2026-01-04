@@ -8,11 +8,7 @@ import type {
   GroupActionType,
 } from "./types";
 import { WsResponseErrors } from "./errors";
-import {
-  validateWsRequest,
-  validateActionParams,
-  parseWsRequest,
-} from "./predicates";
+import { validateActionParams, parseWsRequest } from "./predicates";
 import {
   getSessions,
   getSession,

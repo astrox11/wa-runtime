@@ -599,7 +599,7 @@ export async function executeGroupAction(
           result = await community.leave();
           message = "Left the community";
         } else {
-          result = await group.Leave();
+          result = await group.leave();
           message = "Left the group";
         }
         break;
@@ -655,7 +655,7 @@ export async function executeGroupAction(
         if (!params?.name || typeof params.name !== "string") {
           return { success: false, error: "Name parameter is required" };
         }
-        result = await group.Name(params.name);
+        result = await group.name(params.name);
         message = "Group name updated";
         break;
 
@@ -674,7 +674,7 @@ export async function executeGroupAction(
         const addParticipant = params.participant.includes("@s.whatsapp.net")
           ? params.participant
           : params.participant + "@s.whatsapp.net";
-        result = await group.Add(addParticipant);
+        result = await group.add(addParticipant);
         message = "Participant added";
         break;
 
@@ -685,7 +685,7 @@ export async function executeGroupAction(
         const removeParticipant = params.participant.includes("@s.whatsapp.net")
           ? params.participant
           : params.participant + "@s.whatsapp.net";
-        result = await group.Remove(removeParticipant);
+        result = await group.remove(removeParticipant);
         if (result === null) {
           return { success: false, error: "User not in group" };
         }

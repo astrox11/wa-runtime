@@ -416,7 +416,7 @@ export default [
               try {
                 if (sock) {
                   const group = new Group(msg.sessionId, msg.chat, sock);
-                  await group.Remove(sender);
+                  await group.remove(sender);
                 }
               } catch (error) {
                 log.error(

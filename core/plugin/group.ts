@@ -13,7 +13,7 @@ export default [
       const number = args.includes("@s.whatsapp.net")
         ? args
         : args + "@s.whatsapp.net";
-      await new Group(msg.sessionId, msg.chat, sock).Add(number);
+      await new Group(msg.sessionId, msg.chat, sock).add(number);
       await msg.reply("ᴅᴏɴᴇ");
     },
   },
@@ -30,7 +30,7 @@ export default [
       const number = args.includes("@s.whatsapp.net")
         ? args
         : args + "@s.whatsapp.net";
-      const result = await new Group(msg.sessionId, msg.chat, sock).Remove(
+      const result = await new Group(msg.sessionId, msg.chat, sock).remove(
         number,
       );
       if (result === null) return await msg.reply("ғᴀɪʟᴇᴅ: ᴜsᴇʀ ɴᴏᴛ ɪɴ ɢʀᴏᴜᴘ");
@@ -100,7 +100,7 @@ export default [
     async exec(msg, sock, args) {
       if (!sock) return;
       if (!args) return await msg.reply("ᴘʀᴏᴠɪᴅᴇ ɴᴇᴡ ɴᴀᴍᴇ");
-      await new Group(msg.sessionId, msg.chat, sock).Name(args);
+      await new Group(msg.sessionId, msg.chat, sock).name(args);
       await msg.reply("ᴅᴏɴᴇ");
     },
   },
@@ -151,7 +151,7 @@ export default [
     isGroup: true,
     async exec(msg, sock) {
       if (!sock) return;
-      await new Group(msg.sessionId, msg.chat, sock).Leave();
+      await new Group(msg.sessionId, msg.chat, sock).leave();
     },
   },
   {
