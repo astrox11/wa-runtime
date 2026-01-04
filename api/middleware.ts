@@ -605,22 +605,22 @@ export async function executeGroupAction(
         break;
 
       case "kickAll":
-        result = await group.KickAll();
+        result = await group.kickall();
         message = "Kicked all non-admin participants";
         break;
 
       case "inviteCode":
-        result = await group.InviteCode();
+        result = await group.invite();
         message = "Invite link generated";
         break;
 
       case "revokeInvite":
-        result = await group.RevokeInvite();
+        result = await group.revoke();
         message = "Invite link revoked and new one generated";
         break;
 
       case "mute":
-        result = await group.SetAnnouncementMode("announcement");
+        result = await group.announce("announcement");
         if (result === null) {
           return { success: false, error: "Group is already muted" };
         }
@@ -628,7 +628,7 @@ export async function executeGroupAction(
         break;
 
       case "unmute":
-        result = await group.SetAnnouncementMode("not_announcement");
+        result = await group.announce("not_announcement");
         if (result === null) {
           return { success: false, error: "Group is already unmuted" };
         }
@@ -636,7 +636,7 @@ export async function executeGroupAction(
         break;
 
       case "lock":
-        result = await group.SetRestrictedMode("locked");
+        result = await group.restrict("locked");
         if (result === null) {
           return { success: false, error: "Group is already locked" };
         }
@@ -644,7 +644,7 @@ export async function executeGroupAction(
         break;
 
       case "unlock":
-        result = await group.SetRestrictedMode("unlocked");
+        result = await group.restrict("unlocked");
         if (result === null) {
           return { success: false, error: "Group is already unlocked" };
         }
@@ -663,7 +663,7 @@ export async function executeGroupAction(
         if (params?.description === undefined) {
           return { success: false, error: "Description parameter is required" };
         }
-        result = await group.Description(String(params.description));
+        result = await group.description(String(params.description));
         message = "Group description updated";
         break;
 
@@ -701,7 +701,7 @@ export async function executeGroupAction(
         )
           ? params.participant
           : params.participant + "@s.whatsapp.net";
-        result = await group.Promote(promoteParticipant);
+        result = await group.promote(promoteParticipant);
         if (result === null) {
           return {
             success: false,
@@ -718,7 +718,7 @@ export async function executeGroupAction(
         const demoteParticipant = params.participant.includes("@s.whatsapp.net")
           ? params.participant
           : params.participant + "@s.whatsapp.net";
-        result = await group.Demote(demoteParticipant);
+        result = await group.demote(demoteParticipant);
         if (result === null) {
           return { success: false, error: "User not in group or not admin" };
         }
@@ -741,7 +741,7 @@ export async function executeGroupAction(
         if (isCommunity && community) {
           result = await community.changeDisappearMsgTimer(duration);
         } else {
-          result = await group.EphermalSetting(duration);
+          result = await group.ephermal(duration);
         }
         if (result === null) {
           return { success: false, error: "Already set to this duration" };
@@ -759,7 +759,7 @@ export async function executeGroupAction(
         ) {
           return { success: false, error: "Mode must be 'admin' or 'member'" };
         }
-        result = await group.MemberJoinMode(
+        result = await group.join_mode(
           params.mode === "admin" ? "admin_add" : "all_member_add",
         );
         if (result === null) {
@@ -775,7 +775,7 @@ export async function executeGroupAction(
         ) {
           return { success: false, error: "Mode must be 'approval' or 'open'" };
         }
-        result = await group.GroupJoinMode(
+        result = await group.joinmode(
           params.mode === "approval" ? "on" : "off",
         );
         if (result === null) {

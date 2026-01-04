@@ -3,146 +3,160 @@ import { GetGroupMeta, isAdmin, isParticipant } from "../sql";
 
 export class Group {
   client: WASocket;
-  metadata: GroupMetadata | undefined;
+  metadata?: GroupMetadata;
   sessionId: string;
 
   constructor(sessionId: string, id: string, client: WASocket) {
     this.sessionId = sessionId;
-    this.metadata = GetGroupMeta(sessionId, id);
     this.client = client;
+    this.metadata = GetGroupMeta(sessionId, id);
   }
 
-  async Promote(participant: string) {
-    if (this.metadata && isParticipant(this.sessionId, this.metadata.id, participant)) {
-      if (isAdmin(this.sessionId, this.metadata.id, participant)) return null;
-      await this.client.groupParticipantsUpdate(
-        this.metadata.id,
-        [participant],
-        "promote",
-      );
-      return true;
-    }
-    return null;
+  private get id() {
+    return this.metadata?.id;
   }
 
-  async Demote(participant: string) {
-    if (this.metadata && isParticipant(this.sessionId, this.metadata.id, participant)) {
-      if (!isAdmin(this.sessionId, this.metadata.id, participant)) return null;
-      await this.client.groupParticipantsUpdate(
-        this.metadata.id,
-        [participant],
-        "demote",
-      );
-      return true;
-    }
-    return null;
+  async promote(participant: string) {
+    if (!this.metadata) return false;
+    if (isAdmin(this.sessionId, this.id!, participant)) return false;
+
+    await this.client.groupParticipantsUpdate(
+      this.id!,
+      [participant],
+      "promote",
+    );
+    return true;
+  }
+
+  async demote(participant: string) {
+    if (!this.metadata) return false;
+    if (!isAdmin(this.sessionId, this.id!, participant)) return false;
+
+    await this.client.groupParticipantsUpdate(
+      this.id!,
+      [participant],
+      "demote",
+    );
+    return true;
   }
 
   async remove(participant: string) {
-    if (this.metadata && isParticipant(this.sessionId, this.metadata.id, participant)) {
-      await this.client.groupParticipantsUpdate(
-        this.metadata.id,
-        [participant],
-        "remove",
-      );
-      return true;
-    }
-    return null;
+    if (!isParticipant(this.sessionId, this.id!, participant)) return false;
+
+    const result = await this.client.groupParticipantsUpdate(
+      this.id!,
+      [participant],
+      "remove",
+    );
+    if (!result || result?.[0]?.status != "200") return false;
+    return true;
   }
 
   async add(participant: string) {
-    if (!this.metadata) return null;
-    return await this.client.groupParticipantsUpdate(
-      this.metadata.id,
+    const result = await this.client.groupParticipantsUpdate(
+      this.id!,
       [participant],
       "add",
     );
+
+    if (!result || result?.[0]?.status != "200") return false;
+    return true;
   }
 
   async leave() {
-    if (!this.metadata) return null;
-    return await this.client.groupLeave(this.metadata.id);
+    if (!this.metadata) return false;
+
+    await this.client.groupLeave(this.id!);
+    return true;
   }
 
   async name(name: string) {
-    if (!this.metadata) return null;
-    return await this.client.groupUpdateSubject(this.metadata.id, name);
-  }
-
-  async Description(description: string) {
-    if (!this.metadata) return null;
-    return await this.client.groupUpdateDescription(
-      this.metadata.id,
-      description,
-    );
-  }
-
-  async MemberJoinMode(mode: "admin_add" | "all_member_add") {
-    if (!this.metadata) return null;
-    if (mode === "admin_add" && !this.metadata.memberAddMode) return null;
-    if (mode === "all_member_add" && this.metadata.memberAddMode) return null;
-    await this.client.groupMemberAddMode(this.metadata.id, mode);
+    await this.client.groupUpdateSubject(this.id!, name);
     return true;
   }
 
-  async EphermalSetting(duration: number) {
-    if (!this.metadata) return null;
-    if (this.metadata.ephemeralDuration === duration) return null;
-    await this.client.groupToggleEphemeral(this.metadata.id, duration);
+  async description(description: string) {
+    await this.client.groupUpdateDescription(this.id!, description);
     return true;
   }
 
-  async KickAll() {
-    if (!this.metadata) return null;
+  async join_mode(mode: "admin_add" | "all_member_add") {
+    if (!this.metadata) return false;
+    const enabled = Boolean(this.metadata.memberAddMode);
+    if (mode === "admin_add" && !enabled) return false;
+    if (mode === "all_member_add" && enabled) return false;
+
+    await this.client.groupMemberAddMode(this.id!, mode);
+    return true;
+  }
+
+  async ephermal(duration: number) {
+    if (!this.metadata) return false;
+    if (this.metadata.ephemeralDuration === duration) return false;
+    await this.client.groupToggleEphemeral(this.id!, duration);
+    return true;
+  }
+
+  async kickall() {
+    if (!this.metadata) return false;
+
+    const self = jidNormalizedUser(this.client.user?.id);
     const participants = this.metadata.participants
       .filter(
         (p) =>
-          p.admin == null &&
-          p.id !== jidNormalizedUser(this.client.user?.id) &&
-          p.id !== this.metadata?.owner,
+          p.admin == null && p.id !== self && p.id !== this.metadata?.owner,
       )
       .map((p) => p.id);
 
-    return await this.client.groupParticipantsUpdate(
-      this.metadata.id,
-      participants,
-      "remove",
-    );
-  }
+    if (!participants.length) return null;
 
-  async InviteCode() {
-    if (!this.metadata) return null;
-    const invite = await this.client.groupInviteCode(this.metadata.id);
-    return `https://chat.whatsapp.com/${invite}`;
-  }
-
-  async RevokeInvite() {
-    if (!this.metadata) return null;
-    const invite = await this.client.groupRevokeInvite(this.metadata.id);
-    return `https://chat.whatsapp.com/${invite}`;
-  }
-
-  async GroupJoinMode(mode: "on" | "off") {
-    if (!this.metadata) return null;
-    if (mode === "on" && this.metadata.joinApprovalMode) return null;
-    if (mode === "off" && !this.metadata.joinApprovalMode) return null;
-    await this.client.groupJoinApprovalMode(this.metadata.id, mode);
+    await this.client.groupParticipantsUpdate(this.id!, participants, "remove");
     return true;
   }
 
-  async SetAnnouncementMode(mode: "announcement" | "not_announcement") {
+  async invite() {
+    if (!this.metadata) return false;
+
+    const code = await this.client.groupInviteCode(this.id!);
+    if (!code) return false;
+    return `https://chat.whatsapp.com/${code}`;
+  }
+
+  async revoke() {
+    if (!isAdmin(this.sessionId, this.id!, this.client.user?.id!)) return false;
+
+    const code = await this.client.groupRevokeInvite(this.id!);
+    if (!code) return false;
+    return `https://chat.whatsapp.com/${code}`;
+  }
+
+  async joinmode(mode: "on" | "off") {
+    if (!this.metadata) return false;
+
+    const enabled = Boolean(this.metadata.joinApprovalMode);
+    if (mode === "on" && enabled) return false;
+    if (mode === "off" && !enabled) return false;
+    await this.client.groupJoinApprovalMode(this.id!, mode);
+    return true;
+  }
+
+  async announce(
+    mode: "announcement" | "not_announcement",
+  ): Promise<boolean | null> {
     if (!this.metadata) return null;
     if (mode === "announcement" && this.metadata.announce) return null;
     if (mode === "not_announcement" && !this.metadata.announce) return null;
-    await this.client.groupSettingUpdate(this.metadata.id, mode);
+
+    await this.client.groupSettingUpdate(this.id!, mode);
     return true;
   }
 
-  async SetRestrictedMode(mode: "locked" | "unlocked") {
-    if (!this.metadata) return null;
-    if (mode === "locked" && this.metadata.restrict) return null;
-    if (mode === "unlocked" && !this.metadata.restrict) return null;
-    await this.client.groupSettingUpdate(this.metadata.id, mode);
+  async restrict(mode: "locked" | "unlocked") {
+    if (!this.metadata) return false;
+    if (mode === "locked" && this.metadata.restrict) return false;
+    if (mode === "unlocked" && !this.metadata.restrict) return false;
+
+    await this.client.groupSettingUpdate(this.id!, mode);
     return true;
   }
 }
