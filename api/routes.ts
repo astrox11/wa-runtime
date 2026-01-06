@@ -15,11 +15,15 @@ import {
   getGroups,
   getGroupMetadata,
   executeGroupAction,
+  getSessionActivitySettings,
+  updateSessionActivitySettings,
+  getMessagesStats,
 } from "./middleware";
 import type {
   ApiResponse,
   SessionCreateRequest,
   GroupActionRequest,
+  ActivitySettingsData,
 } from "./types";
 import { ApiResponseErrors } from "./errors";
 import { validatePhoneNumber, validatePagination } from "./predicates";
@@ -70,6 +74,15 @@ const routes: Record<
     );
   },
 
+  "GET /api/sessions/:id/settings": async (_req, params) =>
+    getSessionActivitySettings(params?.id as string),
+
+  "PUT /api/sessions/:id/settings": async (req, params) => {
+    const body = await parseBody<Partial<ActivitySettingsData>>(req);
+    if (!body) return createApiError(ApiResponseErrors.INVALID_PARAMETERS);
+    return updateSessionActivitySettings(params?.id as string, body);
+  },
+
   "GET /api/auth/status/:sessionId": async (_req, params) =>
     getAuthStatus(params?.sessionId),
 
@@ -88,6 +101,8 @@ const routes: Record<
 
   "GET /api/stats/:sessionId": async (_req, params) =>
     getSessionStats(params?.sessionId as string),
+
+  "GET /api/stats/messages": async () => getMessagesStats(),
 
   "GET /api/config": async () => getConfig(),
 };
