@@ -12,6 +12,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// BunBackendPort is the internal port where the Bun server runs
+const BunBackendPort = "8001"
+
 // ProcessStatus represents the possible states of the BunJS process
 type ProcessStatus string
 
@@ -59,9 +62,9 @@ func (m *BunJSManager) Start() error {
 
 	m.cmd = exec.Command("bun", "run", m.scriptPath)
 
-	// Set environment variables - Bun backend runs on internal port 8001
+	// Set environment variables - Bun backend runs on internal port
 	m.cmd.Env = append(os.Environ(),
-		"API_PORT=8001",
+		"API_PORT="+BunBackendPort,
 		"HOST=127.0.0.1",
 	)
 

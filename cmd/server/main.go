@@ -17,14 +17,18 @@ import (
 )
 
 const (
-	bunBackendPort = "8001" // Internal port where Bun server runs
+	// bunBackendPort uses the value from processmanager for consistency
+	bunBackendPort = processmanager.BunBackendPort
 )
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
-		return true // Allow all origins in development
+		// In production, validate that the origin matches expected domains
+		// For now, allow all origins for development flexibility
+		// TODO: Add production origin validation based on environment
+		return true
 	},
 }
 
