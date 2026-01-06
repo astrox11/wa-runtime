@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Whatsaly - Real-time Messaging</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .message-container::-webkit-scrollbar {
+      width: 6px;
+    }
+    .message-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    .message-container::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 3px;
+    }
+    .message-container::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <div class="container mx-auto p-4 max-w-4xl">
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-green-600">Whatsaly</h1>
+        <div class="flex items-center gap-2">
+          <span id="connectionStatus" class="inline-flex items-center">
+            <span id="statusDot" class="w-3 h-3 rounded-full bg-red-500 mr-2"></span>
+            <span id="statusText" class="text-sm text-gray-600">Disconnected</span>
+          </span>
+        </div>
+      </div>
+      <p class="text-sm text-gray-500 mt-1">User ID: <span id="userId" class="font-mono"></span></p>
+    </div>
+
+    <!-- Process Manager Panel -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+      <h2 class="text-lg font-semibold text-gray-700 mb-3">BunJS Process Manager</h2>
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm">
+            Status: <span id="processStatus" class="font-semibold text-gray-700">Loading...</span>
+          </p>
+          <p id="processError" class="text-sm text-red-500 mt-1 hidden"></p>
+        </div>
+        <button id="restartBtn" 
+                onclick="restartProcess()"
+                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+          Restart Process
+        </button>
+      </div>
+    </div>
+
+    <!-- Messages Area -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+      <h2 class="text-lg font-semibold text-gray-700 mb-3">Messages</h2>
+      <div id="messages" class="message-container h-96 overflow-y-auto border border-gray-200 rounded-lg p-4 bg-gray-50">
+        <p class="text-gray-400 text-center">No messages yet</p>
+      </div>
+    </div>
+
+    <!-- Message Input -->
+    <div class="bg-white rounded-lg shadow-md p-4">
+      <div class="flex gap-2">
+        <input type="text" 
+               id="messageInput" 
+               placeholder="Type a message..." 
+               class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+               onkeypress="handleKeyPress(event)">
+        <button onclick="sendMessage()" 
+                class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors">
+          Send
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Generate random user ID
+    const userId = 'user_' + Math.random().toString(36).substring(2, 10);
+    document.getElementById('userId').textContent = userId;
+
+    let ws = null;
+    let reconnectTimeout = null;
+
+    // WebSocket connection
+    function connectWebSocket() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws?id=${userId}`;
+      
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = function() {
+        console.log('WebSocket connected');
+        updateConnectionStatus(true);
+        clearTimeout(reconnectTimeout);
+      };
+
+      ws.onmessage = function(event) {
+        const message = JSON.parse(event.data);
+        displayMessage(message);
+      };
+
+      ws.onclose = function() {
+        console.log('WebSocket disconnected');
+        updateConnectionStatus(false);
+        // Auto-reconnect after 3 seconds
+        reconnectTimeout = setTimeout(connectWebSocket, 3000);
+      };
+
+      ws.onerror = function(error) {
+        console.error('WebSocket error:', error);
+        updateConnectionStatus(false);
+      };
+    }
+
+    // Update connection status indicator
+    function updateConnectionStatus(connected) {
+      const statusDot = document.getElementById('statusDot');
+      const statusText = document.getElementById('statusText');
+      
+      if (connected) {
+        statusDot.className = 'w-3 h-3 rounded-full bg-green-500 mr-2';
+        statusText.textContent = 'Connected';
+        statusText.className = 'text-sm text-green-600';
+      } else {
+        statusDot.className = 'w-3 h-3 rounded-full bg-red-500 mr-2';
+        statusText.textContent = 'Disconnected';
+        statusText.className = 'text-sm text-red-600';
+      }
+    }
+
+    // Display a message
+    function displayMessage(message) {
+      const messagesContainer = document.getElementById('messages');
+      
+      // Remove "no messages" placeholder if present
+      const placeholder = messagesContainer.querySelector('p.text-gray-400');
+      if (placeholder) {
+        placeholder.remove();
+      }
+
+      const isSent = message.from === userId;
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `mb-2 flex ${isSent ? 'justify-end' : 'justify-start'}`;
+      
+      const bubbleClass = isSent 
+        ? 'bg-green-500 text-white rounded-lg rounded-br-none' 
+        : 'bg-gray-200 text-gray-800 rounded-lg rounded-bl-none';
+      
+      const time = message.time ? new Date(message.time).toLocaleTimeString() : new Date().toLocaleTimeString();
+      
+      messageDiv.innerHTML = `
+        <div class="max-w-xs lg:max-w-md px-4 py-2 ${bubbleClass}">
+          <p class="text-xs ${isSent ? 'text-green-100' : 'text-gray-500'} mb-1">${message.from}</p>
+          <p class="break-words">${escapeHtml(message.content)}</p>
+          <p class="text-xs ${isSent ? 'text-green-100' : 'text-gray-400'} mt-1 text-right">${time}</p>
+        </div>
+      `;
+      
+      messagesContainer.appendChild(messageDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Escape HTML to prevent XSS
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Send a message
+    function sendMessage() {
+      const input = document.getElementById('messageInput');
+      const content = input.value.trim();
+      
+      if (!content || !ws || ws.readyState !== WebSocket.OPEN) {
+        return;
+      }
+
+      const message = {
+        type: 'chat',
+        from: userId,
+        to: 'broadcast',
+        content: content,
+        time: new Date().toISOString()
+      };
+
+      ws.send(JSON.stringify(message));
+      input.value = '';
+    }
+
+    // Handle Enter key press
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    }
+
+    // Fetch process status
+    async function fetchProcessStatus() {
+      try {
+        const response = await fetch('/api/process/status');
+        const data = await response.json();
+        
+        const statusEl = document.getElementById('processStatus');
+        const errorEl = document.getElementById('processError');
+        
+        // Update status display
+        statusEl.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+        
+        // Color code the status
+        switch(data.status) {
+          case 'running':
+            statusEl.className = 'font-semibold text-green-600';
+            break;
+          case 'stopped':
+            statusEl.className = 'font-semibold text-gray-600';
+            break;
+          case 'crashed':
+          case 'error':
+            statusEl.className = 'font-semibold text-red-600';
+            break;
+          default:
+            statusEl.className = 'font-semibold text-gray-700';
+        }
+        
+        // Show/hide error message
+        if (data.lastError) {
+          errorEl.textContent = 'Error: ' + data.lastError;
+          errorEl.classList.remove('hidden');
+        } else {
+          errorEl.classList.add('hidden');
+        }
+      } catch (error) {
+        console.error('Failed to fetch process status:', error);
+      }
+    }
+
+    // Restart process
+    async function restartProcess() {
+      const btn = document.getElementById('restartBtn');
+      btn.disabled = true;
+      btn.textContent = 'Restarting...';
+      btn.className = 'bg-gray-400 text-white px-4 py-2 rounded-lg cursor-not-allowed';
+      
+      try {
+        const response = await fetch('/api/process/restart', { method: 'POST' });
+        const data = await response.json();
+        
+        if (data.success) {
+          console.log('Process restarted successfully');
+        } else {
+          console.error('Failed to restart process:', data.message);
+        }
+      } catch (error) {
+        console.error('Failed to restart process:', error);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Restart Process';
+        btn.className = 'bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors';
+        fetchProcessStatus();
+      }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      connectWebSocket();
+      fetchProcessStatus();
+      // Auto-refresh process status every 5 seconds
+      setInterval(fetchProcessStatus, 5000);
+    });
+  </script>
+</body>
+</html>
