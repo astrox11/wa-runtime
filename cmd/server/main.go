@@ -15,7 +15,9 @@ import (
 	"time"
 
 	"whatsaly/internal/api"
+	"whatsaly/internal/database"
 	"whatsaly/internal/datastore"
+	"whatsaly/internal/phone"
 	"whatsaly/internal/processmanager"
 	"whatsaly/internal/websocket"
 
@@ -38,6 +40,10 @@ var upgrader = gorillaWs.Upgrader{
 }
 
 func main() {
+	db := database.GetDatabase()
+	defer db.Close()
+	log.Println("Database initialized")
+
 	store := datastore.GetStore()
 	hub := websocket.NewHub()
 	go hub.Run()
@@ -54,6 +60,223 @@ func main() {
 
 	staticFs := http.FileServer(http.Dir("./service"))
 	mux := http.NewServeMux()
+
+	mux.HandleFunc("/api/go/validate-phone", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		var req struct {
+			PhoneNumber string `json:"phoneNumber"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+		result := phone.Validate(req.PhoneNumber)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(result)
+	})
+
+	mux.HandleFunc("/api/db/session", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.Method {
+		case http.MethodGet:
+			id := r.URL.Query().Get("id")
+			if id == "" {
+				sessions, err := db.GetAllSessions()
+				if err != nil {
+					json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+					return
+				}
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": true, "data": sessions})
+			} else {
+				session, err := db.GetSession(id)
+				if err != nil {
+					json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+					return
+				}
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": true, "data": session})
+			}
+		case http.MethodPost:
+			var req struct {
+				ID          string `json:"id"`
+				PhoneNumber string `json:"phone_number"`
+				Status      int    `json:"status"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+				return
+			}
+			if err := db.CreateSession(req.ID, req.PhoneNumber, req.Status); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+				return
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
+		case http.MethodPut:
+			var req struct {
+				ID       string  `json:"id"`
+				Status   *int    `json:"status,omitempty"`
+				UserInfo *string `json:"user_info,omitempty"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+				return
+			}
+			if req.Status != nil {
+				if err := db.UpdateSessionStatus(req.ID, *req.Status); err != nil {
+					json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+					return
+				}
+			}
+			if req.UserInfo != nil {
+				if err := db.UpdateSessionUserInfo(req.ID, *req.UserInfo); err != nil {
+					json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+					return
+				}
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
+		case http.MethodDelete:
+			id := r.URL.Query().Get("id")
+			if err := db.DeleteSession(id); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+				return
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
+		}
+	})
+
+	mux.HandleFunc("/api/db/auth", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		sessionID := r.URL.Query().Get("session_id")
+		name := r.URL.Query().Get("name")
+
+		switch r.Method {
+		case http.MethodGet:
+			if name != "" {
+				data, err := db.GetAuthData(sessionID, name)
+				if err != nil {
+					json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+					return
+				}
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": true, "data": data})
+			} else {
+				data, err := db.GetAllAuthData(sessionID)
+				if err != nil {
+					json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+					return
+				}
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": true, "data": data})
+			}
+		case http.MethodPost:
+			var req struct {
+				SessionID string `json:"session_id"`
+				Name      string `json:"name"`
+				Data      string `json:"data"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+				return
+			}
+			if err := db.SaveAuthData(req.SessionID, req.Name, req.Data); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+				return
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
+		case http.MethodDelete:
+			if err := db.DeleteAuthData(sessionID); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+				return
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
+		}
+	})
+
+	mux.HandleFunc("/api/db/settings", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		sessionID := r.URL.Query().Get("session_id")
+
+		switch r.Method {
+		case http.MethodGet:
+			settings, err := db.GetActivitySettings(sessionID)
+			if err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+				return
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": true, "data": settings})
+		case http.MethodPut:
+			var updates map[string]bool
+			if err := json.NewDecoder(r.Body).Decode(&updates); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+				return
+			}
+			if err := db.UpdateActivitySettings(sessionID, updates); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+				return
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
+		}
+	})
+
+	mux.HandleFunc("/api/db/contact", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		switch r.Method {
+		case http.MethodGet:
+			sessionID := r.URL.Query().Get("session_id")
+			phoneNumber := r.URL.Query().Get("phone_number")
+			lid, err := db.GetContact(sessionID, phoneNumber)
+			if err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+				return
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": true, "data": lid})
+		case http.MethodPost:
+			var req struct {
+				SessionID   string `json:"session_id"`
+				PhoneNumber string `json:"phone_number"`
+				LID         string `json:"lid"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+				return
+			}
+			if err := db.AddContact(req.SessionID, req.PhoneNumber, req.LID); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+				return
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
+		}
+	})
+
+	mux.HandleFunc("/api/db/groups", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		sessionID := r.URL.Query().Get("session_id")
+
+		switch r.Method {
+		case http.MethodGet:
+			data, err := db.GetGroupsCache(sessionID)
+			if err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+				return
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": true, "data": data})
+		case http.MethodPost:
+			var req struct {
+				SessionID string `json:"session_id"`
+				Groups    string `json:"groups"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+				return
+			}
+			if err := db.SaveGroupsCache(req.SessionID, req.Groups); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": err.Error()})
+				return
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
+		}
+	})
 
 	mux.HandleFunc("/ws/stats", func(w http.ResponseWriter, r *http.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)

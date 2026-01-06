@@ -82,7 +82,7 @@ func (m *BunJSManager) Start() error {
 	}
 
 	m.cmd = exec.Command("bun", "run", m.scriptPath)
-	m.cmd.Env = append(os.Environ(), "API_PORT="+BunBackendPort, "HOST=127.0.0.1")
+	m.cmd.Env = append(os.Environ(), "BUN_API_PORT="+BunBackendPort, "HOST=127.0.0.1", "GO_SERVER=http://127.0.0.1:8000")
 
 	stdout, err := m.cmd.StdoutPipe()
 	if err != nil {

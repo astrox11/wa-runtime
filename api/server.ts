@@ -19,9 +19,10 @@ import config from "../config";
 import type { ApiResponse } from "./types";
 import { handleApiRequest } from "./routes";
 
-const GO_SERVER = "http://127.0.0.1:8000";
+const GO_SERVER = process.env.GO_SERVER || "http://127.0.0.1:8000";
+const BUN_API_PORT = parseInt(process.env.BUN_API_PORT || "0", 10);
 
-log.info("Starting Bun API server...");
+log.info("Starting Bun worker process...");
 
 function getHttpStatusCode(data: ApiResponse): number {
   if (data.success) return 200;
@@ -108,48 +109,52 @@ process.on("SIGTERM", () => {
   process.exit(0);
 });
 
-const server = Bun.serve({
-  port: config.API_PORT,
-  hostname: process.env.HOST || "0.0.0.0",
-  async fetch(req) {
-    const url = new URL(req.url);
-    const path = url.pathname;
+if (BUN_API_PORT > 0) {
+  const server = Bun.serve({
+    port: BUN_API_PORT,
+    hostname: process.env.HOST || "127.0.0.1",
+    async fetch(req) {
+      const url = new URL(req.url);
+      const path = url.pathname;
 
-    log.debug("Request:", req.method, path);
+      log.debug("Request:", req.method, path);
 
-    if (path === "/health" && req.method === "GET") {
-      return createResponse({
-        success: true,
-        data: { status: "healthy", version: config.VERSION },
-      });
-    }
-
-    if (path.startsWith("/api/")) {
-      if (req.method === "OPTIONS") {
-        return new Response(null, {
-          status: 204,
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type",
-          },
+      if (path === "/health" && req.method === "GET") {
+        return createResponse({
+          success: true,
+          data: { status: "healthy", version: config.VERSION },
         });
       }
-      const result = await handleApiRequest(req);
-      if (
-        path.includes("/sessions") &&
-        (req.method === "POST" || req.method === "DELETE")
-      ) {
-        setTimeout(pushStatsToGo, 100);
+
+      if (path.startsWith("/api/")) {
+        if (req.method === "OPTIONS") {
+          return new Response(null, {
+            status: 204,
+            headers: {
+              "Access-Control-Allow-Origin": "*",
+              "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+              "Access-Control-Allow-Headers": "Content-Type",
+            },
+          });
+        }
+        const result = await handleApiRequest(req);
+        if (
+          path.includes("/sessions") &&
+          (req.method === "POST" || req.method === "DELETE")
+        ) {
+          setTimeout(pushStatsToGo, 100);
+        }
+        return createResponse(result);
       }
-      return createResponse(result);
-    }
 
-    return new Response("Not Found", { status: 404 });
-  },
-});
+      return new Response("Not Found", { status: 404 });
+    },
+  });
 
-log.info(`Bun API server listening on port ${config.API_PORT}`);
+  log.info(`Bun API server listening on port ${BUN_API_PORT}`);
+} else {
+  log.info("Bun running in worker mode (no HTTP server)");
+}
 
 sessionManager
   .restore_all()
@@ -160,5 +165,3 @@ sessionManager
   .catch((error) => {
     log.error("Failed to restore sessions:", error);
   });
-
-export { server };
