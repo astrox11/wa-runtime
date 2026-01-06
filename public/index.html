@@ -403,9 +403,7 @@
       pauseSession: (id) => api.fetch(`/api/sessions/${id}/pause`, { method: 'POST' }),
       resumeSession: (id) => api.fetch(`/api/sessions/${id}/resume`, { method: 'POST' }),
       getStats: () => api.fetch('/api/stats/full'),
-      getProcessStatus: () => api.fetch('/api/process/status'),
       restartProcess: () => api.fetch('/api/process/restart', { method: 'POST' }),
-      getSystemStats: () => api.fetch('/api/go/system-stats'),
       connectWS() {
         const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
         ws = new WebSocket(`${protocol}//${location.host}/ws/stats`);
@@ -594,32 +592,13 @@
     });
 
 
-    async function fetchProcessStatus() {
-      try {
-        const res = await api.getProcessStatus();
-        const status = res.status || 'unknown';
-        if (processStatusBadge) {
-          processStatusBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-          processStatusBadge.className = `px-2 py-0.5 text-xs font-medium rounded ${status === 'running' ? 'bg-gh-success-subtle text-gh-success' : status === 'stopped' ? 'bg-gh-bg-tertiary text-gh-text-muted' : 'bg-gh-danger-subtle text-gh-danger'}`;
-        }
-        if (res.lastError && processError) { processError.textContent = res.lastError; processError.classList.remove('hidden'); }
-        else if (processError) { processError.classList.add('hidden'); }
-      } catch {}
-    }
-
-
-    async function fetchSystemStats() {
-      try {
-        const res = await api.getSystemStats();
-        if (res.memory) updateMemoryChart(res.memory.heapAlloc, res.memory.numGC);
-        if (res.goroutines && res.cpus) updateCpuChart(res.goroutines, res.cpus);
-        if (uptimeEl) uptimeEl.textContent = formatUptime(res.uptime);
-        if (sysPlatform) sysPlatform.textContent = res.platform || '--';
-        if (sysArch) sysArch.textContent = res.arch || '--';
-        if (sysGo) sysGo.textContent = res.goVersion?.replace('go', '') || '--';
-        if (sysCpus) sysCpus.textContent = res.cpus || '--';
-        if (sysGoroutines) sysGoroutines.textContent = res.goroutines || '--';
-      } catch {}
+    function updateProcessStatus(status, lastError) {
+      if (processStatusBadge) {
+        processStatusBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+        processStatusBadge.className = `px-2 py-0.5 text-xs font-medium rounded ${status === 'running' ? 'bg-gh-success-subtle text-gh-success' : status === 'stopped' ? 'bg-gh-bg-tertiary text-gh-text-muted' : 'bg-gh-danger-subtle text-gh-danger'}`;
+      }
+      if (lastError && processError) { processError.textContent = lastError; processError.classList.remove('hidden'); }
+      else if (processError) { processError.classList.add('hidden'); }
     }
 
 
@@ -709,17 +688,39 @@
       restartBtn.disabled = true;
       restartBtn.textContent = 'Restarting...';
       await api.restartProcess();
-      setTimeout(fetchProcessStatus, 1000);
       restartBtn.disabled = false;
       restartBtn.textContent = 'Restart Process';
     });
 
 
+    let eventSource = null;
+    function connectSSE() {
+      eventSource = new EventSource('/api/go/events');
+      eventSource.onopen = () => { networkStats.apiHealthy = true; updateNetworkUI(); };
+      eventSource.onmessage = (e) => {
+        try {
+          const res = JSON.parse(e.data);
+          if (res.memory) updateMemoryChart(res.memory.heapAlloc, res.memory.numGC);
+          if (res.goroutines && res.cpus) updateCpuChart(res.goroutines, res.cpus);
+          if (uptimeEl) uptimeEl.textContent = formatUptime(res.uptime);
+          if (sysPlatform) sysPlatform.textContent = res.platform || '--';
+          if (sysArch) sysArch.textContent = res.arch || '--';
+          if (sysGo) sysGo.textContent = res.goVersion?.replace('go', '') || '--';
+          if (sysCpus) sysCpus.textContent = res.cpus || '--';
+          if (sysGoroutines) sysGoroutines.textContent = res.goroutines || '--';
+          if (res.process) updateProcessStatus(res.process.status || 'unknown', res.process.lastError);
+        } catch {}
+      };
+      eventSource.onerror = () => { 
+        networkStats.apiHealthy = false; 
+        updateNetworkUI(); 
+        eventSource.close();
+        setTimeout(connectSSE, 3000);
+      };
+    }
+
     api.connectWS();
-    fetchProcessStatus();
-    fetchSystemStats();
-    setInterval(fetchProcessStatus, 5000);
-    setInterval(fetchSystemStats, 2000);
+    connectSSE();
 
 
     api.getStats().then(res => {

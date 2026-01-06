@@ -4,10 +4,12 @@ import (
 	"bufio"
 	"encoding/json"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
 	"sync"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -145,11 +147,23 @@ func (m *BunJSManager) Stop() error {
 	return nil
 }
 
+func (m *BunJSManager) waitForPortFree() {
+	for i := 0; i < 50; i++ {
+		conn, err := net.DialTimeout("tcp", "127.0.0.1:"+BunBackendPort, 100*time.Millisecond)
+		if err != nil {
+			return
+		}
+		conn.Close()
+		time.Sleep(100 * time.Millisecond)
+	}
+}
+
 func (m *BunJSManager) Restart() error {
 	log.Println("[BunJS] Restarting process...")
 	if err := m.Stop(); err != nil {
 		return err
 	}
+	m.waitForPortFree()
 	return m.Start()
 }
 

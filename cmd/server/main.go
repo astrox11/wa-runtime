@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -62,6 +63,62 @@ func main() {
 
 	mux.HandleFunc("/api/process/status", bunManager.HandleGetStatusHTTP)
 	mux.HandleFunc("/api/process/restart", bunManager.HandleRestartHTTP)
+
+	mux.HandleFunc("/api/go/events", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Header().Set("Connection", "keep-alive")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+
+		flusher, ok := w.(http.Flusher)
+		if !ok {
+			http.Error(w, "SSE not supported", http.StatusInternalServerError)
+			return
+		}
+
+		ticker := time.NewTicker(2 * time.Second)
+		defer ticker.Stop()
+
+		sendEvent := func() {
+			var m runtime.MemStats
+			runtime.ReadMemStats(&m)
+			const bytesToMB = 1024 * 1024
+
+			data := map[string]interface{}{
+				"memory": map[string]interface{}{
+					"alloc":     m.Alloc / bytesToMB,
+					"heapAlloc": m.HeapAlloc / bytesToMB,
+					"heapSys":   m.HeapSys / bytesToMB,
+					"numGC":     m.NumGC,
+				},
+				"goroutines": runtime.NumGoroutine(),
+				"cpus":       runtime.NumCPU(),
+				"goVersion":  runtime.Version(),
+				"platform":   runtime.GOOS,
+				"arch":       runtime.GOARCH,
+				"uptime":     int64(time.Since(serverStartTime).Seconds()),
+				"process": map[string]interface{}{
+					"status":    string(bunManager.GetStatus()),
+					"lastError": bunManager.GetLastError(),
+				},
+			}
+
+			jsonBytes, _ := json.Marshal(data)
+			fmt.Fprintf(w, "data: %s\n\n", jsonBytes)
+			flusher.Flush()
+		}
+
+		sendEvent()
+
+		for {
+			select {
+			case <-ticker.C:
+				sendEvent()
+			case <-r.Context().Done():
+				return
+			}
+		}
+	})
 
 	mux.HandleFunc("/api/go/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
