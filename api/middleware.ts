@@ -4,6 +4,12 @@ import {
   GetGroupMeta,
   Group,
   Community,
+  getAllGroups,
+  getActivitySettings,
+  setActivitySettings,
+  getMessagesCount,
+  getAllMessages,
+  type ActivitySettings,
 } from "../service";
 import config from "../config";
 import type {
@@ -285,8 +291,8 @@ export function getSessionStats(sessionId: string) {
 
 export function getMessages(
   sessionId: string,
-  _limit: number = 100,
-  _offset: number = 0,
+  limit: number = 100,
+  offset: number = 0,
 ) {
   if (!sessionId) {
     return { success: false, error: "Session ID is required" };
@@ -297,11 +303,42 @@ export function getMessages(
     return { success: false, error: "Session not found" };
   }
 
+  const messages = getAllMessages(sessionId, limit, offset);
+  const total = getMessagesCount(sessionId);
+  const received = messages.filter((m) => m.message?.key?.fromMe === false).length;
+  const sent = messages.filter((m) => m.message?.key?.fromMe === true).length;
+
   return {
     success: true,
     data: {
-      messages: [],
-      total: 0,
+      messages,
+      total,
+      received,
+      sent,
+    },
+  };
+}
+
+export function getMessagesStats() {
+  const sessions = sessionManager.listExtended();
+  let totalMessages = 0;
+  let totalSent = 0;
+  let totalReceived = 0;
+
+  for (const session of sessions) {
+    const count = getMessagesCount(session.id);
+    totalMessages += count;
+    const messages = getAllMessages(session.id, 1000, 0);
+    totalSent += messages.filter((m) => m.message?.key?.fromMe === true).length;
+    totalReceived += messages.filter((m) => m.message?.key?.fromMe === false).length;
+  }
+
+  return {
+    success: true,
+    data: {
+      total: totalMessages,
+      sent: totalSent,
+      received: totalReceived,
     },
   };
 }
@@ -327,10 +364,7 @@ export async function getGroups(sessionId: string) {
   }
 
   try {
-    const data = await fetchFromGo<string>(
-      `/api/db/groups?session_id=${sessionId}`,
-    );
-    const groups = data ? JSON.parse(data) : [];
+    const groups = getAllGroups(sessionId);
 
     return {
       success: true,
@@ -347,7 +381,7 @@ export async function getGroups(sessionId: string) {
   }
 }
 
-export async function getActivitySettings(sessionId: string) {
+export function getSessionActivitySettings(sessionId: string) {
   if (!sessionId) {
     return { success: false, error: "Session ID is required" };
   }
@@ -358,17 +392,10 @@ export async function getActivitySettings(sessionId: string) {
   }
 
   try {
-    const settings = await fetchFromGo<ActivitySettingsData>(
-      `/api/db/settings?session_id=${sessionId}`,
-    );
+    const settings = getActivitySettings(sessionId);
     return {
       success: true,
-      data: settings || {
-        always_online: false,
-        typing: false,
-        auto_read: false,
-        auto_reject_calls: false,
-      },
+      data: settings,
     };
   } catch (error) {
     return {
@@ -381,9 +408,9 @@ export async function getActivitySettings(sessionId: string) {
   }
 }
 
-export async function updateActivitySettings(
+export function updateSessionActivitySettings(
   sessionId: string,
-  settings: Partial<ActivitySettingsData>,
+  settings: Partial<ActivitySettings>,
 ) {
   if (!sessionId) {
     return { success: false, error: "Session ID is required" };
@@ -395,10 +422,7 @@ export async function updateActivitySettings(
   }
 
   try {
-    const updatedSettings = await putToGo<ActivitySettingsData>(
-      `/api/db/settings?session_id=${sessionId}`,
-      settings as Record<string, unknown>,
-    );
+    const updatedSettings = setActivitySettings(sessionId, settings);
     return {
       success: true,
       data: updatedSettings,

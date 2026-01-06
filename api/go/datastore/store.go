@@ -42,10 +42,13 @@ type OverallStats struct {
 }
 
 type ActivitySettings struct {
-	AutoAlwaysOnline bool `json:"auto_always_online"`
-	AutoTyping       bool `json:"auto_typing"`
-	AutoReadMessages bool `json:"auto_read_messages"`
-	AutoRejectCalls  bool `json:"auto_reject_calls"`
+	AutoAlwaysOnline             bool `json:"auto_always_online"`
+	AutoTyping                   bool `json:"auto_typing"`
+	AutoReadMessages             bool `json:"auto_read_messages"`
+	AutoRejectCalls              bool `json:"auto_reject_calls"`
+	AutoRecoverDeletedMessages   bool `json:"auto_recover_deleted_messages"`
+	AutoAntispam                 bool `json:"auto_antispam"`
+	AutoRecording                bool `json:"auto_recording"`
 }
 
 type Store struct {
@@ -162,6 +165,12 @@ func (s *Store) UpdateActivitySettings(id string, updates map[string]bool) *Acti
 			settings.AutoReadMessages = value
 		case "auto_reject_calls":
 			settings.AutoRejectCalls = value
+		case "auto_recover_deleted_messages":
+			settings.AutoRecoverDeletedMessages = value
+		case "auto_antispam":
+			settings.AutoAntispam = value
+		case "auto_recording":
+			settings.AutoRecording = value
 		}
 	}
 

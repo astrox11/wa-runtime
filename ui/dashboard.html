@@ -475,6 +475,24 @@
             class="flex items-center justify-between p-3 bg-gh-bg-secondary rounded-gh"
           >
             <span class="text-sm font-medium text-gh-text"
+              >Recording Indicator</span
+            >
+            <button
+              id="toggle-auto_recording"
+              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gh-bg-tertiary transition-colors"
+              role="switch"
+              aria-checked="false"
+              data-setting="auto_recording"
+            >
+              <span
+                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition translate-x-0"
+              ></span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 bg-gh-bg-secondary rounded-gh"
+          >
+            <span class="text-sm font-medium text-gh-text"
               >Auto Read Messages</span
             >
             <button
@@ -501,6 +519,42 @@
               role="switch"
               aria-checked="false"
               data-setting="auto_reject_calls"
+            >
+              <span
+                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition translate-x-0"
+              ></span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 bg-gh-bg-secondary rounded-gh"
+          >
+            <span class="text-sm font-medium text-gh-text"
+              >Auto Recover Deleted Messages</span
+            >
+            <button
+              id="toggle-auto_recover_deleted_messages"
+              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gh-bg-tertiary transition-colors"
+              role="switch"
+              aria-checked="false"
+              data-setting="auto_recover_deleted_messages"
+            >
+              <span
+                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition translate-x-0"
+              ></span>
+            </button>
+          </div>
+          <div
+            class="flex items-center justify-between p-3 bg-gh-bg-secondary rounded-gh"
+          >
+            <span class="text-sm font-medium text-gh-text"
+              >Anti-Spam</span
+            >
+            <button
+              id="toggle-auto_antispam"
+              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gh-bg-tertiary transition-colors"
+              role="switch"
+              aria-checked="false"
+              data-setting="auto_antispam"
             >
               <span
                 class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition translate-x-0"
@@ -761,8 +815,11 @@
         const keys = [
           "auto_always_online",
           "auto_typing",
+          "auto_recording",
           "auto_read_messages",
           "auto_reject_calls",
+          "auto_recover_deleted_messages",
+          "auto_antispam",
         ];
         keys.forEach((key) => {
           const toggle = document.getElementById(`toggle-${key}`);
