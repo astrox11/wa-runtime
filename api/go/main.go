@@ -257,6 +257,29 @@ func main() {
 		}
 	})
 
+	mux.HandleFunc("/api/db/contacts", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		if r.Method == http.MethodPost {
+			var req struct {
+				SessionID   string `json:"session_id"`
+				PhoneNumber string `json:"phone_number"`
+				LID         string `json:"lid"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": sanitizeError(err)})
+				return
+			}
+			if err := db.AddContact(req.SessionID, req.PhoneNumber, req.LID); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": sanitizeError(err)})
+				return
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
+			return
+		}
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	})
+
 	mux.HandleFunc("/api/db/groups", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		sessionID := r.URL.Query().Get("session_id")
@@ -279,6 +302,117 @@ func main() {
 				return
 			}
 			if err := db.SaveGroupsCache(req.SessionID, req.Groups); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": sanitizeError(err)})
+				return
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
+		}
+	})
+
+	mux.HandleFunc("/api/db/alive", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		sessionID := r.URL.Query().Get("session_id")
+
+		switch r.Method {
+		case http.MethodGet:
+			message, err := db.GetAliveMessage(sessionID)
+			if err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": sanitizeError(err)})
+				return
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": true, "data": message})
+		case http.MethodPost:
+			var req struct {
+				SessionID string `json:"session_id"`
+				Message   string `json:"message"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": sanitizeError(err)})
+				return
+			}
+			if err := db.SetAliveMessage(req.SessionID, req.Message); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": sanitizeError(err)})
+				return
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
+		}
+	})
+
+	mux.HandleFunc("/api/db/afk", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		sessionID := r.URL.Query().Get("session_id")
+
+		switch r.Method {
+		case http.MethodGet:
+			afk, err := db.GetAfk(sessionID)
+			if err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": sanitizeError(err)})
+				return
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": true, "data": afk})
+		case http.MethodPost:
+			var req struct {
+				SessionID string `json:"session_id"`
+				Status    int    `json:"status"`
+				Message   string `json:"message"`
+				Time      int64  `json:"time"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": sanitizeError(err)})
+				return
+			}
+			if err := db.SetAfk(req.SessionID, req.Status, req.Message, req.Time); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": sanitizeError(err)})
+				return
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
+		}
+	})
+
+	mux.HandleFunc("/api/db/mention/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		path := strings.TrimPrefix(r.URL.Path, "/api/db/mention/")
+		parts := strings.Split(path, "/")
+
+		if r.Method == http.MethodDelete && len(parts) >= 2 {
+			sessionID := parts[0]
+			groupID := parts[1]
+			if err := db.DeleteMention(sessionID, groupID); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": sanitizeError(err)})
+				return
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
+			return
+		}
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	})
+
+	mux.HandleFunc("/api/db/mention", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		sessionID := r.URL.Query().Get("session_id")
+		groupID := r.URL.Query().Get("group_id")
+
+		switch r.Method {
+		case http.MethodGet:
+			mention, err := db.GetMention(sessionID, groupID)
+			if err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": sanitizeError(err)})
+				return
+			}
+			json.NewEncoder(w).Encode(map[string]interface{}{"success": true, "data": mention})
+		case http.MethodPost:
+			var req struct {
+				SessionID string `json:"session_id"`
+				GroupID   string `json:"group_id"`
+				Type      string `json:"type"`
+				Message   string `json:"message"`
+				Data      string `json:"data"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": sanitizeError(err)})
+				return
+			}
+			if err := db.SetMention(req.SessionID, req.GroupID, req.Type, req.Message, req.Data); err != nil {
 				json.NewEncoder(w).Encode(map[string]interface{}{"success": false, "error": sanitizeError(err)})
 				return
 			}

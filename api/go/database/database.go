@@ -364,3 +364,125 @@ func (d *Database) QueryRow(query string, args ...interface{}) *sql.Row {
 	defer d.mu.RUnlock()
 	return d.db.QueryRow(query, args...)
 }
+
+func (d *Database) GetAliveMessage(sessionID string) (string, error) {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+
+	var message sql.NullString
+	err := d.db.QueryRow(
+		"SELECT alive_message FROM alive_settings WHERE session_id = ?",
+		sessionID,
+	).Scan(&message)
+	if err == sql.ErrNoRows {
+		return "", nil
+	}
+	if err != nil {
+		return "", err
+	}
+	return message.String, nil
+}
+
+func (d *Database) SetAliveMessage(sessionID, message string) error {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	_, err := d.db.Exec(
+		"INSERT OR REPLACE INTO alive_settings (session_id, alive_message) VALUES (?, ?)",
+		sessionID, message,
+	)
+	return err
+}
+
+type AfkSettings struct {
+	Status  int    `json:"status"`
+	Message string `json:"message,omitempty"`
+	Time    int64  `json:"time,omitempty"`
+}
+
+func (d *Database) GetAfk(sessionID string) (*AfkSettings, error) {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+
+	var status int
+	var message sql.NullString
+	var timestamp sql.NullInt64
+	err := d.db.QueryRow(
+		"SELECT status, message, time FROM afk_settings WHERE session_id = ?",
+		sessionID,
+	).Scan(&status, &message, &timestamp)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &AfkSettings{
+		Status:  status,
+		Message: message.String,
+		Time:    timestamp.Int64,
+	}, nil
+}
+
+func (d *Database) SetAfk(sessionID string, status int, message string, timestamp int64) error {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	_, err := d.db.Exec(
+		"INSERT OR REPLACE INTO afk_settings (session_id, status, message, time) VALUES (?, ?, ?, ?)",
+		sessionID, status, message, timestamp,
+	)
+	return err
+}
+
+type MentionData struct {
+	Type    string `json:"type"`
+	Message string `json:"message,omitempty"`
+	Data    string `json:"data,omitempty"`
+}
+
+func (d *Database) GetMention(sessionID, groupID string) (*MentionData, error) {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+
+	var mentionType sql.NullString
+	var message sql.NullString
+	var data sql.NullString
+	err := d.db.QueryRow(
+		"SELECT type, message, data FROM mention_settings WHERE session_id = ? AND group_id = ?",
+		sessionID, groupID,
+	).Scan(&mentionType, &message, &data)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &MentionData{
+		Type:    mentionType.String,
+		Message: message.String,
+		Data:    data.String,
+	}, nil
+}
+
+func (d *Database) SetMention(sessionID, groupID, mentionType, message, data string) error {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	_, err := d.db.Exec(
+		"INSERT OR REPLACE INTO mention_settings (session_id, group_id, type, message, data) VALUES (?, ?, ?, ?, ?)",
+		sessionID, groupID, mentionType, message, data,
+	)
+	return err
+}
+
+func (d *Database) DeleteMention(sessionID, groupID string) error {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	_, err := d.db.Exec(
+		"DELETE FROM mention_settings WHERE session_id = ? AND group_id = ?",
+		sessionID, groupID,
+	)
+	return err
+}
