@@ -1,5 +1,9 @@
 package api
 
+// Package api provides HTTP handlers for the REST API endpoints.
+// It includes both net/http handlers (used with coder/websocket compatibility)
+// and Fiber handlers (for potential future use with Fiber-compatible WebSocket libraries).
+
 import (
 	"encoding/json"
 	"net/http"

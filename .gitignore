@@ -104,3 +104,14 @@ baileys_auth_info
 *.sqlite3
 *db-shm
 *db-wal
+
+# Go build artifacts
+/server
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/

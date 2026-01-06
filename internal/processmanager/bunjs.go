@@ -150,8 +150,8 @@ func (m *BunJSManager) Stop() error {
 		return err
 	}
 
-	// Wait for the process to exit
-	proc.Wait()
+	// Wait for the process to exit (ignore error since we killed it)
+	_, _ = proc.Wait()
 
 	m.status = StatusStopped
 	m.lastError = ""

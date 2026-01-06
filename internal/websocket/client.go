@@ -36,8 +36,10 @@ func HandleWebSocket(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Accept WebSocket connection
+	// NOTE: InsecureSkipVerify is set to true for development only.
+	// In production, this should be set to false and proper origin validation should be implemented.
 	conn, err := websocket.Accept(w, r, &websocket.AcceptOptions{
-		InsecureSkipVerify: true, // Development only
+		InsecureSkipVerify: true,
 	})
 	if err != nil {
 		log.Printf("Failed to accept WebSocket connection: %v", err)
