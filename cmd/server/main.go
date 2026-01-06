@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
 	"os/signal"
+	"runtime"
 	"strings"
 	"syscall"
 	"time"
@@ -79,6 +81,33 @@ func main() {
 	mux.HandleFunc("/api/go/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"status":"ok","server":"go","bunStatus":"` + string(bunManager.GetStatus()) + `"}`))
+	})
+
+	// System stats endpoint for real CPU/memory monitoring
+	mux.HandleFunc("/api/go/system-stats", func(w http.ResponseWriter, r *http.Request) {
+		var m runtime.MemStats
+		runtime.ReadMemStats(&m)
+
+		const bytesToMB = 1024 * 1024
+		stats := map[string]interface{}{
+			"memory": map[string]interface{}{
+				"alloc":      m.Alloc / bytesToMB,
+				"totalAlloc": m.TotalAlloc / bytesToMB,
+				"sys":        m.Sys / bytesToMB,
+				"heapAlloc":  m.HeapAlloc / bytesToMB,
+				"heapSys":    m.HeapSys / bytesToMB,
+				"numGC":      m.NumGC,
+			},
+			"goroutines": runtime.NumGoroutine(),
+			"cpus":       runtime.NumCPU(),
+			"goVersion":  runtime.Version(),
+			"platform":   runtime.GOOS,
+			"arch":       runtime.GOARCH,
+			"timestamp":  time.Now().UnixMilli(),
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(stats)
 	})
 
 	// Health check - proxy to Bun

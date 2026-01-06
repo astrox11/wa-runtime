@@ -21,35 +21,25 @@
             'gh-bg-secondary': 'var(--gh-bg-secondary)',
             'gh-bg-tertiary': 'var(--gh-bg-tertiary)',
             'gh-border': 'var(--gh-border)',
-            'gh-border-muted': 'var(--gh-border-muted)',
             'gh-text': 'var(--gh-text)',
             'gh-text-secondary': 'var(--gh-text-secondary)',
             'gh-text-muted': 'var(--gh-text-muted)',
             'gh-link': 'var(--gh-link)',
             'gh-accent': 'var(--gh-accent)',
-            'gh-accent-emphasis': 'var(--gh-accent-emphasis)',
             'gh-success': 'var(--gh-success)',
             'gh-success-subtle': 'var(--gh-success-subtle)',
             'gh-warning': 'var(--gh-warning)',
             'gh-warning-subtle': 'var(--gh-warning-subtle)',
             'gh-danger': 'var(--gh-danger)',
             'gh-danger-subtle': 'var(--gh-danger-subtle)',
-            'gh-done': 'var(--gh-done)',
-            'gh-tooltip': 'var(--gh-tooltip)',
-            'gh-tooltip-text': 'var(--gh-tooltip-text)',
           },
-          borderRadius: {
-            'gh': '6px',
-          },
-          fontFamily: {
-            'sans': ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
-          },
+          borderRadius: { 'gh': '6px' },
+          fontFamily: { 'sans': ['Plus Jakarta Sans', 'system-ui', 'sans-serif'] },
         }
       }
     }
   </script>
   <script>
-    // Theme initialization
     (function() {
       const storedTheme = localStorage.getItem('theme');
       const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -59,264 +49,277 @@
     })();
   </script>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-
-    /* Light mode (default) */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
     :root {
-      --gh-bg: #ffffff;
-      --gh-bg-secondary: #f6f8fa;
-      --gh-bg-tertiary: #eaeef2;
-      --gh-border: #d0d7de;
-      --gh-border-muted: #d8dee4;
-      --gh-text: #1f2328;
-      --gh-text-secondary: #656d76;
-      --gh-text-muted: #8c959f;
-      --gh-link: #0969da;
-      --gh-accent: #0969da;
-      --gh-accent-emphasis: #0550ae;
-      --gh-success: #1a7f37;
-      --gh-success-subtle: #dafbe1;
-      --gh-warning: #9a6700;
-      --gh-warning-subtle: #fff8c5;
-      --gh-danger: #cf222e;
-      --gh-danger-subtle: #ffebe9;
-      --gh-done: #8250df;
-      --gh-tooltip: #1f2328;
-      --gh-tooltip-text: #ffffff;
+      --gh-bg: #ffffff; --gh-bg-secondary: #f6f8fa; --gh-bg-tertiary: #eaeef2;
+      --gh-border: #d0d7de; --gh-text: #1f2328; --gh-text-secondary: #656d76;
+      --gh-text-muted: #8c959f; --gh-link: #0969da; --gh-accent: #0969da;
+      --gh-success: #1a7f37; --gh-success-subtle: #dafbe1;
+      --gh-warning: #9a6700; --gh-warning-subtle: #fff8c5;
+      --gh-danger: #cf222e; --gh-danger-subtle: #ffebe9;
     }
-
-    /* Dark mode */
     .dark {
-      --gh-bg: #0d1117;
-      --gh-bg-secondary: #161b22;
-      --gh-bg-tertiary: #21262d;
-      --gh-border: #30363d;
-      --gh-border-muted: #21262d;
-      --gh-text: #e6edf3;
-      --gh-text-secondary: #8b949e;
-      --gh-text-muted: #6e7681;
-      --gh-link: #58a6ff;
-      --gh-accent: #58a6ff;
-      --gh-accent-emphasis: #79c0ff;
-      --gh-success: #3fb950;
-      --gh-success-subtle: #12261e;
-      --gh-warning: #d29922;
-      --gh-warning-subtle: #2d2413;
-      --gh-danger: #f85149;
-      --gh-danger-subtle: #2d1b1b;
-      --gh-done: #a371f7;
-      --gh-tooltip: #e6edf3;
-      --gh-tooltip-text: #0d1117;
+      --gh-bg: #0d1117; --gh-bg-secondary: #161b22; --gh-bg-tertiary: #21262d;
+      --gh-border: #30363d; --gh-text: #e6edf3; --gh-text-secondary: #8b949e;
+      --gh-text-muted: #6e7681; --gh-link: #58a6ff; --gh-accent: #58a6ff;
+      --gh-success: #3fb950; --gh-success-subtle: #12261e;
+      --gh-warning: #d29922; --gh-warning-subtle: #2d2413;
+      --gh-danger: #f85149; --gh-danger-subtle: #2d1b1b;
     }
-
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--gh-border); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--gh-text-muted); }
-
-    @keyframes ghost-pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
+    @keyframes ghost-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     .animate-ghost-pulse { animation: ghost-pulse 1.5s ease-in-out infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .animate-spin { animation: spin 1s linear infinite; }
+    .chart-line { stroke-linecap: round; stroke-linejoin: round; fill: none; }
+    .chart-area { opacity: 0.15; }
   </style>
 </head>
 <body class="bg-gh-bg font-sans text-gh-text min-h-screen antialiased">
-  <!-- Global Tooltip -->
-  <div id="global-tooltip" class="fixed z-[100] px-2 py-1 text-xs font-medium bg-gh-tooltip text-gh-tooltip-text border border-gh-border rounded-md shadow-lg pointer-events-none opacity-0 transition-opacity duration-150 whitespace-nowrap max-w-[250px]">
-    <span id="global-tooltip-text"></span>
-  </div>
-
-  <!-- Top Left Action Icons -->
-  <div id="top-left-actions" class="fixed top-4 left-4 z-50 flex items-center gap-2 bg-gh-bg border border-gh-border rounded-gh p-1.5 shadow-lg">
-    <a href="https://github.com/astrox11/Whatsaly/fork" target="_blank" rel="noopener noreferrer" class="p-2 text-gh-text-secondary hover:text-gh-accent hover:bg-gh-bg-tertiary rounded-gh transition-colors" data-tooltip="Fork Repository">
-      <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 16 16" fill="currentColor">
-        <path d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Z"></path>
-      </svg>
-    </a>
-    <a href="https://github.com/astrox11/Whatsaly" target="_blank" rel="noopener noreferrer" class="p-2 text-gh-text-secondary hover:text-gh-warning hover:bg-gh-bg-tertiary rounded-gh transition-colors" data-tooltip="Star Repository">
-      <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 16 16" fill="currentColor">
-        <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"></path>
-      </svg>
-    </a>
-    <a href="https://wa.me/2348062795602" target="_blank" rel="noopener noreferrer" class="p-2 text-gh-text-secondary hover:text-gh-success hover:bg-gh-bg-tertiary rounded-gh transition-colors" data-tooltip="Chat on WhatsApp">
-      <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 16 16" fill="currentColor">
-        <path d="M1.75 1h8.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 10.25 10H7.061l-2.574 2.573A1.458 1.458 0 0 1 2 11.543V10h-.25A1.75 1.75 0 0 1 0 8.25v-5.5C0 1.784.784 1 1.75 1Z"></path>
-      </svg>
-    </a>
-    <div class="w-px h-5 bg-gh-border mx-0.5"></div>
-    <button id="theme-toggle" class="p-2 text-gh-text-secondary hover:text-gh-accent hover:bg-gh-bg-tertiary rounded-gh transition-colors" data-tooltip="Toggle Theme">
-      <svg id="theme-icon-auto" class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 16 16" fill="currentColor">
-        <path d="M14.064 0a8.75 8.75 0 0 0-6.187 2.563l-.459.458c-.314.314-.616.641-.904.979H3.31a1.75 1.75 0 0 0-1.49.833L.11 7.607a.75.75 0 0 0 .418 1.11l3.102.954c.037.051.079.1.124.145l2.429 2.428c.046.046.094.088.145.125l.954 3.102a.75.75 0 0 0 1.11.418l2.774-1.707a1.75 1.75 0 0 0 .833-1.49V9.485c.338-.288.665-.59.979-.904l.458-.459A8.75 8.75 0 0 0 16 1.936V1.75A1.75 1.75 0 0 0 14.25 0Z"></path>
-      </svg>
-      <svg id="theme-icon-light" class="w-4 h-4 sm:w-5 sm:h-5 hidden" viewBox="0 0 16 16" fill="currentColor">
-        <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 1.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11Z"></path>
-      </svg>
-      <svg id="theme-icon-dark" class="w-4 h-4 sm:w-5 sm:h-5 hidden" viewBox="0 0 16 16" fill="currentColor">
-        <path d="M9.598 1.591a.749.749 0 0 1 .785-.175 7.001 7.001 0 1 1-8.967 8.967.75.75 0 0 1 .961-.96 5.5 5.5 0 0 0 7.046-7.046.75.75 0 0 1 .175-.786Z"></path>
-      </svg>
-    </button>
-  </div>
-
-  <!-- Desktop Sidebar -->
-  <aside id="desktop-sidebar" class="hidden lg:flex fixed left-4 top-1/2 -translate-y-1/2 z-50 flex-col gap-2 bg-gh-bg border border-gh-border rounded-gh p-2 shadow-lg">
-    <button id="sidebar-info" class="p-2 text-gh-text-secondary hover:text-gh-accent hover:bg-gh-bg-tertiary rounded-gh transition-colors" data-tooltip="Info">
-      <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>
-    </button>
-    <button id="sidebar-settings" class="p-2 text-gh-text-secondary hover:text-gh-accent hover:bg-gh-bg-tertiary rounded-gh transition-colors" data-tooltip="Settings">
-      <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8.2 8.2 0 0 1 .701.031C9.444.095 9.99.645 10.16 1.29l.288 1.107c.018.066.079.158.212.224.231.114.454.243.668.386.123.082.233.09.299.071l1.103-.303c.644-.176 1.392.021 1.82.63.27.385.506.792.704 1.218.315.675.111 1.422-.364 1.891l-.814.806c-.049.048-.098.147-.088.294.016.257.016.515 0 .772-.01.147.04.246.088.294l.814.806c.475.469.679 1.216.364 1.891a7.977 7.977 0 0 1-.704 1.217c-.428.61-1.176.807-1.82.63l-1.102-.302c-.067-.019-.177-.011-.3.071a5.909 5.909 0 0 1-.668.386c-.133.066-.194.158-.212.224l-.288 1.107c-.17.645-.715 1.195-1.458 1.26a8.006 8.006 0 0 1-1.402 0c-.743-.065-1.289-.615-1.458-1.26l-.289-1.106c-.018-.066-.079-.158-.212-.225a5.893 5.893 0 0 1-.668-.386c-.123-.082-.233-.09-.299-.071l-1.103.303c-.644.176-1.392-.021-1.82-.63a8.004 8.004 0 0 1-.704-1.217c-.315-.675-.111-1.422.363-1.891l.815-.806c.05-.048.098-.147.088-.294a6.854 6.854 0 0 1 0-.772c.01-.147-.04-.246-.088-.294l-.815-.806C.635 6.045.431 5.298.746 4.623a7.92 7.92 0 0 1 .704-1.217c.428-.61 1.176-.807 1.82-.63l1.102.302c.067.019.177.011.3-.071.214-.143.437-.272.668-.386.133-.066.194-.158.212-.224l.289-1.106C6.009.645 6.556.095 7.299.03 7.53.01 7.764 0 8 0ZM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"></path></svg>
-    </button>
-    <button id="sidebar-console" class="p-2 text-gh-text-secondary hover:text-gh-text hover:bg-gh-bg-tertiary rounded-gh transition-colors" data-tooltip="View Logs">
-      <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor"><path d="M0 2.75C0 1.784.784 1 1.75 1h12.5c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 14.25 15H1.75A1.75 1.75 0 0 1 0 13.25Zm1.75-.25a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25Z"></path></svg>
-    </button>
-    <div class="h-px bg-gh-border my-1"></div>
-    <button id="sidebar-report" class="p-2 text-gh-text-secondary hover:text-gh-warning hover:bg-gh-bg-tertiary rounded-gh transition-colors" data-tooltip="Report">
-      <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Z"></path></svg>
-    </button>
-    <a href="https://github.com/astrox11/Whatsaly/pulls" target="_blank" rel="noopener noreferrer" class="p-2 text-gh-text-secondary hover:text-gh-success hover:bg-gh-bg-tertiary rounded-gh transition-colors" data-tooltip="Contribute">
-      <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354Z"></path></svg>
-    </a>
-  </aside>
-
-  <!-- Mobile Sidebar -->
-  <nav id="mobile-sidebar" class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-gh-bg border-t border-gh-border shadow-lg">
-    <div class="flex items-center justify-around py-2 px-2 sm:px-4">
-      <button id="mobile-info" class="flex flex-col items-center p-1.5 sm:p-2 text-gh-text-secondary hover:text-gh-accent transition-colors" data-tooltip="Info">
-        <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 16 16" fill="currentColor"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13Z"></path></svg>
-        <span class="text-[9px] sm:text-[10px] mt-0.5">Info</span>
-      </button>
-      <button id="mobile-settings" class="flex flex-col items-center p-1.5 sm:p-2 text-gh-text-secondary hover:text-gh-accent transition-colors" data-tooltip="Settings">
-        <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8.2 8.2 0 0 1 .701.031C9.444.095 9.99.645 10.16 1.29l.288 1.107Z"></path></svg>
-        <span class="text-[9px] sm:text-[10px] mt-0.5">Settings</span>
-      </button>
-      <button id="mobile-console" class="flex flex-col items-center p-1.5 sm:p-2 text-gh-text-secondary hover:text-gh-text transition-colors" data-tooltip="Logs">
-        <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 16 16" fill="currentColor"><path d="M0 2.75C0 1.784.784 1 1.75 1h12.5c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 14.25 15H1.75A1.75 1.75 0 0 1 0 13.25Z"></path></svg>
-        <span class="text-[9px] sm:text-[10px] mt-0.5">Logs</span>
-      </button>
-      <button id="mobile-report" class="flex flex-col items-center p-1.5 sm:p-2 text-gh-text-secondary hover:text-gh-warning transition-colors" data-tooltip="Report">
-        <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 16 16" fill="currentColor"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Z"></path></svg>
-        <span class="text-[9px] sm:text-[10px] mt-0.5">Report</span>
-      </button>
-      <a href="https://github.com/astrox11/Whatsaly/pulls" target="_blank" rel="noopener noreferrer" class="flex flex-col items-center p-1.5 sm:p-2 text-gh-text-secondary hover:text-gh-success transition-colors" data-tooltip="Contribute">
-        <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Z"></path></svg>
-        <span class="text-[9px] sm:text-[10px] mt-0.5">Contribute</span>
-      </a>
+  <!-- Header - Sticky, doesn't cover content -->
+  <header class="sticky top-0 z-40 bg-gh-bg/95 backdrop-blur border-b border-gh-border">
+    <div class="max-w-6xl mx-auto px-3 sm:px-4 py-2 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <svg class="w-6 h-6 text-gh-success" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path></svg>
+        <span class="text-base sm:text-lg font-bold text-gh-text">Whatsaly</span>
+      </div>
+      <div class="flex items-center gap-1 sm:gap-2">
+        <a href="https://github.com/astrox11/Whatsaly/fork" target="_blank" class="p-1.5 sm:p-2 text-gh-text-secondary hover:text-gh-accent rounded-gh hover:bg-gh-bg-tertiary" title="Fork Repository">
+          <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Z"></path></svg>
+        </a>
+        <a href="https://github.com/astrox11/Whatsaly" target="_blank" class="p-1.5 sm:p-2 text-gh-text-secondary hover:text-gh-warning rounded-gh hover:bg-gh-bg-tertiary" title="Star Repository">
+          <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"></path></svg>
+        </a>
+        <a href="https://wa.me/2348062795602" target="_blank" class="p-1.5 sm:p-2 text-gh-text-secondary hover:text-gh-success rounded-gh hover:bg-gh-bg-tertiary" title="Contact">
+          <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="M1.75 1h8.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 10.25 10H7.061l-2.574 2.573A1.458 1.458 0 0 1 2 11.543V10h-.25A1.75 1.75 0 0 1 0 8.25v-5.5C0 1.784.784 1 1.75 1Z"></path></svg>
+        </a>
+        <div class="w-px h-4 bg-gh-border mx-1"></div>
+        <button id="theme-toggle" class="p-1.5 sm:p-2 text-gh-text-secondary hover:text-gh-accent rounded-gh hover:bg-gh-bg-tertiary" title="Toggle Theme">
+          <svg id="theme-icon-auto" class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="M14.064 0a8.75 8.75 0 0 0-6.187 2.563l-.459.458c-.314.314-.616.641-.904.979H3.31a1.75 1.75 0 0 0-1.49.833L.11 7.607a.75.75 0 0 0 .418 1.11l3.102.954c.037.051.079.1.124.145l2.429 2.428c.046.046.094.088.145.125l.954 3.102a.75.75 0 0 0 1.11.418l2.774-1.707a1.75 1.75 0 0 0 .833-1.49V9.485c.338-.288.665-.59.979-.904l.458-.459A8.75 8.75 0 0 0 16 1.936V1.75A1.75 1.75 0 0 0 14.25 0Z"></path></svg>
+          <svg id="theme-icon-light" class="w-4 h-4 hidden" viewBox="0 0 16 16" fill="currentColor"><path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 1.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11Z"></path></svg>
+          <svg id="theme-icon-dark" class="w-4 h-4 hidden" viewBox="0 0 16 16" fill="currentColor"><path d="M9.598 1.591a.749.749 0 0 1 .785-.175 7.001 7.001 0 1 1-8.967 8.967.75.75 0 0 1 .961-.96 5.5 5.5 0 0 0 7.046-7.046.75.75 0 0 1 .175-.786Z"></path></svg>
+        </button>
+      </div>
     </div>
-  </nav>
+  </header>
 
   <!-- Main Content -->
-  <main class="max-w-5xl mx-auto px-4 py-6 pb-20 lg:pb-6 lg:pl-20">
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
+  <main class="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-20 lg:pb-6">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
       <div>
-        <h1 class="text-2xl font-bold text-gh-text">Sessions</h1>
-        <p class="text-sm text-gh-text-secondary">Manage your WhatsApp sessions</p>
+        <h1 class="text-xl sm:text-2xl font-bold text-gh-text">Sessions</h1>
+        <p class="text-xs sm:text-sm text-gh-text-secondary">Manage your WhatsApp sessions</p>
       </div>
-      <button id="create-session-btn" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gh-success rounded-gh hover:bg-green-700 transition-colors">
+      <button id="create-session-btn" class="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium text-white bg-gh-success rounded-gh hover:opacity-90 transition-opacity">
         <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"></path></svg>
-        New Session
+        <span>New Session</span>
       </button>
     </div>
 
-    <!-- Stats Overview -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <div class="bg-gh-bg border border-gh-border rounded-gh p-4">
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
+      <div class="bg-gh-bg border border-gh-border rounded-gh p-3 sm:p-4">
         <div class="flex items-center gap-2 mb-1">
-          <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Z"></path></svg>
-          <p class="text-xs text-gh-text-secondary">Total Sessions</p>
+          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Z"></path></svg>
+          <p class="text-[10px] sm:text-xs text-gh-text-secondary">Total</p>
         </div>
-        <p id="total-sessions" class="text-2xl font-bold text-gh-text">0</p>
+        <p id="total-sessions" class="text-lg sm:text-2xl font-bold text-gh-text">0</p>
       </div>
-      <div class="bg-gh-bg border border-gh-border rounded-gh p-4">
+      <div class="bg-gh-bg border border-gh-border rounded-gh p-3 sm:p-4">
         <div class="flex items-center gap-2 mb-1">
-          <svg class="w-4 h-4 text-gh-success" viewBox="0 0 16 16" fill="currentColor"><path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"></path><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"></path></svg>
-          <p class="text-xs text-gh-text-secondary">Active</p>
+          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gh-success" viewBox="0 0 16 16" fill="currentColor"><path d="M8 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8Z"></path></svg>
+          <p class="text-[10px] sm:text-xs text-gh-text-secondary">Active</p>
         </div>
-        <p id="active-sessions" class="text-2xl font-bold text-gh-success">0</p>
+        <p id="active-sessions" class="text-lg sm:text-2xl font-bold text-gh-success">0</p>
       </div>
-      <div class="bg-gh-bg border border-gh-border rounded-gh p-4">
+      <div class="bg-gh-bg border border-gh-border rounded-gh p-3 sm:p-4">
         <div class="flex items-center gap-2 mb-1">
-          <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor"><path d="M1.75 1h8.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 10.25 10H7.061l-2.574 2.573A1.458 1.458 0 0 1 2 11.543V10h-.25A1.75 1.75 0 0 1 0 8.25v-5.5C0 1.784.784 1 1.75 1Z"></path></svg>
-          <p class="text-xs text-gh-text-secondary">Messages</p>
+          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor"><path d="M1.75 1h8.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 10.25 10H7.061l-2.574 2.573A1.458 1.458 0 0 1 2 11.543V10h-.25A1.75 1.75 0 0 1 0 8.25v-5.5C0 1.784.784 1 1.75 1Z"></path></svg>
+          <p class="text-[10px] sm:text-xs text-gh-text-secondary">Messages</p>
         </div>
-        <p id="total-messages" class="text-2xl font-bold text-gh-text">0</p>
+        <p id="total-messages" class="text-lg sm:text-2xl font-bold text-gh-text">0</p>
       </div>
-      <div class="bg-gh-bg border border-gh-border rounded-gh p-4">
+      <div class="bg-gh-bg border border-gh-border rounded-gh p-3 sm:p-4">
         <div class="flex items-center gap-2 mb-1">
-          <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 8a6.5 6.5 0 1 1 13 0 6.5 6.5 0 0 1-13 0ZM8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM6.379 5.227A.25.25 0 0 0 6 5.442v5.117a.25.25 0 0 0 .379.214l4.264-2.559a.25.25 0 0 0 0-.428Z"></path></svg>
-          <p class="text-xs text-gh-text-secondary">Uptime</p>
+          <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm7-3.25v2.992l2.028.812a.75.75 0 0 1-.557 1.392l-2.5-1A.751.751 0 0 1 7 8.25v-3.5a.75.75 0 0 1 1.5 0Z"></path></svg>
+          <p class="text-[10px] sm:text-xs text-gh-text-secondary">Uptime</p>
         </div>
-        <p id="uptime" class="text-2xl font-bold text-gh-text">--</p>
+        <p id="uptime" class="text-lg sm:text-2xl font-bold text-gh-text">--</p>
       </div>
     </div>
-
-    <!-- Sessions List -->
-    <div class="bg-gh-bg border border-gh-border rounded-gh">
-      <div class="p-4 border-b border-gh-border">
-        <h2 class="text-sm font-semibold text-gh-text">Active Sessions</h2>
-      </div>
-      <div id="sessions-list" class="divide-y divide-gh-border">
-        <div class="p-8 text-center">
-          <div class="space-y-3 max-w-xs mx-auto">
-            <div class="h-6 bg-gh-bg-tertiary rounded-gh animate-ghost-pulse"></div>
-            <div class="h-6 bg-gh-bg-tertiary rounded-gh animate-ghost-pulse w-4/5 mx-auto"></div>
+    <!-- Two Column Layout -->
+    <div class="grid lg:grid-cols-3 gap-4 sm:gap-6">
+      <!-- Sessions List -->
+      <div class="lg:col-span-2 space-y-4">
+        <div class="bg-gh-bg border border-gh-border rounded-gh overflow-hidden">
+          <div class="p-3 sm:p-4 border-b border-gh-border flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-gh-text flex items-center gap-2">
+              <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor"><path d="M2 5.5a3.5 3.5 0 1 1 5.898 2.549 5.508 5.508 0 0 1 3.034 4.084.75.75 0 1 1-1.482.235 4 4 0 0 0-7.9 0 .75.75 0 0 1-1.482-.236A5.507 5.507 0 0 1 3.102 8.05 3.493 3.493 0 0 1 2 5.5ZM11 4a3.001 3.001 0 0 1 2.22 5.018 5.01 5.01 0 0 1 2.56 3.012.749.749 0 0 1-.885.954.752.752 0 0 1-.549-.514 3.507 3.507 0 0 0-2.522-2.372.75.75 0 0 1-.574-.73v-.352a.75.75 0 0 1 .416-.672A1.5 1.5 0 0 0 11 5.5.75.75 0 0 1 11 4Zm-5.5-.5a2 2 0 1 0-.001 3.999A2 2 0 0 0 5.5 3.5Z"></path></svg>
+              Sessions
+            </h2>
+            <span id="session-count-badge" class="px-2 py-0.5 text-xs font-medium rounded bg-gh-bg-tertiary text-gh-text-muted">0</span>
           </div>
-          <p class="text-sm text-gh-text-muted mt-4">Loading sessions...</p>
+          <div id="sessions-list" class="divide-y divide-gh-border max-h-[350px] sm:max-h-[400px] overflow-y-auto">
+            <div class="p-6 text-center">
+              <div class="space-y-2 max-w-[200px] mx-auto">
+                <div class="h-4 bg-gh-bg-tertiary rounded animate-ghost-pulse"></div>
+                <div class="h-4 bg-gh-bg-tertiary rounded animate-ghost-pulse w-3/4 mx-auto"></div>
+              </div>
+              <p class="text-xs text-gh-text-muted mt-3">Loading sessions...</p>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Process Manager Panel -->
-    <div class="mt-6 bg-gh-bg border border-gh-border rounded-gh">
-      <div class="p-4 border-b border-gh-border flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <svg class="w-4 h-4 text-gh-accent" viewBox="0 0 16 16" fill="currentColor"><path d="M0 2.75C0 1.784.784 1 1.75 1h12.5c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 14.25 15H1.75A1.75 1.75 0 0 1 0 13.25Z"></path></svg>
-          <h2 class="text-sm font-semibold text-gh-text">Process Manager</h2>
+        <!-- Process Manager -->
+        <div class="bg-gh-bg border border-gh-border rounded-gh">
+          <div class="p-3 sm:p-4 border-b border-gh-border flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-gh-text flex items-center gap-2">
+              <svg class="w-4 h-4 text-gh-accent" viewBox="0 0 16 16" fill="currentColor"><path d="M1.75 1h12.5c.966 0 1.75.784 1.75 1.75v4c0 .372-.116.717-.314 1 .198.283.314.628.314 1v4a1.75 1.75 0 0 1-1.75 1.75H1.75A1.75 1.75 0 0 1 0 12.75v-4c0-.372.116-.717.314-1a1.739 1.739 0 0 1-.314-1v-4C0 1.784.784 1 1.75 1ZM1.5 2.75v4c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25v-4a.25.25 0 0 0-.25-.25H1.75a.25.25 0 0 0-.25.25Zm.25 5.75a.25.25 0 0 0-.25.25v4c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25v-4a.25.25 0 0 0-.25-.25ZM7 4.75A.75.75 0 0 1 7.75 4h4.5a.75.75 0 0 1 0 1.5h-4.5A.75.75 0 0 1 7 4.75ZM7.75 10h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM3 4.75A.75.75 0 0 1 3.75 4h.5a.75.75 0 0 1 0 1.5h-.5A.75.75 0 0 1 3 4.75ZM3.75 10h.5a.75.75 0 0 1 0 1.5h-.5a.75.75 0 0 1 0-1.5Z"></path></svg>
+              Process Manager
+            </h2>
+            <span id="process-status-badge" class="px-2 py-0.5 text-xs font-medium rounded bg-gh-bg-tertiary text-gh-text-muted">Loading...</span>
+          </div>
+          <div class="p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p class="text-sm text-gh-text">BunJS Backend</p>
+              <p id="process-error" class="text-xs text-gh-danger mt-1 hidden"></p>
+            </div>
+            <button id="restart-process-btn" class="px-3 py-1.5 text-xs font-medium text-gh-text bg-gh-bg-secondary border border-gh-border rounded-gh hover:bg-gh-bg-tertiary transition-colors">
+              Restart Process
+            </button>
+          </div>
         </div>
-        <span id="process-status-badge" class="px-2 py-0.5 text-xs font-medium rounded bg-gh-bg-tertiary text-gh-text-muted">Loading...</span>
       </div>
-      <div class="p-4 flex items-center justify-between">
-        <div>
-          <p class="text-sm text-gh-text">BunJS Backend Status</p>
-          <p id="process-error" class="text-xs text-gh-danger mt-1 hidden"></p>
+
+      <!-- Right Column -->
+      <div class="space-y-4">
+        <!-- Memory Chart -->
+        <div class="bg-gh-bg border border-gh-border rounded-gh">
+          <div class="p-3 sm:p-4 border-b border-gh-border flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-gh-text flex items-center gap-2">
+              <svg class="w-4 h-4 text-gh-success" viewBox="0 0 16 16" fill="currentColor"><path d="M6.5.75V2h3V.75a.75.75 0 0 1 1.5 0V2h1.25c.966 0 1.75.784 1.75 1.75V5h1.25a.75.75 0 0 1 0 1.5H14v3h1.25a.75.75 0 0 1 0 1.5H14v1.25A1.75 1.75 0 0 1 12.25 14H11v1.25a.75.75 0 0 1-1.5 0V14h-3v1.25a.75.75 0 0 1-1.5 0V14H3.75A1.75 1.75 0 0 1 2 12.25V11H.75a.75.75 0 0 1 0-1.5H2v-3H.75a.75.75 0 0 1 0-1.5H2V3.75C2 2.784 2.784 2 3.75 2H5V.75a.75.75 0 0 1 1.5 0Zm5.75 11.75a.25.25 0 0 0 .25-.25v-8.5a.25.25 0 0 0-.25-.25h-8.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25ZM5.75 5h4.5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-.75.75h-4.5a.75.75 0 0 1-.75-.75v-4.5A.75.75 0 0 1 5.75 5Zm.75 4.5h3v-3h-3Z"></path></svg>
+              Memory Usage
+            </h2>
+            <span id="memory-current" class="text-xs font-mono text-gh-text">-- MB</span>
+          </div>
+          <div class="p-3 sm:p-4">
+            <div class="relative h-20 sm:h-24 bg-gh-bg-secondary rounded overflow-hidden">
+              <svg id="memory-chart" class="w-full h-full" viewBox="0 0 300 80" preserveAspectRatio="none">
+                <path id="memory-area" class="chart-area fill-gh-success" d=""></path>
+                <path id="memory-line" class="chart-line stroke-gh-success" stroke-width="2" d=""></path>
+              </svg>
+              <div id="memory-skeleton" class="absolute inset-0 flex items-center justify-center bg-gh-bg-secondary">
+                <div class="w-3/4 h-2 bg-gh-bg-tertiary rounded animate-ghost-pulse"></div>
+              </div>
+            </div>
+            <div class="mt-2 flex justify-between text-[10px] text-gh-text-muted">
+              <span>60s ago</span>
+              <span>Now</span>
+            </div>
+            <div class="mt-2 grid grid-cols-3 gap-2 text-center">
+              <div><p class="text-[10px] text-gh-text-muted">Peak</p><p id="memory-peak" class="text-xs font-medium text-gh-text">-- MB</p></div>
+              <div><p class="text-[10px] text-gh-text-muted">Avg</p><p id="memory-avg" class="text-xs font-medium text-gh-text">-- MB</p></div>
+              <div><p class="text-[10px] text-gh-text-muted">GCs</p><p id="memory-gc" class="text-xs font-medium text-gh-text">--</p></div>
+            </div>
+          </div>
         </div>
-        <button id="restart-process-btn" class="px-3 py-1.5 text-xs font-medium text-gh-text bg-gh-bg-secondary border border-gh-border rounded-gh hover:bg-gh-bg-tertiary transition-colors">
-          Restart Process
-        </button>
+
+        <!-- Network Status -->
+        <div class="bg-gh-bg border border-gh-border rounded-gh">
+          <div class="p-3 sm:p-4 border-b border-gh-border flex items-center justify-between">
+            <h2 class="text-sm font-semibold text-gh-text flex items-center gap-2">
+              <svg class="w-4 h-4 text-gh-accent" viewBox="0 0 16 16" fill="currentColor"><path d="M8.75 8.582v5.668a.75.75 0 0 1-1.5 0V8.582a1.75 1.75 0 1 1 1.5 0Zm3.983-7.125a.75.75 0 0 1 1.06.026A7.976 7.976 0 0 1 16 7c0 2.139-.84 4.083-2.207 5.517a.75.75 0 1 1-1.086-1.034A6.474 6.474 0 0 0 14.5 7a6.476 6.476 0 0 0-1.793-4.483.75.75 0 0 1 .026-1.06Zm-9.466 0a.75.75 0 0 1 .026 1.06A6.476 6.476 0 0 0 1.5 7a6.474 6.474 0 0 0 1.793 4.483.75.75 0 1 1-1.086 1.034A7.976 7.976 0 0 1 0 7c0-2.139.84-4.083 2.207-5.517a.75.75 0 0 1 1.06-.026Z"></path></svg>
+              Network
+            </h2>
+            <span id="network-status-badge" class="px-1.5 py-0.5 text-xs font-medium rounded bg-gh-success-subtle text-gh-success">Connected</span>
+          </div>
+          <div class="p-3 sm:p-4 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-gh-text-secondary">WebSocket</span>
+              <span class="flex items-center gap-1.5"><span id="ws-indicator" class="w-2 h-2 rounded-full bg-gh-success"></span><span id="ws-status" class="text-xs font-medium text-gh-success">Active</span></span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-gh-text-secondary">API Health</span>
+              <span class="flex items-center gap-1.5"><span id="api-indicator" class="w-2 h-2 rounded-full bg-gh-success"></span><span id="api-status" class="text-xs font-medium text-gh-success">Healthy</span></span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-gh-text-secondary">Latency</span>
+              <span id="network-latency" class="text-xs font-medium text-gh-text">-- ms</span>
+            </div>
+            <div class="pt-2 border-t border-gh-border flex justify-between text-[10px] text-gh-text-muted">
+              <span>Req: <span id="net-requests" class="text-gh-text">0</span></span>
+              <span>OK: <span id="net-success" class="text-gh-success">0</span></span>
+              <span>Err: <span id="net-failed" class="text-gh-danger">0</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Info -->
+        <div class="bg-gh-bg border border-gh-border rounded-gh">
+          <div class="p-3 sm:p-4 border-b border-gh-border">
+            <h2 class="text-sm font-semibold text-gh-text flex items-center gap-2">
+              <svg class="w-4 h-4 text-gh-text-secondary" viewBox="0 0 16 16" fill="currentColor"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>
+              System Info
+            </h2>
+          </div>
+          <div class="p-3 sm:p-4 space-y-1.5 text-xs">
+            <div class="flex justify-between"><span class="text-gh-text-secondary">Platform</span><span id="sys-platform" class="font-mono text-gh-text">--</span></div>
+            <div class="flex justify-between"><span class="text-gh-text-secondary">Arch</span><span id="sys-arch" class="font-mono text-gh-text">--</span></div>
+            <div class="flex justify-between"><span class="text-gh-text-secondary">Go</span><span id="sys-go" class="font-mono text-gh-text">--</span></div>
+            <div class="flex justify-between"><span class="text-gh-text-secondary">CPUs</span><span id="sys-cpus" class="font-mono text-gh-text">--</span></div>
+            <div class="flex justify-between"><span class="text-gh-text-secondary">Goroutines</span><span id="sys-goroutines" class="font-mono text-gh-text">--</span></div>
+          </div>
+        </div>
       </div>
     </div>
   </main>
 
+  <!-- Mobile Bottom Nav -->
+  <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-gh-bg border-t border-gh-border">
+    <div class="flex items-center justify-around py-2 px-1">
+      <a href="/" class="flex flex-col items-center p-1.5 text-gh-accent">
+        <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor"><path d="M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Z"></path></svg>
+        <span class="text-[10px] mt-0.5">Home</span>
+      </a>
+      <button id="mobile-logs-btn" class="flex flex-col items-center p-1.5 text-gh-text-secondary hover:text-gh-accent">
+        <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor"><path d="M0 2.75C0 1.784.784 1 1.75 1h12.5c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 14.25 15H1.75A1.75 1.75 0 0 1 0 13.25Zm1.75-.25a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25Z"></path></svg>
+        <span class="text-[10px] mt-0.5">Logs</span>
+      </button>
+      <a href="https://github.com/astrox11/Whatsaly/issues" target="_blank" class="flex flex-col items-center p-1.5 text-gh-text-secondary hover:text-gh-warning">
+        <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Z"></path></svg>
+        <span class="text-[10px] mt-0.5">Report</span>
+      </a>
+      <a href="https://github.com/astrox11/Whatsaly/pulls" target="_blank" class="flex flex-col items-center p-1.5 text-gh-text-secondary hover:text-gh-success">
+        <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354Z"></path></svg>
+        <span class="text-[10px] mt-0.5">Contrib</span>
+      </a>
+    </div>
+  </nav>
   <!-- Create Session Modal -->
-  <div id="create-session-modal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0 bg-black/50" id="create-session-modal-backdrop"></div>
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-gh-bg border border-gh-border rounded-gh shadow-xl">
+  <div id="create-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50" id="create-modal-backdrop"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-md bg-gh-bg border border-gh-border rounded-gh shadow-xl">
       <div class="p-4 border-b border-gh-border flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <svg class="w-4 h-4 text-gh-success" viewBox="0 0 16 16" fill="currentColor"><path d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"></path></svg>
-          <h2 class="text-sm font-semibold text-gh-text">Create New Session</h2>
-        </div>
-        <button id="close-create-modal" class="p-1 text-gh-text-secondary hover:text-gh-text transition-colors">
+        <h2 class="text-sm font-semibold text-gh-text">Create New Session</h2>
+        <button id="close-create-modal" class="p-1 text-gh-text-secondary hover:text-gh-text">
           <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor"><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"></path></svg>
         </button>
       </div>
-      <form id="modal-session-form" class="p-4 space-y-4">
+      <form id="session-form" class="p-4 space-y-4">
         <div>
-          <label for="modal-phone" class="block text-sm font-medium text-gh-text mb-1">Phone Number</label>
-          <input type="tel" id="modal-phone" name="phoneNumber" placeholder="14155551234" required pattern="[0-9]+" class="w-full px-3 py-1.5 text-sm bg-gh-bg border border-gh-border rounded-gh text-gh-text placeholder-gh-text-muted focus:outline-none focus:border-gh-accent focus:ring-1 focus:ring-gh-accent">
+          <label class="block text-sm font-medium text-gh-text mb-1">Phone Number</label>
+          <input type="tel" name="phoneNumber" placeholder="14155551234" required pattern="[0-9]+" class="w-full px-3 py-2 text-sm bg-gh-bg border border-gh-border rounded-gh text-gh-text placeholder-gh-text-muted focus:outline-none focus:border-gh-accent">
           <p class="text-xs text-gh-text-muted mt-1">Include country code without + symbol</p>
         </div>
         <div>
-          <label for="modal-botName" class="block text-sm font-medium text-gh-text mb-1">Bot Name <span class="text-gh-text-muted font-normal">(optional)</span></label>
-          <input type="text" id="modal-botName" name="botName" placeholder="My Bot" class="w-full px-3 py-1.5 text-sm bg-gh-bg border border-gh-border rounded-gh text-gh-text placeholder-gh-text-muted focus:outline-none focus:border-gh-accent focus:ring-1 focus:ring-gh-accent">
+          <label class="block text-sm font-medium text-gh-text mb-1">Bot Name <span class="text-gh-text-muted">(optional)</span></label>
+          <input type="text" name="botName" placeholder="My Bot" class="w-full px-3 py-2 text-sm bg-gh-bg border border-gh-border rounded-gh text-gh-text placeholder-gh-text-muted focus:outline-none focus:border-gh-accent">
         </div>
-        <div id="modal-error-message" class="p-3 rounded-gh bg-gh-danger-subtle border border-gh-danger text-gh-danger text-sm hidden"></div>
-        <button type="submit" class="w-full py-2 px-4 text-sm font-medium rounded-gh bg-gh-success text-white hover:bg-green-700 transition-colors">Create Session</button>
+        <div id="form-error" class="p-3 rounded-gh bg-gh-danger-subtle text-gh-danger text-sm hidden"></div>
+        <button type="submit" class="w-full py-2 px-4 text-sm font-medium rounded-gh bg-gh-success text-white hover:opacity-90">Create Session</button>
       </form>
     </div>
   </div>
@@ -324,355 +327,311 @@
   <!-- Logs Modal -->
   <div id="logs-modal" class="fixed inset-0 z-50 hidden">
     <div class="absolute inset-0 bg-black/50" id="logs-modal-backdrop"></div>
-    <div class="absolute inset-4 lg:inset-20 bg-gh-bg border border-gh-border rounded-gh shadow-xl flex flex-col">
-      <div class="p-4 border-b border-gh-border flex items-center justify-between">
+    <div class="absolute inset-3 sm:inset-4 lg:inset-16 bg-gh-bg border border-gh-border rounded-gh shadow-xl flex flex-col">
+      <div class="p-3 sm:p-4 border-b border-gh-border flex items-center justify-between">
         <h2 class="text-sm font-semibold text-gh-text">Application Logs</h2>
-        <button id="close-logs-modal" class="p-1 text-gh-text-secondary hover:text-gh-text transition-colors">
+        <button id="close-logs-modal" class="p-1 text-gh-text-secondary hover:text-gh-text">
           <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor"><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"></path></svg>
         </button>
       </div>
-      <div id="logs-container" class="flex-1 p-4 overflow-auto font-mono text-xs text-gh-text-secondary bg-gh-bg-secondary">
+      <div id="logs-container" class="flex-1 p-3 sm:p-4 overflow-auto font-mono text-xs text-gh-text-secondary bg-gh-bg-secondary">
         <p class="text-gh-text-muted">Logs will appear here...</p>
       </div>
     </div>
   </div>
 
-  <!-- Info Modal -->
-  <div id="info-modal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0 bg-black/50" id="info-modal-backdrop"></div>
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-gh-bg border border-gh-border rounded-gh shadow-xl">
-      <div class="p-4 border-b border-gh-border flex items-center justify-between">
-        <h2 class="text-sm font-semibold text-gh-text">System Information</h2>
-        <button id="close-info-modal" class="p-1 text-gh-text-secondary hover:text-gh-text transition-colors">
-          <svg class="w-5 h-5" viewBox="0 0 16 16" fill="currentColor"><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"></path></svg>
-        </button>
-      </div>
-      <div class="p-4 space-y-4">
-        <div class="bg-gh-bg-secondary rounded-gh p-3">
-          <h3 class="text-xs font-semibold text-gh-text-muted uppercase tracking-wider mb-2">Application</h3>
-          <div class="space-y-2">
-            <div class="flex justify-between items-center">
-              <span class="text-sm text-gh-text-secondary">Version</span>
-              <span id="info-version" class="text-sm font-mono text-gh-text">-</span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="text-sm text-gh-text-secondary">Sessions</span>
-              <span id="info-sessions" class="text-sm font-mono text-gh-text">-</span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="text-sm text-gh-text-secondary">Active</span>
-              <span id="info-active" class="text-sm font-mono text-gh-text">-</span>
-            </div>
-          </div>
-        </div>
-        <div class="bg-gh-bg-secondary rounded-gh p-3">
-          <h3 class="text-xs font-semibold text-gh-text-muted uppercase tracking-wider mb-2">Browser</h3>
-          <div class="space-y-2">
-            <div class="flex justify-between items-center">
-              <span class="text-sm text-gh-text-secondary">Browser</span>
-              <span id="info-browser" class="text-sm font-mono text-gh-text">-</span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span class="text-sm text-gh-text-secondary">Screen</span>
-              <span id="info-screen" class="text-sm font-mono text-gh-text">-</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <script>
-    // API Module
-    const API_BASE = '';
+    // API & WebSocket
     let ws = null;
-    let statsCallbacks = [];
-
+    let wsRetries = 0;
+    const statsCallbacks = [];
+    const networkStats = { requests: 0, success: 0, failed: 0, latency: 0, wsConnected: false, apiHealthy: true };
+    
     const api = {
-      async createSession(phoneNumber, botName) {
-        const response = await fetch(`${API_BASE}/api/sessions`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phoneNumber, botName })
-        });
-        return response.json();
+      async fetch(url, options = {}) {
+        networkStats.requests++;
+        const start = performance.now();
+        try {
+          const res = await fetch(url, options);
+          networkStats.latency = Math.round(performance.now() - start);
+          if (res.ok) { networkStats.success++; networkStats.apiHealthy = true; }
+          else { networkStats.failed++; }
+          updateNetworkUI();
+          return res.json();
+        } catch (e) {
+          networkStats.failed++;
+          networkStats.apiHealthy = false;
+          updateNetworkUI();
+          throw e;
+        }
       },
-      async deleteSession(sessionId) {
-        const response = await fetch(`${API_BASE}/api/sessions/${sessionId}`, { method: 'DELETE' });
-        return response.json();
+      createSession: (phone, name) => api.fetch('/api/sessions', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({phoneNumber: phone, botName: name}) }),
+      deleteSession: (id) => api.fetch(`/api/sessions/${id}`, { method: 'DELETE' }),
+      pauseSession: (id) => api.fetch(`/api/sessions/${id}/pause`, { method: 'POST' }),
+      resumeSession: (id) => api.fetch(`/api/sessions/${id}/resume`, { method: 'POST' }),
+      getStats: () => api.fetch('/api/stats/full'),
+      getProcessStatus: () => api.fetch('/api/process/status'),
+      restartProcess: () => api.fetch('/api/process/restart', { method: 'POST' }),
+      getSystemStats: () => api.fetch('/api/go/system-stats'),
+      connectWS() {
+        const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        ws = new WebSocket(`${protocol}//${location.host}/ws/stats`);
+        ws.onopen = () => { networkStats.wsConnected = true; wsRetries = 0; updateNetworkUI(); };
+        ws.onmessage = (e) => { try { const d = JSON.parse(e.data); statsCallbacks.forEach(cb => cb(d)); } catch {} };
+        ws.onclose = () => { networkStats.wsConnected = false; updateNetworkUI(); setTimeout(() => api.connectWS(), Math.min(3000 * ++wsRetries, 30000)); };
+        ws.onerror = () => { networkStats.wsConnected = false; };
       },
-      async getOverallStats() {
-        const response = await fetch(`${API_BASE}/api/stats/full`);
-        return response.json();
-      },
-      async getProcessStatus() {
-        const response = await fetch(`${API_BASE}/api/process/status`);
-        return response.json();
-      },
-      async restartProcess() {
-        const response = await fetch(`${API_BASE}/api/process/restart`, { method: 'POST' });
-        return response.json();
-      },
-      connectWebSocket() {
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        ws = new WebSocket(`${protocol}//${window.location.host}/ws/stats`);
-        ws.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            statsCallbacks.forEach(cb => cb(data));
-          } catch (e) { console.error('WS parse error:', e); }
-        };
-        ws.onclose = () => setTimeout(() => api.connectWebSocket(), 3000);
-        ws.onerror = (e) => console.error('WS error:', e);
-      },
-      onStats(callback) { statsCallbacks.push(callback); }
+      onStats(cb) { statsCallbacks.push(cb); }
     };
 
-    // Initialize WebSocket
-    api.connectWebSocket();
-
     // DOM Elements
-    const createSessionBtn = document.getElementById('create-session-btn');
-    const createSessionModal = document.getElementById('create-session-modal');
-    const closeCreateModal = document.getElementById('close-create-modal');
-    const createModalBackdrop = document.getElementById('create-session-modal-backdrop');
-    const sessionForm = document.getElementById('modal-session-form');
-    const modalErrorMessage = document.getElementById('modal-error-message');
-    const sessionsList = document.getElementById('sessions-list');
-    const totalSessionsEl = document.getElementById('total-sessions');
-    const activeSessionsEl = document.getElementById('active-sessions');
-    const totalMessagesEl = document.getElementById('total-messages');
-    const uptimeEl = document.getElementById('uptime');
-    const processStatusBadge = document.getElementById('process-status-badge');
-    const processError = document.getElementById('process-error');
-    const restartProcessBtn = document.getElementById('restart-process-btn');
-    const logsModal = document.getElementById('logs-modal');
-    const logsContainer = document.getElementById('logs-container');
-    const closeLogsModal = document.getElementById('close-logs-modal');
-    const logsModalBackdrop = document.getElementById('logs-modal-backdrop');
-    const infoModal = document.getElementById('info-modal');
-    const closeInfoModal = document.getElementById('close-info-modal');
-    const infoModalBackdrop = document.getElementById('info-modal-backdrop');
-    const sidebarConsole = document.getElementById('sidebar-console');
-    const mobileConsole = document.getElementById('mobile-console');
-    const sidebarInfo = document.getElementById('sidebar-info');
-    const mobileInfo = document.getElementById('mobile-info');
-    const themeToggle = document.getElementById('theme-toggle');
+    const $ = (s) => document.getElementById(s);
+    const totalSessionsEl = $('total-sessions'), activeSessionsEl = $('active-sessions'), totalMessagesEl = $('total-messages'), uptimeEl = $('uptime');
+    const sessionsListEl = $('sessions-list'), sessionCountBadge = $('session-count-badge');
+    const processStatusBadge = $('process-status-badge'), processError = $('process-error'), restartBtn = $('restart-process-btn');
+    const memoryCurrentEl = $('memory-current'), memoryPeakEl = $('memory-peak'), memoryAvgEl = $('memory-avg'), memoryGcEl = $('memory-gc');
+    const memoryChart = $('memory-chart'), memoryLine = $('memory-line'), memoryArea = $('memory-area'), memorySkeleton = $('memory-skeleton');
+    const networkStatusBadge = $('network-status-badge'), wsIndicator = $('ws-indicator'), wsStatus = $('ws-status'), apiIndicator = $('api-indicator'), apiStatus = $('api-status');
+    const networkLatency = $('network-latency'), netRequests = $('net-requests'), netSuccess = $('net-success'), netFailed = $('net-failed');
+    const sysPlatform = $('sys-platform'), sysArch = $('sys-arch'), sysGo = $('sys-go'), sysCpus = $('sys-cpus'), sysGoroutines = $('sys-goroutines');
+    const createModal = $('create-modal'), createModalBackdrop = $('create-modal-backdrop'), closeCreateModal = $('close-create-modal');
+    const sessionForm = $('session-form'), formError = $('form-error');
+    const logsModal = $('logs-modal'), logsModalBackdrop = $('logs-modal-backdrop'), closeLogsModal = $('close-logs-modal'), logsContainer = $('logs-container');
+    const createSessionBtn = $('create-session-btn'), mobileLogsBtn = $('mobile-logs-btn');
+    const themeToggle = $('theme-toggle'), themeIconAuto = $('theme-icon-auto'), themeIconLight = $('theme-icon-light'), themeIconDark = $('theme-icon-dark');
 
-    // Create Session Modal
-    createSessionBtn?.addEventListener('click', () => createSessionModal?.classList.remove('hidden'));
-    closeCreateModal?.addEventListener('click', () => createSessionModal?.classList.add('hidden'));
-    createModalBackdrop?.addEventListener('click', () => createSessionModal?.classList.add('hidden'));
+    // Memory chart data
+    const memoryData = [];
+    const maxMemoryPoints = 60;
 
-    sessionForm?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      modalErrorMessage?.classList.add('hidden');
-      const formData = new FormData(sessionForm);
-      const phoneNumber = formData.get('phoneNumber');
-      const botName = formData.get('botName');
+    // Update Network UI
+    function updateNetworkUI() {
+      const isHealthy = networkStats.wsConnected && networkStats.apiHealthy;
+      if (networkStatusBadge) {
+        networkStatusBadge.textContent = isHealthy ? 'Connected' : 'Issues';
+        networkStatusBadge.className = `px-1.5 py-0.5 text-xs font-medium rounded ${isHealthy ? 'bg-gh-success-subtle text-gh-success' : 'bg-gh-warning-subtle text-gh-warning'}`;
+      }
+      if (wsIndicator) wsIndicator.className = `w-2 h-2 rounded-full ${networkStats.wsConnected ? 'bg-gh-success' : 'bg-gh-warning'}`;
+      if (wsStatus) { wsStatus.textContent = networkStats.wsConnected ? 'Active' : 'Reconnecting'; wsStatus.className = `text-xs font-medium ${networkStats.wsConnected ? 'text-gh-success' : 'text-gh-warning'}`; }
+      if (apiIndicator) apiIndicator.className = `w-2 h-2 rounded-full ${networkStats.apiHealthy ? 'bg-gh-success' : 'bg-gh-danger'}`;
+      if (apiStatus) { apiStatus.textContent = networkStats.apiHealthy ? 'Healthy' : 'Error'; apiStatus.className = `text-xs font-medium ${networkStats.apiHealthy ? 'text-gh-success' : 'text-gh-danger'}`; }
+      if (networkLatency) networkLatency.textContent = networkStats.latency > 0 ? `${networkStats.latency} ms` : '-- ms';
+      if (netRequests) netRequests.textContent = networkStats.requests;
+      if (netSuccess) netSuccess.textContent = networkStats.success;
+      if (netFailed) netFailed.textContent = networkStats.failed;
+    }
+
+    // Update Memory Chart
+    function updateMemoryChart(memMB, numGC) {
+      memoryData.push(memMB);
+      if (memoryData.length > maxMemoryPoints) memoryData.shift();
       
-      try {
-        const result = await api.createSession(phoneNumber, botName);
-        if (result.success) {
-          createSessionModal?.classList.add('hidden');
-          sessionForm.reset();
-          if (result.data?.pairingCode) {
-            window.location.href = `/pairing.html?id=${result.data.sessionId}&code=${result.data.pairingCode}`;
-          }
-        } else {
-          if (modalErrorMessage) {
-            modalErrorMessage.textContent = result.error || 'Failed to create session';
-            modalErrorMessage.classList.remove('hidden');
-          }
-        }
-      } catch (error) {
-        if (modalErrorMessage) {
-          modalErrorMessage.textContent = 'Network error. Please try again.';
-          modalErrorMessage.classList.remove('hidden');
-        }
+      if (memorySkeleton) memorySkeleton.classList.add('hidden');
+      if (memoryCurrentEl) memoryCurrentEl.textContent = `${memMB} MB`;
+      if (memoryGcEl) memoryGcEl.textContent = numGC;
+      
+      const peak = Math.max(...memoryData);
+      const avg = Math.round(memoryData.reduce((a, b) => a + b, 0) / memoryData.length);
+      if (memoryPeakEl) memoryPeakEl.textContent = `${peak} MB`;
+      if (memoryAvgEl) memoryAvgEl.textContent = `${avg} MB`;
+      
+      // Draw chart
+      if (memoryLine && memoryArea && memoryData.length > 1) {
+        const w = 300, h = 80, padding = 5;
+        const min = Math.max(0, Math.min(...memoryData) - 10);
+        const max = Math.max(...memoryData) + 10;
+        const range = max - min || 1;
+        const divisor = Math.max(1, maxMemoryPoints - 1);
+        
+        const points = memoryData.map((v, i) => {
+          const x = padding + (i / divisor) * (w - 2 * padding);
+          const y = h - padding - ((v - min) / range) * (h - 2 * padding);
+          return `${x},${y}`;
+        });
+        
+        const linePath = 'M' + points.join(' L');
+        memoryLine.setAttribute('d', linePath);
+        memoryArea.setAttribute('d', linePath + ` L${w - padding},${h - padding} L${padding},${h - padding} Z`);
       }
-    });
-
-    // Logs Modal
-    sidebarConsole?.addEventListener('click', () => logsModal?.classList.remove('hidden'));
-    mobileConsole?.addEventListener('click', () => logsModal?.classList.remove('hidden'));
-    closeLogsModal?.addEventListener('click', () => logsModal?.classList.add('hidden'));
-    logsModalBackdrop?.addEventListener('click', () => logsModal?.classList.add('hidden'));
-
-    // Info Modal
-    sidebarInfo?.addEventListener('click', () => {
-      infoModal?.classList.remove('hidden');
-      updateInfoModal();
-    });
-    mobileInfo?.addEventListener('click', () => {
-      infoModal?.classList.remove('hidden');
-      updateInfoModal();
-    });
-    closeInfoModal?.addEventListener('click', () => infoModal?.classList.add('hidden'));
-    infoModalBackdrop?.addEventListener('click', () => infoModal?.classList.add('hidden'));
-
-    function updateInfoModal() {
-      const browserEl = document.getElementById('info-browser');
-      const screenEl = document.getElementById('info-screen');
-      if (browserEl) {
-        const ua = navigator.userAgent;
-        let browser = 'Other';
-        if (ua.includes('Chrome')) browser = 'Chrome';
-        else if (ua.includes('Firefox')) browser = 'Firefox';
-        else if (ua.includes('Safari')) browser = 'Safari';
-        browserEl.textContent = browser;
-      }
-      if (screenEl) screenEl.textContent = `${window.screen.width}x${window.screen.height}`;
     }
 
-    // Process Manager
-    async function fetchProcessStatus() {
-      try {
-        const result = await api.getProcessStatus();
-        if (processStatusBadge) {
-          const status = result.status || 'unknown';
-          processStatusBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-          processStatusBadge.className = 'px-2 py-0.5 text-xs font-medium rounded ' + 
-            (status === 'running' ? 'bg-gh-success-subtle text-gh-success' : 
-             status === 'stopped' ? 'bg-gh-bg-tertiary text-gh-text-muted' : 
-             'bg-gh-danger-subtle text-gh-danger');
-        }
-        if (result.lastError && processError) {
-          processError.textContent = result.lastError;
-          processError.classList.remove('hidden');
-        } else {
-          processError?.classList.add('hidden');
-        }
-      } catch (e) { console.error('Failed to fetch process status:', e); }
-    }
-
-    restartProcessBtn?.addEventListener('click', async () => {
-      restartProcessBtn.disabled = true;
-      restartProcessBtn.textContent = 'Restarting...';
-      try {
-        await api.restartProcess();
-        setTimeout(fetchProcessStatus, 1000);
-      } catch (e) { console.error('Failed to restart:', e); }
-      restartProcessBtn.disabled = false;
-      restartProcessBtn.textContent = 'Restart Process';
-    });
-
-    // Update sessions list from stats
+    // Render Sessions
     function renderSessions(sessions) {
-      if (!sessionsList) return;
+      if (!sessionsListEl) return;
+      if (sessionCountBadge) sessionCountBadge.textContent = sessions?.length || 0;
+      
       if (!sessions || sessions.length === 0) {
-        sessionsList.innerHTML = `
-          <div class="p-8 text-center">
-            <p class="text-sm text-gh-text-muted">No sessions yet. Create one to get started.</p>
-          </div>`;
+        sessionsListEl.innerHTML = `<div class="p-6 text-center"><p class="text-sm text-gh-text-muted">No sessions yet. Create one to get started.</p></div>`;
         return;
       }
-      sessionsList.innerHTML = sessions.map(session => `
-        <div class="p-4 flex items-center justify-between hover:bg-gh-bg-secondary transition-colors">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-gh-bg-tertiary flex items-center justify-center">
-              <span class="text-sm font-medium text-gh-text">${(session.user_info?.name || session.phone_number || '?')[0].toUpperCase()}</span>
+      
+      sessionsListEl.innerHTML = sessions.map(s => {
+        const name = s.user_info?.name || s.phone_number || 'Unknown';
+        const initial = name.charAt(0).toUpperCase();
+        const isConnected = s.status === 'connected';
+        const isPaused = s.status === 'paused';
+        
+        return `
+          <div class="p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-gh-bg-secondary transition-colors">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gh-bg-tertiary flex items-center justify-center flex-shrink-0">
+                <span class="text-xs sm:text-sm font-medium text-gh-text">${initial}</span>
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-gh-text truncate">${name}</p>
+                <p class="text-xs text-gh-text-muted truncate">${s.phone_number || s.id}</p>
+              </div>
             </div>
-            <div>
-              <p class="text-sm font-medium text-gh-text">${session.user_info?.name || session.phone_number}</p>
-              <p class="text-xs text-gh-text-muted">${session.phone_number}</p>
+            <div class="flex items-center gap-2 ml-11 sm:ml-0">
+              <span class="px-2 py-0.5 text-xs font-medium rounded ${isConnected ? 'bg-gh-success-subtle text-gh-success' : isPaused ? 'bg-gh-warning-subtle text-gh-warning' : 'bg-gh-bg-tertiary text-gh-text-muted'}">${s.status}</span>
+              <div class="flex items-center gap-1">
+                ${isPaused ? `<button data-session-action="resume" data-session-id="${s.id}" class="p-1 text-gh-success hover:bg-gh-bg-tertiary rounded" title="Resume"><svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm4.879-2.773 4.264 2.559a.25.25 0 0 1 0 .428l-4.264 2.559A.25.25 0 0 1 6 10.559V5.442a.25.25 0 0 1 .379-.215Z"></path></svg></button>` : isConnected ? `<button data-session-action="pause" data-session-id="${s.id}" class="p-1 text-gh-warning hover:bg-gh-bg-tertiary rounded" title="Pause"><svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0ZM6.25 5C5.56 5 5 5.56 5 6.25v3.5a1.25 1.25 0 1 0 2.5 0v-3.5C7.5 5.56 6.94 5 6.25 5Zm3.5 0c-.69 0-1.25.56-1.25 1.25v3.5a1.25 1.25 0 1 0 2.5 0v-3.5C11 5.56 10.44 5 9.75 5Z"></path></svg></button>` : ''}
+                <a href="/dashboard.html?id=${s.id}" class="p-1 text-gh-link hover:bg-gh-bg-tertiary rounded" title="Dashboard"><svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm7-3.25v2.992l2.028.812a.75.75 0 0 1-.557 1.392l-2.5-1A.751.751 0 0 1 7 8.25v-3.5a.75.75 0 0 1 1.5 0Z"></path></svg></a>
+                <button data-session-action="delete" data-session-id="${s.id}" class="p-1 text-gh-danger hover:bg-gh-bg-tertiary rounded" title="Delete"><svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.675l.66 6.6a.25.25 0 0 0 .249.225h5.19a.25.25 0 0 0 .249-.225l.66-6.6a.75.75 0 0 1 1.492.149l-.66 6.6A1.748 1.748 0 0 1 10.595 15h-5.19a1.75 1.75 0 0 1-1.741-1.575l-.66-6.6a.75.75 0 1 1 1.492-.15ZM6.5 1.75V3h3V1.75a.25.25 0 0 0-.25-.25h-2.5a.25.25 0 0 0-.25.25Z"></path></svg></button>
+              </div>
             </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="px-2 py-0.5 text-xs font-medium rounded ${session.status === 'connected' ? 'bg-gh-success-subtle text-gh-success' : 'bg-gh-warning-subtle text-gh-warning'}">${session.status}</span>
-            <a href="/dashboard.html?id=${session.id}" class="px-2 py-1 text-xs text-gh-link hover:underline">View</a>
-            <button onclick="deleteSession('${session.id}')" class="px-2 py-1 text-xs text-gh-danger hover:underline">Delete</button>
-          </div>
-        </div>
-      `).join('');
+          </div>`;
+      }).join('');
     }
 
-    async function deleteSession(sessionId) {
-      if (!confirm('Are you sure you want to delete this session?')) return;
+    // Session Actions - using event delegation
+    async function handleSessionAction(id, action) {
+      if (action === 'delete') {
+        if (confirm('Delete this session?')) { await api.deleteSession(id); }
+      } else if (action === 'pause') {
+        await api.pauseSession(id);
+      } else if (action === 'resume') {
+        await api.resumeSession(id);
+      }
+    }
+    
+    // Event delegation for session actions
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-session-action]');
+      if (btn) {
+        const id = btn.dataset.sessionId;
+        const action = btn.dataset.sessionAction;
+        if (id && action) handleSessionAction(id, action);
+      }
+    });
+
+    // Process Status
+    async function fetchProcessStatus() {
       try {
-        await api.deleteSession(sessionId);
-      } catch (e) { console.error('Failed to delete:', e); }
+        const res = await api.getProcessStatus();
+        const status = res.status || 'unknown';
+        if (processStatusBadge) {
+          processStatusBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+          processStatusBadge.className = `px-2 py-0.5 text-xs font-medium rounded ${status === 'running' ? 'bg-gh-success-subtle text-gh-success' : status === 'stopped' ? 'bg-gh-bg-tertiary text-gh-text-muted' : 'bg-gh-danger-subtle text-gh-danger'}`;
+        }
+        if (res.lastError && processError) { processError.textContent = res.lastError; processError.classList.remove('hidden'); }
+        else if (processError) { processError.classList.add('hidden'); }
+      } catch {}
+    }
+
+    // System Stats
+    async function fetchSystemStats() {
+      try {
+        const res = await api.getSystemStats();
+        if (res.memory) updateMemoryChart(res.memory.heapAlloc, res.memory.numGC);
+        if (sysPlatform) sysPlatform.textContent = res.platform || '--';
+        if (sysArch) sysArch.textContent = res.arch || '--';
+        if (sysGo) sysGo.textContent = res.goVersion?.replace('go', '') || '--';
+        if (sysCpus) sysCpus.textContent = res.cpus || '--';
+        if (sysGoroutines) sysGoroutines.textContent = res.goroutines || '--';
+      } catch {}
     }
 
     // Stats handler
     api.onStats((data) => {
       if (data?.type === 'stats' && data.data) {
-        const stats = data.data;
-        if (totalSessionsEl) totalSessionsEl.textContent = stats.totalSessions || 0;
-        if (activeSessionsEl) activeSessionsEl.textContent = stats.activeSessions || 0;
-        if (totalMessagesEl) totalMessagesEl.textContent = stats.totalMessages || 0;
-        if (uptimeEl && stats.uptime) {
-          const mins = Math.floor(stats.uptime / 60);
+        const s = data.data;
+        if (totalSessionsEl) totalSessionsEl.textContent = s.totalSessions || 0;
+        if (activeSessionsEl) activeSessionsEl.textContent = s.activeSessions || 0;
+        if (totalMessagesEl) totalMessagesEl.textContent = s.totalMessages || 0;
+        if (uptimeEl && s.uptime) {
+          const mins = Math.floor(s.uptime / 60);
           const hrs = Math.floor(mins / 60);
           uptimeEl.textContent = hrs > 0 ? `${hrs}h ${mins % 60}m` : `${mins}m`;
         }
-        if (stats.sessions) renderSessions(stats.sessions);
-        
-        // Update info modal
-        const infoVersionEl = document.getElementById('info-version');
-        const infoSessionsEl = document.getElementById('info-sessions');
-        const infoActiveEl = document.getElementById('info-active');
-        if (infoVersionEl) infoVersionEl.textContent = stats.version || '-';
-        if (infoSessionsEl) infoSessionsEl.textContent = stats.totalSessions || 0;
-        if (infoActiveEl) infoActiveEl.textContent = stats.activeSessions || 0;
+        if (s.sessions) renderSessions(s.sessions);
       }
     });
 
-    // Theme toggle
+    // Theme Toggle
     function getTheme() { return localStorage.getItem('theme') || 'auto'; }
-    function setTheme(theme) {
-      localStorage.setItem('theme', theme);
-      const isDark = theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-      document.documentElement.classList.toggle('dark', isDark);
-      updateThemeIcon(theme);
+    function setTheme(t) {
+      localStorage.setItem('theme', t);
+      const dark = t === 'dark' || (t === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.classList.toggle('dark', dark);
+      updateThemeIcon(t);
     }
-    function updateThemeIcon(theme) {
-      document.getElementById('theme-icon-auto')?.classList.toggle('hidden', theme !== 'auto');
-      document.getElementById('theme-icon-light')?.classList.toggle('hidden', theme !== 'light');
-      document.getElementById('theme-icon-dark')?.classList.toggle('hidden', theme !== 'dark');
+    function updateThemeIcon(t) {
+      if (themeIconAuto) themeIconAuto.classList.toggle('hidden', t !== 'auto');
+      if (themeIconLight) themeIconLight.classList.toggle('hidden', t !== 'light');
+      if (themeIconDark) themeIconDark.classList.toggle('hidden', t !== 'dark');
     }
     themeToggle?.addEventListener('click', () => {
-      const current = getTheme();
-      setTheme(current === 'auto' ? 'light' : current === 'light' ? 'dark' : 'auto');
+      const c = getTheme();
+      setTheme(c === 'auto' ? 'light' : c === 'light' ? 'dark' : 'auto');
     });
     updateThemeIcon(getTheme());
 
-    // Tooltip handler
-    const globalTooltip = document.getElementById('global-tooltip');
-    const globalTooltipText = document.getElementById('global-tooltip-text');
-    document.addEventListener('mouseenter', (e) => {
-      if (!(e.target instanceof Element)) return;
-      const el = e.target.closest('[data-tooltip]');
-      if (el && globalTooltip && globalTooltipText) {
-        globalTooltipText.textContent = el.getAttribute('data-tooltip');
-        globalTooltip.style.opacity = '1';
-        const rect = el.getBoundingClientRect();
-        globalTooltip.style.top = `${rect.top - 30}px`;
-        globalTooltip.style.left = `${rect.left + rect.width / 2}px`;
-        globalTooltip.style.transform = 'translateX(-50%)';
-      }
-    }, true);
-    document.addEventListener('mouseleave', (e) => {
-      if (!(e.target instanceof Element)) return;
-      if (e.target.closest('[data-tooltip]') && globalTooltip) {
-        globalTooltip.style.opacity = '0';
-      }
-    }, true);
+    // Modals
+    createSessionBtn?.addEventListener('click', () => createModal?.classList.remove('hidden'));
+    closeCreateModal?.addEventListener('click', () => createModal?.classList.add('hidden'));
+    createModalBackdrop?.addEventListener('click', () => createModal?.classList.add('hidden'));
 
-    // Initial fetch
+    mobileLogsBtn?.addEventListener('click', () => logsModal?.classList.remove('hidden'));
+    closeLogsModal?.addEventListener('click', () => logsModal?.classList.add('hidden'));
+    logsModalBackdrop?.addEventListener('click', () => logsModal?.classList.add('hidden'));
+
+    // Form Submit
+    sessionForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      formError?.classList.add('hidden');
+      const fd = new FormData(sessionForm);
+      try {
+        const res = await api.createSession(fd.get('phoneNumber'), fd.get('botName'));
+        if (res.success) {
+          createModal?.classList.add('hidden');
+          sessionForm.reset();
+          if (res.data?.pairingCode) window.location.href = `/pairing.html?id=${res.data.sessionId}&code=${res.data.pairingCode}`;
+        } else {
+          if (formError) { formError.textContent = res.error || 'Failed to create session'; formError.classList.remove('hidden'); }
+        }
+      } catch (err) {
+        if (formError) { formError.textContent = 'Network error. Please try again.'; formError.classList.remove('hidden'); }
+      }
+    });
+
+    // Restart Process
+    restartBtn?.addEventListener('click', async () => {
+      restartBtn.disabled = true;
+      restartBtn.textContent = 'Restarting...';
+      await api.restartProcess();
+      setTimeout(fetchProcessStatus, 1000);
+      restartBtn.disabled = false;
+      restartBtn.textContent = 'Restart Process';
+    });
+
+    // Initial Load
+    api.connectWS();
     fetchProcessStatus();
+    fetchSystemStats();
     setInterval(fetchProcessStatus, 5000);
+    setInterval(fetchSystemStats, 2000);
 
-    // Fetch initial stats
-    api.getOverallStats().then(result => {
-      if (result.success && result.data) {
-        const stats = result.data;
-        if (totalSessionsEl) totalSessionsEl.textContent = stats.totalSessions || 0;
-        if (activeSessionsEl) activeSessionsEl.textContent = stats.activeSessions || 0;
-        if (totalMessagesEl) totalMessagesEl.textContent = stats.totalMessages || 0;
-        if (stats.sessions) renderSessions(stats.sessions);
+    // Initial stats fetch
+    api.getStats().then(res => {
+      if (res.success && res.data) {
+        const s = res.data;
+        if (totalSessionsEl) totalSessionsEl.textContent = s.totalSessions || 0;
+        if (activeSessionsEl) activeSessionsEl.textContent = s.activeSessions || 0;
+        if (totalMessagesEl) totalMessagesEl.textContent = s.totalMessages || 0;
+        if (s.sessions) renderSessions(s.sessions);
       }
-    }).catch(console.error);
+    }).catch(() => {});
   </script>
 </body>
 </html>
