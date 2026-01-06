@@ -295,7 +295,7 @@ func waitForBunServer() {
 
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasPrefix(r.URL.Path, "/api/go/events") {
+		if strings.HasPrefix(r.URL.Path, "/api/go/events") || strings.HasPrefix(r.URL.Path, "/ws") {
 			next.ServeHTTP(w, r)
 			return
 		}
