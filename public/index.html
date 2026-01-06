@@ -716,12 +716,16 @@
       
       try {
         const res = await api.createSession(fd.get('phoneNumber'), fd.get('botName'));
-        if (res.success) {
+        if (res.success && res.data) {
           if (createCountdown) clearInterval(createCountdown);
           if (submitBtn) { submitBtn.textContent = 'Create Session'; submitBtn.disabled = false; }
           createModal?.classList.add('hidden');
           sessionForm.reset();
-          if (res.data?.pairingCode) window.location.href = `/pairing.html?id=${res.data.sessionId}&code=${res.data.pairingCode}`;
+          if (res.data.code && res.data.id) {
+            window.location.href = `/pairing.html?id=${res.data.id}&code=${res.data.code}`;
+          } else if (res.data.id) {
+            window.location.href = `/dashboard.html?id=${res.data.id}`;
+          }
         } else {
           if (createCountdown) clearInterval(createCountdown);
           if (submitBtn) { submitBtn.textContent = 'Create Session'; submitBtn.disabled = false; }

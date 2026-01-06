@@ -22,6 +22,7 @@
             'gh-text-muted': 'var(--gh-text-muted)',
             'gh-link': 'var(--gh-link)',
             'gh-success': 'var(--gh-success)',
+            'gh-warning': 'var(--gh-warning)',
             'gh-danger': 'var(--gh-danger)',
             'gh-danger-subtle': 'var(--gh-danger-subtle)',
           },
@@ -45,17 +46,19 @@
       --gh-bg: #ffffff; --gh-bg-secondary: #f6f8fa; --gh-bg-tertiary: #eaeef2;
       --gh-border: #d0d7de; --gh-text: #1f2328; --gh-text-secondary: #656d76;
       --gh-text-muted: #8c959f; --gh-link: #0969da; --gh-success: #1a7f37;
-      --gh-danger: #cf222e; --gh-danger-subtle: #ffebe9;
+      --gh-warning: #9a6700; --gh-danger: #cf222e; --gh-danger-subtle: #ffebe9;
     }
     .dark {
       --gh-bg: #0d1117; --gh-bg-secondary: #161b22; --gh-bg-tertiary: #21262d;
       --gh-border: #30363d; --gh-text: #e6edf3; --gh-text-secondary: #8b949e;
       --gh-text-muted: #6e7681; --gh-link: #58a6ff; --gh-success: #3fb950;
-      --gh-danger: #f85149; --gh-danger-subtle: #2d1b1b;
+      --gh-warning: #d29922; --gh-danger: #f85149; --gh-danger-subtle: #2d1b1b;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
     @keyframes ghost-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     .animate-ghost-pulse { animation: ghost-pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
   </style>
 </head>
 <body class="bg-gh-bg font-sans text-gh-text min-h-screen antialiased">
@@ -85,7 +88,8 @@
             <svg class="w-6 h-6 text-gh-danger" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
           </div>
           <h2 class="text-lg font-semibold text-gh-text mb-1">Pairing Failed</h2>
-          <p id="error-message" class="text-sm text-gh-text-secondary mb-4 text-center"></p>
+          <p id="error-message" class="text-sm text-gh-text-secondary mb-2 text-center"></p>
+          <p id="countdown-text" class="text-xs text-gh-warning mb-4 hidden">Session will be deleted in <span id="countdown-seconds">10</span>s...</p>
           <a href="/" class="px-4 py-1.5 text-sm font-medium rounded-gh bg-gh-bg-secondary border border-gh-border text-gh-text hover:bg-gh-bg-tertiary">Try Again</a>
         </div>
       </div>
@@ -96,15 +100,22 @@
     const pairingContent = document.getElementById('pairing-content');
     const errorContent = document.getElementById('error-content');
     const errorMessage = document.getElementById('error-message');
+    const countdownText = document.getElementById('countdown-text');
+    const countdownSeconds = document.getElementById('countdown-seconds');
 
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('id');
     const pairingCode = urlParams.get('code');
 
-    if (pairingCode) {
+    let ws = null;
+    let pairingTimeout = null;
+    let countdownInterval = null;
+    let pairingComplete = false;
+
+    if (pairingCode && sessionId) {
       showPairingCode(pairingCode);
     } else {
-      showError('No pairing code provided');
+      showError('No pairing code provided', false);
     }
 
     function showPairingCode(code) {
@@ -120,37 +131,94 @@
             <h3 class="text-sm font-semibold text-gh-text mb-2">How to link:</h3>
             <ol class="space-y-1 pl-4 list-decimal text-sm text-gh-text-secondary">
               <li>Open WhatsApp on your phone</li>
-              <li>Go to Settings → Linked Devices</li>
-              <li>Tap "Link a Device"</li>
-              <li>Select "Link with phone number instead"</li>
+              <li>Go to <strong class="text-gh-text">Settings</strong> → <strong class="text-gh-text">Linked Devices</strong></li>
+              <li>Tap <strong class="text-gh-text">Link a Device</strong></li>
+              <li>Select <strong class="text-gh-text">Link with phone number instead</strong></li>
               <li>Enter the code shown above</li>
             </ol>
           </div>
-          <p class="text-xs text-gh-text-muted">This code expires in 60 seconds</p>
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-gh-warning animate-pulse"></span>
+            <span class="text-sm text-gh-text-secondary">Waiting for pairing...</span>
+          </div>
         </div>
       `;
       
-      // Connect WebSocket to listen for connection updates
+      connectAndWatchPairing();
+      
+      pairingTimeout = setTimeout(() => {
+        if (!pairingComplete) {
+          showError('Pairing timed out. Please try again.', true);
+        }
+      }, 120000);
+    }
+
+    function connectAndWatchPairing() {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const ws = new WebSocket(`${protocol}//${window.location.host}/ws/stats`);
+      ws = new WebSocket(`${protocol}//${window.location.host}/ws/stats`);
       
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
           if (data.type === 'stats' && data.data?.sessions) {
             const session = data.data.sessions.find(s => s.id === sessionId);
-            if (session?.status === 'connected') {
-              window.location.href = `/dashboard.html?id=${sessionId}`;
+            if (session) {
+              if (session.status === 'connected' || session.status === 'active') {
+                pairingComplete = true;
+                if (pairingTimeout) clearTimeout(pairingTimeout);
+                window.location.href = `/dashboard.html?id=${sessionId}`;
+              } else if (session.status === 'inactive' || session.status === 'disconnected') {
+                showError('Session was disconnected or timed out', true);
+              }
             }
           }
         } catch (e) { console.error('WS error:', e); }
       };
+      
+      ws.onclose = () => {
+        if (!pairingComplete && !errorContent.classList.contains('hidden') === false) {
+          setTimeout(connectAndWatchPairing, 3000);
+        }
+      };
+      
+      ws.onerror = () => {
+        console.error('WebSocket connection error');
+      };
     }
 
-    function showError(msg) {
+    async function deleteSession() {
+      if (!sessionId) return;
+      try {
+        await fetch(`/api/sessions/${sessionId}`, { method: 'DELETE' });
+        console.log('Session deleted successfully');
+      } catch (e) {
+        console.error('Failed to delete session:', e);
+      }
+    }
+
+    function showError(msg, shouldDeleteSession = false) {
+      if (pairingTimeout) clearTimeout(pairingTimeout);
+      if (ws) ws.close();
+      
       pairingContent.classList.add('hidden');
       errorContent.classList.remove('hidden');
       errorMessage.textContent = msg;
+      
+      if (shouldDeleteSession && sessionId) {
+        countdownText.classList.remove('hidden');
+        let seconds = 10;
+        countdownSeconds.textContent = seconds;
+        
+        countdownInterval = setInterval(() => {
+          seconds--;
+          countdownSeconds.textContent = seconds;
+          if (seconds <= 0) {
+            clearInterval(countdownInterval);
+            deleteSession();
+            countdownText.textContent = 'Session deleted.';
+          }
+        }, 1000);
+      }
     }
   </script>
 </body>
