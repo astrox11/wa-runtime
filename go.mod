@@ -3,8 +3,8 @@ module whatsaly
 go 1.21
 
 require (
-	github.com/coder/websocket v1.8.12
 	github.com/gofiber/fiber/v2 v2.52.0
+	github.com/gorilla/websocket v1.5.1
 )
 
 require (
@@ -18,5 +18,6 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.51.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 )

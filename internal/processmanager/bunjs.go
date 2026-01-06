@@ -59,6 +59,12 @@ func (m *BunJSManager) Start() error {
 
 	m.cmd = exec.Command("bun", "run", m.scriptPath)
 
+	// Set environment variables - Bun backend runs on internal port 8001
+	m.cmd.Env = append(os.Environ(),
+		"API_PORT=8001",
+		"HOST=127.0.0.1",
+	)
+
 	// Setup stdout pipe
 	stdout, err := m.cmd.StdoutPipe()
 	if err != nil {
