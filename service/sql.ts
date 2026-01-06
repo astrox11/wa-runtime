@@ -1,10 +1,7 @@
 import type { GroupMetadata, GroupParticipant, WASocket, WAMessageKey, WAMessage, Contact } from "baileys";
 import { proto, jidNormalizedUser } from "baileys";
 import { Database } from "bun:sqlite";
-import config from "../config";
 import { log } from "./util";
-
-const GO_SERVER = process.env.GO_SERVER || `http://localhost:${config.API_PORT}`;
 
 const db = new Database("database.db", { create: true });
 db.exec("PRAGMA journal_mode = WAL;");
@@ -12,7 +9,7 @@ db.exec("PRAGMA journal_mode = WAL;");
 const createdTables = new Set<string>();
 
 export const bunql = {
-  query: <T>(sql: string, params: any[] = []): T[] => {
+  query: <T>(sql: string, params: unknown[] = []): T[] => {
     const stmt = db.prepare(sql);
     return stmt.all(...params) as T[];
   },
@@ -22,12 +19,12 @@ export const bunql = {
   getDatabase: () => db,
 };
 
-export function execWithParams(sql: string, params: any[] = []): void {
+export function execWithParams(sql: string, params: unknown[] = []): void {
   const stmt = db.prepare(sql);
   stmt.run(...params);
 }
 
-export function queryWithParams<T>(sql: string, params: any[] = []): T[] {
+export function queryWithParams<T>(sql: string, params: unknown[] = []): T[] {
   return bunql.query<T>(sql, params);
 }
 
