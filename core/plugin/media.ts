@@ -106,31 +106,33 @@ export default [
     pattern: "sticker",
     alias: ["stiker", "s"],
     category: "media",
-    async exec(msg, sock) {
+    async exec(msg, sock, args) {
       if (!sock) return;
       if (!msg?.quoted?.image && !msg?.quoted?.video) {
-        return await msg.reply("```Reply to an image or a video```");
+        return await msg.reply(
+          "```Reply to an image or a video\n\nExamples:\nsticker\nsticker Author:PackName```",
+        );
       }
 
       let sticker: Uint8Array;
+      const packName = args?.split(":")[1] || "Whatsaly";
+      const publisher = args?.split(":")[0] || "αѕтяσχ";
 
       if (msg.quoted?.image) {
         sticker = convertToWebP(await msg.quoted.download());
         sticker = addStickerMetadata(sticker, {
-          packName: "Whatsaly",
-          publisher: "αѕтяσχ",
+          packName,
+          publisher,
         });
         return await msg.client.sendMessage(msg.chat, {
           sticker: Buffer.from(sticker),
         });
       } else {
         sticker = await videoWebp(bufferToPath(await msg.quoted.download()));
-        console.log("sticker:", sticker.length);
         sticker = addStickerMetadata(sticker, {
-          packName: "Whatsaly",
-          publisher: "αѕтяσχ",
+          packName,
+          publisher,
         });
-        console.log("sticker:", sticker.length);
         return await msg.client.sendMessage(msg.chat, {
           sticker: Buffer.from(sticker),
         });
