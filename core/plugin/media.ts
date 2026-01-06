@@ -1,11 +1,14 @@
+import { addStickerMetadata, convertToWebP } from "whatsapp-rust-bridge";
 import {
   bufferToPath,
   ToMp3,
   ToMp4,
   ToPTT,
   TrimVideo,
+  videoWebp,
   type CommandProperty,
 } from "..";
+import { log } from "console";
 
 export default [
   {
@@ -97,6 +100,41 @@ export default [
         mimetype: "audio/ogg; codecs=opus",
         ptt: true,
       });
+    },
+  },
+  {
+    pattern: "sticker",
+    alias: ["stiker", "s"],
+    category: "media",
+    async exec(msg, sock) {
+      if (!sock) return;
+      if (!msg?.quoted?.image && !msg?.quoted?.video) {
+        return await msg.reply("```Reply to an image or a video```");
+      }
+
+      let sticker: Uint8Array;
+
+      if (msg.quoted?.image) {
+        sticker = convertToWebP(await msg.quoted.download());
+        sticker = addStickerMetadata(sticker, {
+          packName: "Whatsaly",
+          publisher: "αѕтяσχ",
+        });
+        return await msg.client.sendMessage(msg.chat, {
+          sticker: Buffer.from(sticker),
+        });
+      } else {
+        sticker = await videoWebp(bufferToPath(await msg.quoted.download()));
+        console.log("sticker:", sticker.length);
+        sticker = addStickerMetadata(sticker, {
+          packName: "Whatsaly",
+          publisher: "αѕтяσχ",
+        });
+        console.log("sticker:", sticker.length);
+        return await msg.client.sendMessage(msg.chat, {
+          sticker: Buffer.from(sticker),
+        });
+      }
     },
   },
 ] satisfies CommandProperty[];

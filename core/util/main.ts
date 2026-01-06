@@ -1,9 +1,9 @@
 import type { WAMessageContent } from "baileys";
-import { writeFileSync } from "fs";
+import { writeFileSync, rmSync, mkdtempSync, promises as fs } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
 import { randomBytes } from "crypto";
-import { execSync } from "child_process";
+import { execSync, spawn } from "child_process";
 import config from "../../config";
 import parsePhoneNumberFromString, {
   isValidPhoneNumber,
@@ -390,4 +390,90 @@ export function timestamp(): string {
   const month = (now.getMonth() + 1).toString().padStart(2, "0");
   const year = now.getFullYear().toString().slice(-2);
   return `${hours}:${minutes}, ${month}/${date}/${year}`;
+}
+
+export async function videoWebp(
+  videoInput: string | Uint8Array,
+): Promise<Uint8Array> {
+  const dir = mkdtempSync(join(tmpdir(), "sticker-"));
+  const outPath = join(dir, "final.webp");
+  const framePattern = join(dir, "f_%04d.png");
+
+  try {
+    let videoPath = "";
+    if (typeof videoInput === "string") {
+      videoPath = videoInput;
+    } else {
+      videoPath = join(dir, "input_video");
+      await fs.writeFile(videoPath, videoInput);
+      log.debug("Input buffer written to temp file");
+    }
+
+    log.debug("Starting FFmpeg: 512x512 square crop and padding");
+    await runCommand("ffmpeg", [
+      "-i",
+      videoPath,
+      "-t",
+      "8",
+      "-vf",
+      "fps=12,scale='if(gt(iw,ih),512,-1)':'if(gt(iw,ih),-1,512)',pad=512:512:(ow-iw)/2:(oh-ih)/2:color=black@0,format=rgba",
+      "-f",
+      "image2",
+      framePattern,
+    ]);
+
+    const files = (await fs.readdir(dir))
+      .filter((f) => f.startsWith("f_"))
+      .sort()
+      .map((f) => join(dir, f));
+
+    if (files.length === 0) throw new Error("Failed to extract frames");
+
+    log.debug("Muxing with WhatsApp compatibility flags");
+    const img2webpArgs = [
+      "-loop",
+      "0",
+      "-lossy",
+      "-q",
+      "40",
+      "-m",
+      "6",
+      "-mixed",
+      "-min_size",
+    ];
+
+    for (const f of files) {
+      img2webpArgs.push("-d", "83", f);
+    }
+    img2webpArgs.push("-o", outPath);
+
+    await runCommand("img2webp", img2webpArgs);
+
+    log.debug("Reading final WebP into memory");
+    const result = await fs.readFile(outPath);
+    return new Uint8Array(result.buffer, result.byteOffset, result.byteLength);
+  } finally {
+    try {
+      rmSync(dir, { recursive: true, force: true });
+      log.debug("Temporary directory cleaned up");
+    } catch (e) {}
+  }
+}
+
+function runCommand(command: string, args: string[]): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args);
+    let errorLog = "";
+
+    child.stderr.on("data", (data) => {
+      errorLog += data.toString();
+    });
+
+    child.on("close", (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`${command} failed: ${errorLog}`));
+    });
+
+    child.on("error", reject);
+  });
 }
