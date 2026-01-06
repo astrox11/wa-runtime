@@ -12,8 +12,11 @@ import {
   getSessionStats,
   getMessages,
   getConfig,
+  getGroups,
+  getGroupMetadata,
+  executeGroupAction,
 } from "./middleware";
-import type { ApiResponse, SessionCreateRequest } from "./types";
+import type { ApiResponse, SessionCreateRequest, GroupActionRequest } from "./types";
 import { ApiResponseErrors } from "./errors";
 import { validatePhoneNumber, validatePagination } from "./predicates";
 import { parseBody, matchRoute, createApiError } from "./handler";
@@ -44,6 +47,23 @@ const routes: Record<
 
   "POST /api/sessions/:id/resume": async (_req, params) =>
     resumeSession(params?.id as string),
+
+  "GET /api/sessions/:id/groups": async (_req, params) =>
+    getGroups(params?.id as string),
+
+  "GET /api/sessions/:id/groups/:groupId/metadata": async (_req, params) =>
+    getGroupMetadata(params?.id as string, params?.groupId as string),
+
+  "POST /api/sessions/:id/groups/:groupId/action": async (req, params) => {
+    const body = await parseBody<GroupActionRequest>(req);
+    if (!body || !body.action) return createApiError(ApiResponseErrors.INVALID_PARAMETERS);
+    return executeGroupAction(
+      params?.id as string,
+      params?.groupId as string,
+      body.action,
+      body.params
+    );
+  },
 
   "GET /api/auth/status/:sessionId": async (_req, params) =>
     getAuthStatus(params?.sessionId),

@@ -3,11 +3,13 @@ package processmanager
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"os/exec"
+	"runtime"
 	"sync"
 	"time"
 
@@ -31,13 +33,34 @@ type BunJSManager struct {
 	status     ProcessStatus
 	lastError  string
 	mu         sync.RWMutex
+	logs       []string
+	logsMu     sync.RWMutex
 }
 
 func NewBunJSManager(scriptPath string) *BunJSManager {
 	return &BunJSManager{
 		scriptPath: scriptPath,
 		status:     StatusStopped,
+		logs:       make([]string, 0, 1000),
 	}
+}
+
+func (m *BunJSManager) addLog(line string) {
+	m.logsMu.Lock()
+	defer m.logsMu.Unlock()
+	timestamp := time.Now().Format("15:04:05")
+	m.logs = append(m.logs, timestamp+" "+line)
+	if len(m.logs) > 1000 {
+		m.logs = m.logs[len(m.logs)-1000:]
+	}
+}
+
+func (m *BunJSManager) GetLogs() []string {
+	m.logsMu.RLock()
+	defer m.logsMu.RUnlock()
+	result := make([]string, len(m.logs))
+	copy(result, m.logs)
+	return result
 }
 
 func (m *BunJSManager) Start() error {
@@ -64,6 +87,7 @@ func (m *BunJSManager) Start() error {
 		m.status = StatusError
 		m.lastError = "Failed to create stdout pipe: " + err.Error()
 		log.Printf("[BunJS ERROR] %s", m.lastError)
+		m.addLog("[ERROR] " + m.lastError)
 		return err
 	}
 
@@ -72,6 +96,7 @@ func (m *BunJSManager) Start() error {
 		m.status = StatusError
 		m.lastError = "Failed to create stderr pipe: " + err.Error()
 		log.Printf("[BunJS ERROR] %s", m.lastError)
+		m.addLog("[ERROR] " + m.lastError)
 		return err
 	}
 
@@ -79,24 +104,30 @@ func (m *BunJSManager) Start() error {
 		m.status = StatusError
 		m.lastError = "Failed to start process: " + err.Error()
 		log.Printf("[BunJS ERROR] %s", m.lastError)
+		m.addLog("[ERROR] " + m.lastError)
 		return err
 	}
 
 	m.status = StatusRunning
 	m.lastError = ""
 	log.Printf("[BunJS] Process started with PID: %d", m.cmd.Process.Pid)
+	m.addLog("[INFO] Process started with PID: " + fmt.Sprintf("%d", m.cmd.Process.Pid))
 
 	go func() {
 		scanner := bufio.NewScanner(stdout)
 		for scanner.Scan() {
-			log.Printf("[BunJS] %s", scanner.Text())
+			text := scanner.Text()
+			log.Printf("[BunJS] %s", text)
+			m.addLog("[OUT] " + text)
 		}
 	}()
 
 	go func() {
 		scanner := bufio.NewScanner(stderr)
 		for scanner.Scan() {
-			log.Printf("[BunJS ERROR] %s", scanner.Text())
+			text := scanner.Text()
+			log.Printf("[BunJS ERROR] %s", text)
+			m.addLog("[ERR] " + text)
 		}
 	}()
 
@@ -112,6 +143,7 @@ func (m *BunJSManager) Start() error {
 			m.status = StatusCrashed
 			m.lastError = "Process exited with error: " + err.Error()
 			log.Printf("[BunJS ERROR] %s", m.lastError)
+			m.addLog("[ERROR] " + m.lastError)
 		} else {
 			m.status = StatusStopped
 			log.Println("[BunJS] Process exited normally")
@@ -131,12 +163,14 @@ func (m *BunJSManager) Stop() error {
 	}
 
 	log.Println("[BunJS] Stopping process...")
+	m.addLog("[INFO] Stopping process...")
 	proc := m.cmd.Process
 	m.cmd = nil
 
 	if err := proc.Kill(); err != nil {
 		m.lastError = "Failed to kill process: " + err.Error()
 		log.Printf("[BunJS ERROR] %s", m.lastError)
+		m.addLog("[ERROR] " + m.lastError)
 		return err
 	}
 
@@ -144,22 +178,36 @@ func (m *BunJSManager) Stop() error {
 	m.status = StatusStopped
 	m.lastError = ""
 	log.Println("[BunJS] Process stopped")
+	m.addLog("[INFO] Process stopped")
 	return nil
 }
 
 func (m *BunJSManager) waitForPortFree() {
-	for i := 0; i < 50; i++ {
+	log.Printf("[BunJS] Waiting for port %s to be released...", BunBackendPort)
+	m.addLog("[INFO] Waiting for port " + BunBackendPort + " to be released...")
+
+	if runtime.GOOS == "windows" {
+		time.Sleep(2 * time.Second)
+	}
+
+	maxAttempts := 100
+	for i := 0; i < maxAttempts; i++ {
 		conn, err := net.DialTimeout("tcp", "127.0.0.1:"+BunBackendPort, 100*time.Millisecond)
 		if err != nil {
+			log.Printf("[BunJS] Port %s is now free", BunBackendPort)
+			m.addLog("[INFO] Port " + BunBackendPort + " is now free")
 			return
 		}
 		conn.Close()
 		time.Sleep(100 * time.Millisecond)
 	}
+	log.Printf("[BunJS] Warning: Port %s may still be in use after waiting", BunBackendPort)
+	m.addLog("[WARN] Port " + BunBackendPort + " may still be in use after waiting")
 }
 
 func (m *BunJSManager) Restart() error {
 	log.Println("[BunJS] Restarting process...")
+	m.addLog("[INFO] Restarting process...")
 	if err := m.Stop(); err != nil {
 		return err
 	}

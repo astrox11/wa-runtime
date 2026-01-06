@@ -147,6 +147,15 @@ func main() {
 		})
 	})
 
+	mux.HandleFunc("/api/go/logs", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		logs := bunManager.GetLogs()
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": true,
+			"data":    logs,
+		})
+	})
+
 	mux.HandleFunc("/api/go/system-stats", func(w http.ResponseWriter, r *http.Request) {
 		var m runtime.MemStats
 		runtime.ReadMemStats(&m)
@@ -201,6 +210,18 @@ func main() {
 		}
 		if strings.HasSuffix(path, "/resume") {
 			handlers.HandleResumeSession(w, r)
+			return
+		}
+		if strings.Contains(path, "/groups/") && strings.HasSuffix(path, "/metadata") {
+			handlers.HandleGetGroupMetadata(w, r)
+			return
+		}
+		if strings.Contains(path, "/groups/") && strings.HasSuffix(path, "/action") {
+			handlers.HandleGroupAction(w, r)
+			return
+		}
+		if strings.HasSuffix(path, "/groups") {
+			handlers.HandleGetGroups(w, r)
 			return
 		}
 		switch r.Method {

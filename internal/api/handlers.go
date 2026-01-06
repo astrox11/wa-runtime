@@ -370,3 +370,97 @@ func getInt(m map[string]interface{}, key string) int {
 	}
 	return 0
 }
+
+func (h *Handlers) HandleGetGroups(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		h.writeJSON(w, http.StatusMethodNotAllowed, APIResponse{Success: false, Error: "Method not allowed"})
+		return
+	}
+
+	path := r.URL.Path
+	id := strings.TrimPrefix(path, "/api/sessions/")
+	id = strings.TrimSuffix(id, "/groups")
+
+	resp, err := http.Get(h.bunBackend + "/api/sessions/" + id + "/groups")
+	if err != nil {
+		h.writeJSON(w, http.StatusBadGateway, APIResponse{Success: false, Error: "Backend unavailable"})
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		h.writeJSON(w, http.StatusInternalServerError, APIResponse{Success: false, Error: "Failed to read response"})
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(resp.StatusCode)
+	w.Write(body)
+}
+
+func (h *Handlers) HandleGetGroupMetadata(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		h.writeJSON(w, http.StatusMethodNotAllowed, APIResponse{Success: false, Error: "Method not allowed"})
+		return
+	}
+
+	path := r.URL.Path
+	parts := strings.Split(strings.TrimPrefix(path, "/api/sessions/"), "/")
+	if len(parts) < 3 {
+		h.writeJSON(w, http.StatusBadRequest, APIResponse{Success: false, Error: "Invalid path"})
+		return
+	}
+	sessionId := parts[0]
+	groupId := parts[2]
+
+	resp, err := http.Get(h.bunBackend + "/api/sessions/" + sessionId + "/groups/" + groupId + "/metadata")
+	if err != nil {
+		h.writeJSON(w, http.StatusBadGateway, APIResponse{Success: false, Error: "Backend unavailable"})
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		h.writeJSON(w, http.StatusInternalServerError, APIResponse{Success: false, Error: "Failed to read response"})
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(resp.StatusCode)
+	w.Write(body)
+}
+
+func (h *Handlers) HandleGroupAction(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		h.writeJSON(w, http.StatusMethodNotAllowed, APIResponse{Success: false, Error: "Method not allowed"})
+		return
+	}
+
+	path := r.URL.Path
+	parts := strings.Split(strings.TrimPrefix(path, "/api/sessions/"), "/")
+	if len(parts) < 3 {
+		h.writeJSON(w, http.StatusBadRequest, APIResponse{Success: false, Error: "Invalid path"})
+		return
+	}
+	sessionId := parts[0]
+	groupId := parts[2]
+
+	req, _ := http.NewRequest(http.MethodPost, h.bunBackend+"/api/sessions/"+sessionId+"/groups/"+groupId+"/action", r.Body)
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{Timeout: 30 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		h.writeJSON(w, http.StatusBadGateway, APIResponse{Success: false, Error: "Backend unavailable"})
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		h.writeJSON(w, http.StatusInternalServerError, APIResponse{Success: false, Error: "Failed to read response"})
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(resp.StatusCode)
+	w.Write(body)
+}
