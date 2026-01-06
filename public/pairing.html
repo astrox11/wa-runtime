@@ -176,7 +176,7 @@
       };
       
       ws.onclose = () => {
-        if (!pairingComplete && !errorContent.classList.contains('hidden') === false) {
+        if (!pairingComplete && errorContent.classList.contains('hidden')) {
           setTimeout(connectAndWatchPairing, 3000);
         }
       };
