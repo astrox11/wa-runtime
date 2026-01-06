@@ -12,10 +12,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// BunBackendPort is the internal port where the Bun server runs
 const BunBackendPort = "8001"
 
-// ProcessStatus represents the possible states of the BunJS process
 type ProcessStatus string
 
 const (
@@ -25,7 +23,6 @@ const (
 	StatusError   ProcessStatus = "error"
 )
 
-// BunJSManager manages the BunJS process
 type BunJSManager struct {
 	cmd        *exec.Cmd
 	scriptPath string
@@ -34,7 +31,6 @@ type BunJSManager struct {
 	mu         sync.RWMutex
 }
 
-// NewBunJSManager creates a new BunJS process manager
 func NewBunJSManager(scriptPath string) *BunJSManager {
 	return &BunJSManager{
 		scriptPath: scriptPath,
@@ -42,7 +38,6 @@ func NewBunJSManager(scriptPath string) *BunJSManager {
 	}
 }
 
-// Start starts the BunJS process
 func (m *BunJSManager) Start() error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -52,7 +47,6 @@ func (m *BunJSManager) Start() error {
 		return nil
 	}
 
-	// Check if script file exists
 	if _, err := os.Stat(m.scriptPath); os.IsNotExist(err) {
 		m.status = StatusError
 		m.lastError = "Script file not found: " + m.scriptPath
@@ -61,14 +55,8 @@ func (m *BunJSManager) Start() error {
 	}
 
 	m.cmd = exec.Command("bun", "run", m.scriptPath)
+	m.cmd.Env = append(os.Environ(), "API_PORT="+BunBackendPort, "HOST=127.0.0.1")
 
-	// Set environment variables - Bun backend runs on internal port
-	m.cmd.Env = append(os.Environ(),
-		"API_PORT="+BunBackendPort,
-		"HOST=127.0.0.1",
-	)
-
-	// Setup stdout pipe
 	stdout, err := m.cmd.StdoutPipe()
 	if err != nil {
 		m.status = StatusError
@@ -77,7 +65,6 @@ func (m *BunJSManager) Start() error {
 		return err
 	}
 
-	// Setup stderr pipe
 	stderr, err := m.cmd.StderrPipe()
 	if err != nil {
 		m.status = StatusError
@@ -86,7 +73,6 @@ func (m *BunJSManager) Start() error {
 		return err
 	}
 
-	// Start the process
 	if err := m.cmd.Start(); err != nil {
 		m.status = StatusError
 		m.lastError = "Failed to start process: " + err.Error()
@@ -98,7 +84,6 @@ func (m *BunJSManager) Start() error {
 	m.lastError = ""
 	log.Printf("[BunJS] Process started with PID: %d", m.cmd.Process.Pid)
 
-	// Read stdout in goroutine
 	go func() {
 		scanner := bufio.NewScanner(stdout)
 		for scanner.Scan() {
@@ -106,7 +91,6 @@ func (m *BunJSManager) Start() error {
 		}
 	}()
 
-	// Read stderr in goroutine
 	go func() {
 		scanner := bufio.NewScanner(stderr)
 		for scanner.Scan() {
@@ -114,18 +98,14 @@ func (m *BunJSManager) Start() error {
 		}
 	}()
 
-	// Monitor process in goroutine
 	go func() {
-		cmd := m.cmd // Capture current cmd
+		cmd := m.cmd
 		err := cmd.Wait()
 		m.mu.Lock()
 		defer m.mu.Unlock()
-
-		// Only update status if this is still the active cmd
 		if m.cmd != cmd {
-			return // Process was stopped/restarted, don't update status
+			return
 		}
-
 		if err != nil {
 			m.status = StatusCrashed
 			m.lastError = "Process exited with error: " + err.Error()
@@ -139,7 +119,6 @@ func (m *BunJSManager) Start() error {
 	return nil
 }
 
-// Stop stops the BunJS process
 func (m *BunJSManager) Stop() error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -151,24 +130,21 @@ func (m *BunJSManager) Stop() error {
 
 	log.Println("[BunJS] Stopping process...")
 	proc := m.cmd.Process
-	m.cmd = nil // Clear the cmd so monitoring goroutine doesn't update status
-	
+	m.cmd = nil
+
 	if err := proc.Kill(); err != nil {
 		m.lastError = "Failed to kill process: " + err.Error()
 		log.Printf("[BunJS ERROR] %s", m.lastError)
 		return err
 	}
 
-	// Wait for the process to exit (ignore error since we killed it)
 	_, _ = proc.Wait()
-
 	m.status = StatusStopped
 	m.lastError = ""
 	log.Println("[BunJS] Process stopped")
 	return nil
 }
 
-// Restart restarts the BunJS process
 func (m *BunJSManager) Restart() error {
 	log.Println("[BunJS] Restarting process...")
 	if err := m.Stop(); err != nil {
@@ -177,27 +153,23 @@ func (m *BunJSManager) Restart() error {
 	return m.Start()
 }
 
-// GetStatus returns the current process status
 func (m *BunJSManager) GetStatus() ProcessStatus {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	return m.status
 }
 
-// GetLastError returns the last error message
 func (m *BunJSManager) GetLastError() string {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	return m.lastError
 }
 
-// StatusResponse represents the process status API response
 type StatusResponse struct {
 	Status    ProcessStatus `json:"status"`
 	LastError string        `json:"lastError,omitempty"`
 }
 
-// HandleGetStatus returns the current process status (Fiber handler)
 func (m *BunJSManager) HandleGetStatus(c *fiber.Ctx) error {
 	return c.JSON(StatusResponse{
 		Status:    m.GetStatus(),
@@ -205,7 +177,6 @@ func (m *BunJSManager) HandleGetStatus(c *fiber.Ctx) error {
 	})
 }
 
-// HandleRestart restarts the BunJS process (Fiber handler)
 func (m *BunJSManager) HandleRestart(c *fiber.Ctx) error {
 	if err := m.Restart(); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -213,7 +184,6 @@ func (m *BunJSManager) HandleRestart(c *fiber.Ctx) error {
 			"message": "Failed to restart process: " + err.Error(),
 		})
 	}
-
 	return c.JSON(fiber.Map{
 		"success": true,
 		"message": "Process restarted successfully",
@@ -221,13 +191,11 @@ func (m *BunJSManager) HandleRestart(c *fiber.Ctx) error {
 	})
 }
 
-// HandleGetStatusHTTP returns the current process status (net/http handler)
 func (m *BunJSManager) HandleGetStatusHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(StatusResponse{
 		Status:    m.GetStatus(),
@@ -235,15 +203,12 @@ func (m *BunJSManager) HandleGetStatusHTTP(w http.ResponseWriter, r *http.Reques
 	})
 }
 
-// HandleRestartHTTP restarts the BunJS process (net/http handler)
 func (m *BunJSManager) HandleRestartHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
-
 	if err := m.Restart(); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{
@@ -252,7 +217,6 @@ func (m *BunJSManager) HandleRestartHTTP(w http.ResponseWriter, r *http.Request)
 		})
 		return
 	}
-
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"success": true,
 		"message": "Process restarted successfully",
@@ -260,10 +224,8 @@ func (m *BunJSManager) HandleRestartHTTP(w http.ResponseWriter, r *http.Request)
 	})
 }
 
-// SetupRoutes configures process manager routes (Fiber)
 func (m *BunJSManager) SetupRoutes(app *fiber.App) {
 	api := app.Group("/api/process")
-
 	api.Get("/status", m.HandleGetStatus)
 	api.Post("/restart", m.HandleRestart)
 }

@@ -4,6 +4,8 @@ import {
   getSession,
   createSession,
   deleteSession,
+  pauseSession,
+  resumeSession,
   getAuthStatus,
   getOverallStats,
   getFullStats,
@@ -22,33 +24,29 @@ const routes: Record<
   string,
   (req: Request, params?: Record<string, string>) => Promise<ApiResponse>
 > = {
-  "GET /api/sessions": async () => {
-    return getSessions();
-  },
+  "GET /api/sessions": async () => getSessions(),
 
   "POST /api/sessions": async (req) => {
     const body = await parseBody<SessionCreateRequest>(req);
-    if (!body) {
-      return createApiError(ApiResponseErrors.INVALID_PARAMETERS);
-    }
-
+    if (!body) return createApiError(ApiResponseErrors.INVALID_PARAMETERS);
     const validationError = validatePhoneNumber(body.phoneNumber);
     if (validationError) return validationError;
-
     return createSession(body.phoneNumber);
   },
 
-  "GET /api/sessions/:id": async (_req, params) => {
-    return getSession(params?.id);
-  },
+  "GET /api/sessions/:id": async (_req, params) => getSession(params?.id),
 
-  "DELETE /api/sessions/:id": async (_req, params) => {
-    return deleteSession(params?.id as string);
-  },
+  "DELETE /api/sessions/:id": async (_req, params) =>
+    deleteSession(params?.id as string),
 
-  "GET /api/auth/status/:sessionId": async (_req, params) => {
-    return getAuthStatus(params?.sessionId);
-  },
+  "POST /api/sessions/:id/pause": async (_req, params) =>
+    pauseSession(params?.id as string),
+
+  "POST /api/sessions/:id/resume": async (_req, params) =>
+    resumeSession(params?.id as string),
+
+  "GET /api/auth/status/:sessionId": async (_req, params) =>
+    getAuthStatus(params?.sessionId),
 
   "GET /api/messages/:sessionId": async (_req, params) => {
     const url = new URL(_req.url);
@@ -59,21 +57,14 @@ const routes: Record<
     return getMessages(params?.sessionId as string, limit, offset);
   },
 
-  "GET /api/stats": async () => {
-    return getOverallStats();
-  },
+  "GET /api/stats": async () => getOverallStats(),
 
-  "GET /api/stats/full": async () => {
-    return getFullStats();
-  },
+  "GET /api/stats/full": async () => getFullStats(),
 
-  "GET /api/stats/:sessionId": async (_req, params) => {
-    return getSessionStats(params?.sessionId as string);
-  },
+  "GET /api/stats/:sessionId": async (_req, params) =>
+    getSessionStats(params?.sessionId as string),
 
-  "GET /api/config": async () => {
-    return getConfig();
-  },
+  "GET /api/config": async () => getConfig(),
 };
 
 export async function handleApiRequest(req: Request): Promise<ApiResponse> {

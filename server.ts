@@ -16,21 +16,16 @@ if (wsListener) {
 
 import { log, sessionManager } from "./core";
 import config from "./config";
-import { handleApiRequest, handleWsAction } from "./api";
-import type { ApiResponse, WsRequest } from "./api";
+import { handleApiRequest } from "./api";
+import type { ApiResponse } from "./api";
 
-const wsClients: Set<any> = new Set();
+const GO_SERVER = "http://127.0.0.1:8000";
 
-// Note: Astro SSR is no longer used - frontend is served as static HTML from Go server
-log.info("Starting Bun API server (no Astro SSR)...");
+log.info("Starting Bun API server...");
 
 function getHttpStatusCode(data: ApiResponse): number {
-  if (data.success) {
-    return 200;
-  }
-  if (data.error?.includes("not found")) {
-    return 404;
-  }
+  if (data.success) return 200;
+  if (data.error?.includes("not found")) return 404;
   return 400;
 }
 
@@ -46,64 +41,81 @@ function createResponse(data: ApiResponse): Response {
   });
 }
 
-// Signal handlers for graceful shutdown
+async function pushStatsToGo() {
+  try {
+    const sessions = sessionManager.listExtended();
+    const activeSessions = sessions.filter(
+      (s) => s.status === 1 || s.status === 2,
+    ).length;
+
+    const payload = {
+      overall: {
+        totalSessions: sessions.length,
+        activeSessions,
+        totalMessages: 0,
+        version: config.VERSION,
+      },
+      sessions: sessions.map((s) => ({
+        id: s.id,
+        phone_number: s.phone_number,
+        status: getStatusString(s.status),
+        user_info: s.user_info ?? null,
+        created_at: s.created_at,
+      })),
+    };
+
+    await fetch(`${GO_SERVER}/api/bun/push/stats`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch (e) {
+    log.debug("Failed to push stats to Go:", e);
+  }
+}
+
+function getStatusString(status: number): string {
+  switch (status) {
+    case 1:
+    case 2:
+      return "connected";
+    case 3:
+      return "pairing";
+    case 4:
+      return "paused";
+    default:
+      return "inactive";
+  }
+}
+
+setInterval(pushStatsToGo, 2000);
+
 process.on("SIGINT", () => {
   log.info("Received SIGINT, shutting down...");
-  // Close all WebSocket connections gracefully
-  for (const client of wsClients) {
-    try {
-      client.close();
-    } catch (e) {
-      // Ignore close errors
-    }
-  }
-  wsClients.clear();
   process.exit(0);
 });
+
 process.on("SIGTERM", () => {
   log.info("Received SIGTERM, shutting down...");
-  // Close all WebSocket connections gracefully
-  for (const client of wsClients) {
-    try {
-      client.close();
-    } catch (e) {
-      // Ignore close errors
-    }
-  }
-  wsClients.clear();
   process.exit(0);
 });
 
 const server = Bun.serve({
   port: config.API_PORT,
   hostname: process.env.HOST || "0.0.0.0",
-  async fetch(req, server) {
+  async fetch(req) {
     const url = new URL(req.url);
     const path = url.pathname;
 
-    log.debug("Received request:", req.method, path);
+    log.debug("Request:", req.method, path);
 
-    // WebSocket upgrade for stats
-    if (path === "/ws/stats" && req.headers.get("upgrade") === "websocket") {
-      log.debug("WebSocket upgrade requested");
-      const success = server.upgrade(req);
-      if (success) return undefined as any;
-      return new Response("WebSocket upgrade failed", { status: 500 });
-    }
-
-    // Health check
     if (path === "/health" && req.method === "GET") {
-      log.debug("Health check requested");
       return createResponse({
         success: true,
-        data: {
-          status: "healthy",
-          version: config.VERSION,
-        },
+        data: { status: "healthy", version: config.VERSION },
       });
     }
 
-    // API routes
     if (path.startsWith("/api/")) {
       if (req.method === "OPTIONS") {
         return new Response(null, {
@@ -115,54 +127,27 @@ const server = Bun.serve({
           },
         });
       }
-      log.debug("API request:", path);
       const result = await handleApiRequest(req);
+      if (
+        path.includes("/sessions") &&
+        (req.method === "POST" || req.method === "DELETE")
+      ) {
+        setTimeout(pushStatsToGo, 100);
+      }
       return createResponse(result);
     }
 
-    // All other routes - return 404 (frontend is served by Go)
-    return new Response("Not Found - Frontend is served by Go server", {
-      status: 404,
-      headers: { "Content-Type": "text/plain" },
-    });
-  },
-  websocket: {
-    open(ws) {
-      wsClients.add(ws);
-    },
-    async message(ws, message) {
-      try {
-        const msgStr =
-          typeof message === "string" ? message : message.toString();
-        const request = JSON.parse(msgStr) as WsRequest;
-
-        if (request.action) {
-          const response = await handleWsAction(request);
-          ws.send(JSON.stringify(response));
-        }
-      } catch (error) {
-        log.error("WebSocket message error:", error);
-        ws.send(
-          JSON.stringify({
-            success: false,
-            error: "Invalid message format",
-          }),
-        );
-      }
-    },
-    close(ws) {
-      wsClients.delete(ws);
-    },
+    return new Response("Not Found", { status: 404 });
   },
 });
 
 log.info(`Bun API server listening on port ${config.API_PORT}`);
-log.debug("Debug mode:", config.DEBUG ? "enabled" : "disabled");
 
 sessionManager
   .restore_all()
   .then(() => {
     log.info("Session restoration complete");
+    pushStatsToGo();
   })
   .catch((error) => {
     log.error("Failed to restore sessions:", error);

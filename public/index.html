@@ -375,7 +375,6 @@
   </div>
 
   <script>
-    // API & WebSocket
     let ws = null;
     let wsRetries = 0;
     const statsCallbacks = [];
@@ -418,7 +417,6 @@
       onStats(cb) { statsCallbacks.push(cb); }
     };
 
-    // DOM Elements
     const $ = (s) => document.getElementById(s);
     const totalSessionsEl = $('total-sessions'), activeSessionsEl = $('active-sessions'), totalMessagesEl = $('total-messages'), uptimeEl = $('uptime');
     const sessionsListEl = $('sessions-list'), sessionCountBadge = $('session-count-badge');
@@ -437,12 +435,9 @@
     const themeToggle = $('theme-toggle'), themeIconAuto = $('theme-icon-auto'), themeIconLight = $('theme-icon-light'), themeIconDark = $('theme-icon-dark');
     const submitBtn = sessionForm?.querySelector('button[type="submit"]');
 
-    // Chart data
     const memoryData = [];
     const cpuData = [];
     const maxChartPoints = 60;
-
-    // Format uptime
     function formatUptime(seconds) {
       if (!seconds && seconds !== 0) return '--';
       const days = Math.floor(seconds / 86400);
@@ -455,7 +450,7 @@
       return `${secs}s`;
     }
 
-    // Update Network UI
+
     function updateNetworkUI() {
       const isHealthy = networkStats.wsConnected && networkStats.apiHealthy;
       if (networkStatusBadge) {
@@ -472,7 +467,7 @@
       if (netFailed) netFailed.textContent = networkStats.failed;
     }
 
-    // Update Memory Chart
+
     function updateMemoryChart(memMB, numGC) {
       memoryData.push(memMB);
       if (memoryData.length > maxChartPoints) memoryData.shift();
@@ -486,7 +481,6 @@
       if (memoryPeakEl) memoryPeakEl.textContent = `${peak} MB`;
       if (memoryAvgEl) memoryAvgEl.textContent = `${avg} MB`;
       
-      // Draw chart
       if (memoryLine && memoryArea && memoryData.length > 1) {
         const w = 300, h = 80, padding = 5;
         const min = Math.max(0, Math.min(...memoryData) - 10);
@@ -506,7 +500,7 @@
       }
     }
 
-    // Update CPU/Goroutines Chart
+
     function updateCpuChart(goroutines, cpus) {
       cpuData.push(goroutines);
       if (cpuData.length > maxChartPoints) cpuData.shift();
@@ -520,7 +514,6 @@
       if (cpuPeakEl) cpuPeakEl.textContent = peak;
       if (cpuAvgEl) cpuAvgEl.textContent = avg;
       
-      // Draw chart
       if (cpuLine && cpuArea && cpuData.length > 1) {
         const w = 300, h = 80, padding = 5;
         const min = Math.max(0, Math.min(...cpuData) - 2);
@@ -540,7 +533,7 @@
       }
     }
 
-    // Render Sessions
+
     function renderSessions(sessions) {
       if (!sessionsListEl) return;
       if (sessionCountBadge) sessionCountBadge.textContent = sessions?.length || 0;
@@ -579,7 +572,7 @@
       }).join('');
     }
 
-    // Session Actions - using event delegation
+
     async function handleSessionAction(id, action) {
       if (action === 'delete') {
         if (confirm('Delete this session?')) { await api.deleteSession(id); }
@@ -590,7 +583,7 @@
       }
     }
     
-    // Event delegation for session actions
+
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-session-action]');
       if (btn) {
@@ -600,7 +593,7 @@
       }
     });
 
-    // Process Status
+
     async function fetchProcessStatus() {
       try {
         const res = await api.getProcessStatus();
@@ -614,7 +607,7 @@
       } catch {}
     }
 
-    // System Stats
+
     async function fetchSystemStats() {
       try {
         const res = await api.getSystemStats();
@@ -629,7 +622,7 @@
       } catch {}
     }
 
-    // Stats handler
+
     api.onStats((data) => {
       if (data?.type === 'stats' && data.data) {
         const s = data.data;
@@ -640,7 +633,7 @@
       }
     });
 
-    // Theme Toggle
+
     function getTheme() { return localStorage.getItem('theme') || 'auto'; }
     function setTheme(t) {
       localStorage.setItem('theme', t);
@@ -659,7 +652,7 @@
     });
     updateThemeIcon(getTheme());
 
-    // Modals
+
     createSessionBtn?.addEventListener('click', () => createModal?.classList.remove('hidden'));
     closeCreateModal?.addEventListener('click', () => createModal?.classList.add('hidden'));
     createModalBackdrop?.addEventListener('click', () => createModal?.classList.add('hidden'));
@@ -668,14 +661,13 @@
     closeLogsModal?.addEventListener('click', () => logsModal?.classList.add('hidden'));
     logsModalBackdrop?.addEventListener('click', () => logsModal?.classList.add('hidden'));
 
-    // Form Submit with countdown
+
     let createCountdown = null;
     sessionForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
       formError?.classList.add('hidden');
       const fd = new FormData(sessionForm);
       
-      // Start countdown
       if (submitBtn) {
         submitBtn.disabled = true;
         let seconds = 10;
@@ -712,7 +704,7 @@
       }
     });
 
-    // Restart Process
+
     restartBtn?.addEventListener('click', async () => {
       restartBtn.disabled = true;
       restartBtn.textContent = 'Restarting...';
@@ -722,14 +714,14 @@
       restartBtn.textContent = 'Restart Process';
     });
 
-    // Initial Load
+
     api.connectWS();
     fetchProcessStatus();
     fetchSystemStats();
     setInterval(fetchProcessStatus, 5000);
     setInterval(fetchSystemStats, 2000);
 
-    // Initial stats fetch
+
     api.getStats().then(res => {
       if (res.success && res.data) {
         const s = res.data;
