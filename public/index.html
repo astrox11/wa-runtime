@@ -514,7 +514,14 @@
     function updateInfoModal() {
       const browserEl = document.getElementById('info-browser');
       const screenEl = document.getElementById('info-screen');
-      if (browserEl) browserEl.textContent = navigator.userAgent.includes('Chrome') ? 'Chrome' : navigator.userAgent.includes('Firefox') ? 'Firefox' : 'Other';
+      if (browserEl) {
+        const ua = navigator.userAgent;
+        let browser = 'Other';
+        if (ua.includes('Chrome')) browser = 'Chrome';
+        else if (ua.includes('Firefox')) browser = 'Firefox';
+        else if (ua.includes('Safari')) browser = 'Safari';
+        browserEl.textContent = browser;
+      }
       if (screenEl) screenEl.textContent = `${window.screen.width}x${window.screen.height}`;
     }
 

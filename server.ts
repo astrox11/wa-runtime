@@ -49,10 +49,28 @@ function createResponse(data: ApiResponse): Response {
 // Signal handlers for graceful shutdown
 process.on("SIGINT", () => {
   log.info("Received SIGINT, shutting down...");
+  // Close all WebSocket connections gracefully
+  for (const client of wsClients) {
+    try {
+      client.close();
+    } catch (e) {
+      // Ignore close errors
+    }
+  }
+  wsClients.clear();
   process.exit(0);
 });
 process.on("SIGTERM", () => {
   log.info("Received SIGTERM, shutting down...");
+  // Close all WebSocket connections gracefully
+  for (const client of wsClients) {
+    try {
+      client.close();
+    } catch (e) {
+      // Ignore close errors
+    }
+  }
+  wsClients.clear();
   process.exit(0);
 });
 
