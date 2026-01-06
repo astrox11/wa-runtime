@@ -445,7 +445,11 @@ func (h *Handlers) HandleGroupAction(w http.ResponseWriter, r *http.Request) {
 	sessionId := parts[0]
 	groupId := parts[2]
 
-	req, _ := http.NewRequest(http.MethodPost, h.bunBackend+"/api/sessions/"+sessionId+"/groups/"+groupId+"/action", r.Body)
+	req, err := http.NewRequest(http.MethodPost, h.bunBackend+"/api/sessions/"+sessionId+"/groups/"+groupId+"/action", r.Body)
+	if err != nil {
+		h.writeJSON(w, http.StatusInternalServerError, APIResponse{Success: false, Error: "Failed to create request"})
+		return
+	}
 	req.Header.Set("Content-Type", "application/json")
 	client := &http.Client{Timeout: 30 * time.Second}
 	resp, err := client.Do(req)

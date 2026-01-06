@@ -37,11 +37,13 @@ type BunJSManager struct {
 	logsMu     sync.RWMutex
 }
 
+const maxLogEntries = 1000
+
 func NewBunJSManager(scriptPath string) *BunJSManager {
 	return &BunJSManager{
 		scriptPath: scriptPath,
 		status:     StatusStopped,
-		logs:       make([]string, 0, 1000),
+		logs:       make([]string, 0, maxLogEntries),
 	}
 }
 
@@ -50,8 +52,8 @@ func (m *BunJSManager) addLog(line string) {
 	defer m.logsMu.Unlock()
 	timestamp := time.Now().Format("15:04:05")
 	m.logs = append(m.logs, timestamp+" "+line)
-	if len(m.logs) > 1000 {
-		m.logs = m.logs[len(m.logs)-1000:]
+	if len(m.logs) > maxLogEntries {
+		m.logs = m.logs[len(m.logs)-maxLogEntries:]
 	}
 }
 

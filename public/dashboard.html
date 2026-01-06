@@ -468,7 +468,7 @@
           <div class="p-3 flex items-center justify-between hover:bg-gh-bg-secondary transition-colors">
             <div class="flex items-center gap-3 min-w-0">
               <div class="w-10 h-10 rounded-full bg-gh-bg-tertiary flex items-center justify-center flex-shrink-0">
-                <span class="text-sm font-medium text-gh-text">${initial}</span>
+                <span class="text-sm font-medium text-gh-text">${escapeHtml(initial)}</span>
               </div>
               <div class="min-w-0">
                 <p class="text-sm font-medium text-gh-text truncate">${escapeHtml(name)}</p>
@@ -494,6 +494,14 @@
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
+    }
+
+    function showGroupInfo(meta) {
+      const subject = meta.subject || 'Unknown';
+      const size = meta.size || 0;
+      const desc = meta.desc || 'None';
+      const isCommunity = meta.isCommunity ? 'Yes' : 'No';
+      alert('Group: ' + subject + '\nMembers: ' + size + '\nDescription: ' + desc + '\nCommunity: ' + isCommunity);
     }
 
     document.addEventListener('click', async (e) => {
@@ -525,8 +533,7 @@
           const res = await fetch(`/api/sessions/${sessionId}/groups/${encodeURIComponent(groupId)}/metadata`);
           const result = await res.json();
           if (result.success && result.data) {
-            const meta = result.data;
-            alert(`Group: ${meta.subject || 'Unknown'}\nMembers: ${meta.size || 0}\nDescription: ${meta.desc || 'None'}\nCommunity: ${meta.isCommunity ? 'Yes' : 'No'}`);
+            showGroupInfo(result.data);
           } else {
             alert(result.error || 'Failed to get group info');
           }

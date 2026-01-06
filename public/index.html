@@ -698,6 +698,12 @@
     closeCreateModal?.addEventListener('click', () => createModal?.classList.add('hidden'));
     createModalBackdrop?.addEventListener('click', () => createModal?.classList.add('hidden'));
 
+    function escapeHtmlFull(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
     async function fetchAndDisplayLogs() {
       try {
         const res = await fetch('/api/go/logs');
@@ -711,7 +717,7 @@
               if (line.includes('[ERROR]') || line.includes('[ERR]')) colorClass = 'text-gh-danger';
               else if (line.includes('[WARN]')) colorClass = 'text-gh-warning';
               else if (line.includes('[INFO]')) colorClass = 'text-gh-success';
-              return `<div class="${colorClass}">${line.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+              return `<div class="${colorClass}">${escapeHtmlFull(line)}</div>`;
             }).join('');
             logsContainer.scrollTop = logsContainer.scrollHeight;
           }
