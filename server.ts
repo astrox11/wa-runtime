@@ -185,7 +185,7 @@ async function proxyToAstro(req: Request): Promise<Response> {
 
 const server = Bun.serve({
   port: config.API_PORT,
-  hostname: "0.0.0.0",
+  hostname: process.env.HOST || "0.0.0.0",
   async fetch(req, server) {
     const url = new URL(req.url);
     const path = url.pathname;
