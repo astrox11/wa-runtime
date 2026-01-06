@@ -1,4 +1,4 @@
-import { log } from "../core";
+import { log } from "../service";
 import {
   getSessions,
   getSession,

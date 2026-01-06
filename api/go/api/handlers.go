@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"whatsaly/internal/datastore"
-	"whatsaly/internal/websocket"
+	"whatsaly/api/go/datastore"
+	"whatsaly/api/go/websocket"
 )
 
 type Handlers struct {

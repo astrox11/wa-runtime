@@ -1,5 +1,5 @@
-import type { CommandProperty } from "core/class";
-import { containsUrl } from "core/util";
+import type { CommandProperty } from "../class";
+import { containsUrl } from "../util";
 
 export default {
   pattern: "tiktok",

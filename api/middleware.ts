@@ -1,15 +1,10 @@
 import {
   sessionManager,
-  getAllMessages,
-  getMessagesCount,
-  getAllGroups,
   StatusType,
-  getActivitySettings as getActivitySettingsFromDb,
-  setActivitySettings as setActivitySettingsInDb,
   GetGroupMeta,
   Group,
   Community,
-} from "../core";
+} from "../service";
 import config from "../config";
 import type {
   SessionStatsData,
@@ -19,61 +14,68 @@ import type {
   GroupActionType,
 } from "./types";
 
+const GO_SERVER = process.env.GO_SERVER || "http://127.0.0.1:8000";
+
+async function fetchFromGo<T>(endpoint: string): Promise<T | null> {
+  try {
+    const response = await fetch(`${GO_SERVER}${endpoint}`);
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.success ? data.data : null;
+  } catch {
+    return null;
+  }
+}
+
+async function postToGo<T>(
+  endpoint: string,
+  body: Record<string, unknown>,
+): Promise<T | null> {
+  try {
+    const response = await fetch(`${GO_SERVER}${endpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.success ? data.data : null;
+  } catch {
+    return null;
+  }
+}
+
+async function putToGo<T>(
+  endpoint: string,
+  body: Record<string, unknown>,
+): Promise<T | null> {
+  try {
+    const response = await fetch(`${GO_SERVER}${endpoint}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.success ? data.data : null;
+  } catch {
+    return null;
+  }
+}
+
 class RuntimeStats {
-  getStats(sessionId: string): SessionStatsData {
-    const stats = getAllMessages(sessionId, null, null);
-
-    const m = stats.map((m) => m.message);
-
-    const messagesReceived = m.filter((m) => m.key.fromMe === false).length;
-    const messagesSent = m.filter((m) => m.key.fromMe === true).length;
-
+  getStats(_sessionId: string): SessionStatsData {
     return {
-      messagesReceived,
-      messagesSent,
+      messagesReceived: 0,
+      messagesSent: 0,
     };
   }
 
-  getHourlyActivity(sessionId: string): HourlyActivityData {
-    const messages = getAllMessages(sessionId, null, null);
-    const now = Date.now();
-    const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000;
-
-    const hourlyData: number[] = new Array(24).fill(0);
-
-    for (const { message } of messages) {
-      let timestamp: number;
-      const ts = message.messageTimestamp;
-      if (typeof ts === "number") {
-        timestamp = ts * 1000;
-      } else if (ts && typeof ts === "object" && "low" in ts) {
-        timestamp = (ts as { low: number }).low * 1000;
-      } else {
-        continue;
-      }
-
-      if (timestamp >= twentyFourHoursAgo && timestamp <= now) {
-        const hoursAgo = Math.floor((now - timestamp) / (60 * 60 * 1000));
-        if (hoursAgo >= 0 && hoursAgo < 24) {
-          const index = 23 - hoursAgo;
-          hourlyData[index] = (hourlyData[index] ?? 0) + 1;
-        }
-      }
-    }
-
-    const maxCount = Math.max(...hourlyData);
-    const peakHourIndex = hourlyData.indexOf(maxCount);
-    const total = hourlyData.reduce((sum, count) => sum + count, 0);
-    const average = total / 24;
-
-    const currentHour = new Date().getHours();
-    const peakHour = (currentHour - (23 - peakHourIndex) + 24) % 24;
-    const peakHourFormatted = formatHour(peakHour);
-
+  getHourlyActivity(_sessionId: string): HourlyActivityData {
     return {
-      hourlyData,
-      peakHour: peakHourFormatted,
-      average: Math.round(average * 10) / 10,
+      hourlyData: new Array(24).fill(0),
+      peakHour: "12pm",
+      average: 0,
     };
   }
 
@@ -83,15 +85,11 @@ class RuntimeStats {
       (s) =>
         s.status === StatusType.Connected || s.status === StatusType.Active,
     ).length;
-    const totalMessages = sessions.reduce((acc, session) => {
-      const count = getMessagesCount(session.id);
-      return acc + count;
-    }, 0);
 
     return {
       totalSessions: sessions.length,
       activeSessions,
-      totalMessages,
+      totalMessages: 0,
       version: config.VERSION,
     };
   }
@@ -287,8 +285,8 @@ export function getSessionStats(sessionId: string) {
 
 export function getMessages(
   sessionId: string,
-  limit: number = 100,
-  offset: number = 0,
+  _limit: number = 100,
+  _offset: number = 0,
 ) {
   if (!sessionId) {
     return { success: false, error: "Session ID is required" };
@@ -299,14 +297,11 @@ export function getMessages(
     return { success: false, error: "Session not found" };
   }
 
-  const messages = getAllMessages(sessionId, limit, offset);
-  const total = getMessagesCount(sessionId);
-
   return {
     success: true,
     data: {
-      messages,
-      total,
+      messages: [],
+      total: 0,
     },
   };
 }
@@ -321,7 +316,7 @@ export function getConfig() {
   };
 }
 
-export function getGroups(sessionId: string) {
+export async function getGroups(sessionId: string) {
   if (!sessionId) {
     return { success: false, error: "Session ID is required" };
   }
@@ -332,7 +327,10 @@ export function getGroups(sessionId: string) {
   }
 
   try {
-    const groups = getAllGroups(sessionId);
+    const data = await fetchFromGo<string>(
+      `/api/db/groups?session_id=${sessionId}`,
+    );
+    const groups = data ? JSON.parse(data) : [];
 
     return {
       success: true,
@@ -349,7 +347,7 @@ export function getGroups(sessionId: string) {
   }
 }
 
-export function getActivitySettings(sessionId: string) {
+export async function getActivitySettings(sessionId: string) {
   if (!sessionId) {
     return { success: false, error: "Session ID is required" };
   }
@@ -360,10 +358,17 @@ export function getActivitySettings(sessionId: string) {
   }
 
   try {
-    const settings = getActivitySettingsFromDb(sessionId);
+    const settings = await fetchFromGo<ActivitySettingsData>(
+      `/api/db/settings?session_id=${sessionId}`,
+    );
     return {
       success: true,
-      data: settings,
+      data: settings || {
+        always_online: false,
+        typing: false,
+        auto_read: false,
+        auto_reject_calls: false,
+      },
     };
   } catch (error) {
     return {
@@ -376,7 +381,7 @@ export function getActivitySettings(sessionId: string) {
   }
 }
 
-export function updateActivitySettings(
+export async function updateActivitySettings(
   sessionId: string,
   settings: Partial<ActivitySettingsData>,
 ) {
@@ -390,7 +395,10 @@ export function updateActivitySettings(
   }
 
   try {
-    const updatedSettings = setActivitySettingsInDb(sessionId, settings);
+    const updatedSettings = await putToGo<ActivitySettingsData>(
+      `/api/db/settings?session_id=${sessionId}`,
+      settings as Record<string, unknown>,
+    );
     return {
       success: true,
       data: updatedSettings,

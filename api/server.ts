@@ -14,7 +14,7 @@ if (wsListener) {
   if (WebSocket.prototype.addListener) WebSocket.prototype.addListener = patch;
 }
 
-import { log, sessionManager } from "../core";
+import { log, sessionManager } from "../service";
 import config from "../config";
 import type { ApiResponse } from "./types";
 import { handleApiRequest } from "./routes";

@@ -20,4 +20,4 @@ if ! command -v bun &> /dev/null; then
 fi
 
 echo "Running Go server on port 8000..."
-go run cmd/server/main.go
+go run api/go/main.go

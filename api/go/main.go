@@ -14,12 +14,12 @@ import (
 	"syscall"
 	"time"
 
-	"whatsaly/internal/api"
-	"whatsaly/internal/database"
-	"whatsaly/internal/datastore"
-	"whatsaly/internal/phone"
-	"whatsaly/internal/processmanager"
-	"whatsaly/internal/websocket"
+	"whatsaly/api/go/api"
+	"whatsaly/api/go/database"
+	"whatsaly/api/go/datastore"
+	"whatsaly/api/go/phone"
+	"whatsaly/api/go/processmanager"
+	"whatsaly/api/go/websocket"
 
 	gorillaWs "github.com/gorilla/websocket"
 )
@@ -66,7 +66,7 @@ func main() {
 	bunBackendURL := "http://127.0.0.1:" + bunBackendPort
 	handlers := api.NewHandlers(store, hub, bunBackendURL)
 
-	staticFs := http.FileServer(http.Dir("./service"))
+	staticFs := http.FileServer(http.Dir("./ui"))
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/api/go/validate-phone", func(w http.ResponseWriter, r *http.Request) {
@@ -474,32 +474,32 @@ func main() {
 	})
 
 	mux.HandleFunc("/favicon.png", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./service/favicon.png")
+		http.ServeFile(w, r, "./ui/favicon.png")
 	})
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
 		if path == "/" {
-			http.ServeFile(w, r, "./service/index.html")
+			http.ServeFile(w, r, "./ui/index.html")
 			return
 		}
 		if strings.HasSuffix(path, ".html") {
-			http.ServeFile(w, r, "./service"+path)
+			http.ServeFile(w, r, "./ui"+path)
 			return
 		}
-		filePath := "./service" + path
+		filePath := "./ui" + path
 		if _, err := os.Stat(filePath); err == nil {
 			staticFs.ServeHTTP(w, r)
 			return
 		}
 		if !strings.Contains(path, ".") {
-			htmlPath := "./service" + path + ".html"
+			htmlPath := "./ui" + path + ".html"
 			if _, err := os.Stat(htmlPath); err == nil {
 				http.ServeFile(w, r, htmlPath)
 				return
 			}
 		}
-		http.ServeFile(w, r, "./service/index.html")
+		http.ServeFile(w, r, "./ui/index.html")
 	})
 
 	handler := recoveryMiddleware(loggingMiddleware(corsMiddleware(mux)))
