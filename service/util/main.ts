@@ -249,7 +249,7 @@ export function bufferToPath(buffer: Buffer, extension = "tmp"): string {
   return filePath;
 }
 
-export function ToMp3(inputPath: string): string {
+export function ToMp3(inputPath: string) {
   const outputPath = join(
     tmpdir(),
     `audio-${randomBytes(6).toString("hex")}.mp3`,
@@ -260,8 +260,8 @@ export function ToMp3(inputPath: string): string {
       { stdio: "ignore" },
     );
     return outputPath;
-  } catch (e) {
-    throw new Error(e.stderr?.toString() || e.message);
+  } catch (e: unknown) {
+    log.error(e);
   }
 }
 
