@@ -21,29 +21,46 @@ const BunBackendPort = "8001"
 type ProcessStatus string
 
 const (
-	StatusStopped ProcessStatus = "stopped"
-	StatusRunning ProcessStatus = "running"
-	StatusCrashed ProcessStatus = "crashed"
-	StatusError   ProcessStatus = "error"
+	StatusStopped   ProcessStatus = "stopped"
+	StatusRunning   ProcessStatus = "running"
+	StatusCrashed   ProcessStatus = "crashed"
+	StatusError     ProcessStatus = "error"
+	StatusSuspended ProcessStatus = "suspended"
+)
+
+// Network error tracking thresholds
+const (
+	maxConsecutiveErrors     = 5           // Suspend after 5 consecutive 500 errors
+	networkCheckInterval     = 5 * time.Second
+	networkRecoveryThreshold = 3           // Resume after 3 successful health checks
 )
 
 type BunJSManager struct {
-	cmd        *exec.Cmd
-	scriptPath string
-	status     ProcessStatus
-	lastError  string
-	mu         sync.RWMutex
-	logs       []string
-	logsMu     sync.RWMutex
+	cmd                     *exec.Cmd
+	scriptPath              string
+	status                  ProcessStatus
+	lastError               string
+	mu                      sync.RWMutex
+	logs                    []string
+	logsMu                  sync.RWMutex
+	consecutiveErrors       int
+	consecutiveSuccesses    int
+	networkSuspended        bool
+	networkMu               sync.RWMutex
+	stopNetworkCheck        chan struct{}
 }
 
 const maxLogEntries = 1000
 
 func NewBunJSManager(scriptPath string) *BunJSManager {
 	return &BunJSManager{
-		scriptPath: scriptPath,
-		status:     StatusStopped,
-		logs:       make([]string, 0, maxLogEntries),
+		scriptPath:           scriptPath,
+		status:               StatusStopped,
+		logs:                 make([]string, 0, maxLogEntries),
+		consecutiveErrors:    0,
+		consecutiveSuccesses: 0,
+		networkSuspended:     false,
+		stopNetworkCheck:     make(chan struct{}),
 	}
 }
 
@@ -63,6 +80,111 @@ func (m *BunJSManager) GetLogs() []string {
 	result := make([]string, len(m.logs))
 	copy(result, m.logs)
 	return result
+}
+
+// RecordError tracks consecutive errors and suspends process if threshold exceeded
+func (m *BunJSManager) RecordError() bool {
+	m.networkMu.Lock()
+	defer m.networkMu.Unlock()
+
+	m.consecutiveErrors++
+	m.consecutiveSuccesses = 0
+
+	if m.consecutiveErrors >= maxConsecutiveErrors && !m.networkSuspended {
+		m.networkSuspended = true
+		log.Printf("[BunJS] Network instability detected (%d consecutive errors), suspending process...", m.consecutiveErrors)
+		m.addLog(fmt.Sprintf("[WARN] Network instability detected (%d consecutive errors), suspending process", m.consecutiveErrors))
+
+		// Suspend the Bun process
+		go func() {
+			m.mu.Lock()
+			if m.cmd != nil && m.cmd.Process != nil {
+				m.status = StatusSuspended
+			}
+			m.mu.Unlock()
+
+			// Start network monitoring to auto-resume
+			go m.monitorNetworkForRecovery()
+		}()
+		return true // Process suspended
+	}
+	return false
+}
+
+// RecordSuccess tracks successful operations and resets error counter
+func (m *BunJSManager) RecordSuccess() {
+	m.networkMu.Lock()
+	defer m.networkMu.Unlock()
+
+	m.consecutiveErrors = 0
+	m.consecutiveSuccesses++
+}
+
+// IsNetworkSuspended returns if the process is suspended due to network issues
+func (m *BunJSManager) IsNetworkSuspended() bool {
+	m.networkMu.RLock()
+	defer m.networkMu.RUnlock()
+	return m.networkSuspended
+}
+
+// monitorNetworkForRecovery checks network and resumes when stable
+func (m *BunJSManager) monitorNetworkForRecovery() {
+	ticker := time.NewTicker(networkCheckInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-m.stopNetworkCheck:
+			return
+		case <-ticker.C:
+			if m.checkNetworkHealth() {
+				m.networkMu.Lock()
+				m.consecutiveSuccesses++
+				if m.consecutiveSuccesses >= networkRecoveryThreshold {
+					m.networkSuspended = false
+					m.consecutiveErrors = 0
+					log.Println("[BunJS] Network recovered, resuming process...")
+					m.addLog("[INFO] Network recovered, resuming process")
+					m.networkMu.Unlock()
+
+					// Resume the process
+					m.mu.Lock()
+					if m.status == StatusSuspended {
+						m.status = StatusRunning
+					}
+					m.mu.Unlock()
+					return
+				}
+				m.networkMu.Unlock()
+			} else {
+				m.networkMu.Lock()
+				m.consecutiveSuccesses = 0
+				m.networkMu.Unlock()
+			}
+		}
+	}
+}
+
+// checkNetworkHealth performs a simple health check
+func (m *BunJSManager) checkNetworkHealth() bool {
+	client := &http.Client{Timeout: 5 * time.Second}
+	resp, err := client.Get("http://127.0.0.1:8000/health")
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
+	return resp.StatusCode == http.StatusOK
+}
+
+// GetNetworkStatus returns network suspension status
+func (m *BunJSManager) GetNetworkStatus() map[string]interface{} {
+	m.networkMu.RLock()
+	defer m.networkMu.RUnlock()
+	return map[string]interface{}{
+		"suspended":            m.networkSuspended,
+		"consecutiveErrors":    m.consecutiveErrors,
+		"consecutiveSuccesses": m.consecutiveSuccesses,
+	}
 }
 
 func (m *BunJSManager) Start() error {

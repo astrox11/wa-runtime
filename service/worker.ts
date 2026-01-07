@@ -39,7 +39,45 @@ function getStatusString(status: number): string {
   }
 }
 
+// Track consecutive errors for network monitoring
+let consecutiveErrors = 0;
+let networkSuspended = false;
+
+async function reportNetworkError() {
+  try {
+    const res = await fetch(`${GO_SERVER}/api/go/network-error`, {
+      method: "POST",
+    });
+    const data = await res.json();
+    if (data.suspended) {
+      networkSuspended = true;
+      log.warn("Network suspended due to consecutive errors");
+    }
+  } catch (e) {
+    // Ignore - Go server might be down too
+  }
+}
+
+async function reportNetworkSuccess() {
+  if (consecutiveErrors > 0) {
+    consecutiveErrors = 0;
+    try {
+      await fetch(`${GO_SERVER}/api/go/network-success`, {
+        method: "POST",
+      });
+      networkSuspended = false;
+    } catch (e) {
+      // Ignore
+    }
+  }
+}
+
 async function pushStatsToGo() {
+  if (networkSuspended) {
+    log.debug("Skipping stats push - network suspended");
+    return;
+  }
+
   try {
     const sessions = sessionManager.listExtended();
     const activeSessions = sessions.filter(
@@ -68,13 +106,23 @@ async function pushStatsToGo() {
       })),
     };
 
-    await fetch(`${GO_SERVER}/api/bun/push/stats`, {
+    const res = await fetch(`${GO_SERVER}/api/bun/push/stats`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
+
+    if (res.status >= 500) {
+      consecutiveErrors++;
+      log.warn(`Stats push failed with status ${res.status} (error #${consecutiveErrors})`);
+      await reportNetworkError();
+    } else {
+      await reportNetworkSuccess();
+    }
   } catch (e) {
-    log.debug("Failed to push stats to Go:", e);
+    consecutiveErrors++;
+    log.debug(`Failed to push stats to Go (error #${consecutiveErrors}):`, e);
+    await reportNetworkError();
   }
 }
 

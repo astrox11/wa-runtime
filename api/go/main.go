@@ -505,10 +505,11 @@ func main() {
 	mux.HandleFunc("/api/go/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]interface{}{
-			"status":    "ok",
-			"server":    "go",
-			"bunStatus": string(bunManager.GetStatus()),
-			"wsClients": hub.ClientCount(),
+			"status":        "ok",
+			"server":        "go",
+			"bunStatus":     string(bunManager.GetStatus()),
+			"wsClients":     hub.ClientCount(),
+			"networkStatus": bunManager.GetNetworkStatus(),
 		})
 	})
 
@@ -518,6 +519,34 @@ func main() {
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": true,
 			"data":    logs,
+		})
+	})
+
+	// Endpoint to report network errors from frontend
+	mux.HandleFunc("/api/go/network-error", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		suspended := bunManager.RecordError()
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"suspended": suspended,
+			"status":    bunManager.GetNetworkStatus(),
+		})
+	})
+
+	// Endpoint to report successful network operations
+	mux.HandleFunc("/api/go/network-success", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		bunManager.RecordSuccess()
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": true,
+			"status":  bunManager.GetNetworkStatus(),
 		})
 	})
 

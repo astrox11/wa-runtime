@@ -156,6 +156,47 @@
       .animate-pulse {
         animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
       }
+      @keyframes shimmer {
+        0% {
+          background-position: -200px 0;
+        }
+        100% {
+          background-position: calc(200px + 100%) 0;
+        }
+      }
+      .skeleton {
+        background: linear-gradient(
+          90deg,
+          var(--gh-bg-tertiary) 0px,
+          var(--gh-bg-secondary) 50px,
+          var(--gh-bg-tertiary) 100px
+        );
+        background-size: 200px 100%;
+        animation: shimmer 1.5s infinite linear;
+        border-radius: 4px;
+      }
+      .page-transition {
+        animation: fadeSlideIn 0.3s ease-out;
+      }
+      @keyframes fadeSlideIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .transition-smooth {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      button:active {
+        transform: scale(0.98);
+      }
+      html {
+        scroll-behavior: smooth;
+      }
       [data-tooltip] {
         position: relative;
       }
@@ -203,8 +244,8 @@
     </style>
   </head>
   <body class="bg-gh-bg font-sans text-gh-text min-h-screen antialiased">
-    <main class="max-w-lg mx-auto px-4 py-8">
-      <div class="bg-gh-bg border border-gh-border rounded-gh">
+    <main class="max-w-lg mx-auto px-4 py-8 page-transition">
+      <div class="bg-gh-bg border border-gh-border rounded-gh transition-smooth">
         <div class="p-4 border-b border-gh-border">
           <a
             href="/"

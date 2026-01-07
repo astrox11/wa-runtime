@@ -184,6 +184,143 @@
       .animate-spin {
         animation: spin 1s linear infinite;
       }
+      @keyframes shimmer {
+        0% {
+          background-position: -200px 0;
+        }
+        100% {
+          background-position: calc(200px + 100%) 0;
+        }
+      }
+      .skeleton {
+        background: linear-gradient(
+          90deg,
+          var(--gh-bg-tertiary) 0px,
+          var(--gh-bg-secondary) 50px,
+          var(--gh-bg-tertiary) 100px
+        );
+        background-size: 200px 100%;
+        animation: shimmer 1.5s infinite linear;
+        border-radius: 4px;
+      }
+      /* Smooth page transitions */
+      .page-transition {
+        animation: fadeSlideIn 0.3s ease-out;
+      }
+      @keyframes fadeSlideIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      /* Smooth element transitions */
+      .transition-smooth {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      /* Card hover effects */
+      .card-hover {
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      }
+      .card-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      .dark .card-hover:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+      /* Button press effect */
+      button:active {
+        transform: scale(0.98);
+      }
+      /* Modal animations */
+      .modal-backdrop {
+        transition: opacity 0.2s ease;
+      }
+      .modal-content {
+        transition: transform 0.2s ease, opacity 0.2s ease;
+      }
+      .modal-enter {
+        animation: modalEnter 0.2s ease-out;
+      }
+      @keyframes modalEnter {
+        from {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+        }
+      }
+      /* Session list item animation */
+      .session-item {
+        animation: slideIn 0.3s ease-out;
+        animation-fill-mode: both;
+      }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      /* Stagger animation for list items */
+      .session-item:nth-child(1) { animation-delay: 0ms; }
+      .session-item:nth-child(2) { animation-delay: 50ms; }
+      .session-item:nth-child(3) { animation-delay: 100ms; }
+      .session-item:nth-child(4) { animation-delay: 150ms; }
+      .session-item:nth-child(5) { animation-delay: 200ms; }
+      /* Loading spinner */
+      .loading-spinner {
+        width: 24px;
+        height: 24px;
+        border: 2px solid var(--gh-border);
+        border-top-color: var(--gh-accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      /* Pulse animation for status indicators */
+      @keyframes pulse {
+        0%, 100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+      .animate-pulse {
+        animation: pulse 2s ease-in-out infinite;
+      }
+      /* Smooth scrolling */
+      html {
+        scroll-behavior: smooth;
+      }
+      /* Ripple effect for buttons */
+      .ripple {
+        position: relative;
+        overflow: hidden;
+      }
+      .ripple::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle, rgba(255,255,255,0.3) 10%, transparent 10.01%);
+        transform: scale(10);
+        opacity: 0;
+        transition: transform 0.3s, opacity 0.3s;
+      }
+      .ripple:active::after {
+        transform: scale(0);
+        opacity: 1;
+        transition: 0s;
+      }
       .chart-line {
         stroke-linecap: round;
         stroke-linejoin: round;
@@ -241,7 +378,7 @@
   <body class="bg-gh-bg font-sans text-gh-text min-h-screen antialiased">
     <!-- Header - Sticky, doesn't cover content -->
     <header
-      class="sticky top-0 z-40 bg-gh-bg/95 backdrop-blur border-b border-gh-border"
+      class="sticky top-0 z-40 bg-gh-bg/95 backdrop-blur border-b border-gh-border transition-smooth"
     >
       <div
         class="max-w-6xl mx-auto px-3 sm:px-4 py-2 flex items-center justify-between"
@@ -249,7 +386,7 @@
         <div class="flex items-center gap-2">
           <!-- Network/Middleware icon - Globe outline -->
           <svg
-            class="w-6 h-6 text-gh-success"
+            class="w-6 h-6 text-gh-success transition-smooth"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -270,7 +407,7 @@
         <!-- Hamburger menu button for very small screens -->
         <button
           id="header-menu-toggle"
-          class="xs:hidden p-1.5 text-gh-text-secondary hover:text-gh-accent rounded-gh hover:bg-gh-bg-tertiary"
+          class="xs:hidden p-1.5 text-gh-text-secondary hover:text-gh-accent rounded-gh hover:bg-gh-bg-tertiary transition-smooth"
           data-tooltip="Menu"
         >
           <span class="custom-tooltip">Menu</span>
@@ -492,7 +629,7 @@
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-20 lg:pb-6">
+    <main class="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-20 lg:pb-6 page-transition">
       <!-- Page Header -->
       <div
         class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6"
@@ -505,7 +642,7 @@
         </div>
         <button
           id="create-session-btn"
-          class="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium text-white bg-gh-success rounded-gh hover:opacity-90 transition-opacity"
+          class="inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium text-white bg-gh-success rounded-gh hover:opacity-90 transition-smooth ripple"
         >
           <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
             <path
@@ -518,7 +655,7 @@
 
       <!-- Stats Grid -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
-        <div class="bg-gh-bg border border-gh-border rounded-gh p-3 sm:p-4">
+        <div class="bg-gh-bg border border-gh-border rounded-gh p-3 sm:p-4 card-hover">
           <div class="flex items-center gap-2 mb-1">
             <svg
               class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gh-text-secondary"
@@ -536,7 +673,7 @@
           </div>
           <p
             id="total-sessions"
-            class="text-lg sm:text-2xl font-bold text-gh-text"
+            class="text-lg sm:text-2xl font-bold text-gh-text transition-smooth"
           >
             0
           </p>
@@ -1551,21 +1688,21 @@
           sessionCountBadge.textContent = sessions?.length || 0;
 
         if (!sessions || sessions.length === 0) {
-          sessionsListEl.innerHTML = `<div class="p-6 text-center"><p class="text-sm text-gh-text-muted">No sessions yet. Create one to get started.</p></div>`;
+          sessionsListEl.innerHTML = `<div class="p-6 text-center page-transition"><p class="text-sm text-gh-text-muted">No sessions yet. Create one to get started.</p></div>`;
           return;
         }
 
         sessionsListEl.innerHTML = sessions
-          .map((s) => {
+          .map((s, index) => {
             const name = s.user_info?.name || s.phone_number || "Unknown";
             const initial = name.charAt(0).toUpperCase();
             const isConnected = s.status === "connected";
             const isPaused = s.status === "paused";
 
             return `
-          <div class="p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-gh-bg-secondary transition-colors">
+          <div class="session-item p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-gh-bg-secondary transition-smooth" style="animation-delay: ${index * 50}ms">
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gh-bg-tertiary flex items-center justify-center flex-shrink-0">
+              <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gh-bg-tertiary flex items-center justify-center flex-shrink-0 transition-smooth">
                 <span class="text-xs sm:text-sm font-medium text-gh-text">${initial}</span>
               </div>
               <div class="min-w-0">
@@ -1574,11 +1711,11 @@
               </div>
             </div>
             <div class="flex items-center gap-2 ml-11 sm:ml-0">
-              <span class="px-2 py-0.5 text-xs font-medium rounded ${isConnected ? "bg-gh-success-subtle text-gh-success" : isPaused ? "bg-gh-warning-subtle text-gh-warning" : "bg-gh-bg-tertiary text-gh-text-muted"}">${s.status}</span>
+              <span class="px-2 py-0.5 text-xs font-medium rounded transition-smooth ${isConnected ? "bg-gh-success-subtle text-gh-success" : isPaused ? "bg-gh-warning-subtle text-gh-warning" : "bg-gh-bg-tertiary text-gh-text-muted"}">${s.status}</span>
               <div class="flex items-center gap-1">
-                ${isPaused ? `<button data-session-action="resume" data-session-id="${s.id}" class="p-1 text-gh-success hover:bg-gh-bg-tertiary rounded" data-tooltip="Resume"><span class="custom-tooltip">Resume Session</span><svg class="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"></circle><polygon points="6.5,5 6.5,11 11,8"></polygon></svg></button>` : isConnected ? `<button data-session-action="pause" data-session-id="${s.id}" class="p-1 text-gh-warning hover:bg-gh-bg-tertiary rounded" data-tooltip="Pause"><span class="custom-tooltip">Pause Session</span><svg class="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"></circle><line x1="6.5" y1="5.5" x2="6.5" y2="10.5"></line><line x1="9.5" y1="5.5" x2="9.5" y2="10.5"></line></svg></button>` : ""}
-                <a href="/dashboard.html?id=${s.id}" class="p-1 text-gh-link hover:bg-gh-bg-tertiary rounded" data-tooltip="Dashboard"><span class="custom-tooltip">View Dashboard</span><svg class="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="12" height="12" rx="2"></rect><path d="M6 10V7M8 10V5M10 10V8"></path></svg></a>
-                <button data-session-action="delete" data-session-id="${s.id}" class="p-1 text-gh-danger hover:bg-gh-bg-tertiary rounded" data-tooltip="Delete"><span class="custom-tooltip">Delete Session</span><svg class="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5h11M5.5 4.5V3a1 1 0 011-1h3a1 1 0 011 1v1.5M12 4.5l-.5 8a1 1 0 01-1 1h-5a1 1 0 01-1-1l-.5-8"></path></svg></button>
+                ${isPaused ? `<button data-session-action="resume" data-session-id="${s.id}" class="p-1 text-gh-success hover:bg-gh-bg-tertiary rounded transition-smooth" data-tooltip="Resume"><span class="custom-tooltip">Resume Session</span><svg class="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"></circle><polygon points="6.5,5 6.5,11 11,8"></polygon></svg></button>` : isConnected ? `<button data-session-action="pause" data-session-id="${s.id}" class="p-1 text-gh-warning hover:bg-gh-bg-tertiary rounded transition-smooth" data-tooltip="Pause"><span class="custom-tooltip">Pause Session</span><svg class="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"></circle><line x1="6.5" y1="5.5" x2="6.5" y2="10.5"></line><line x1="9.5" y1="5.5" x2="9.5" y2="10.5"></line></svg></button>` : ""}
+                <a href="/dashboard.html?id=${s.id}" class="p-1 text-gh-link hover:bg-gh-bg-tertiary rounded transition-smooth" data-tooltip="Dashboard"><span class="custom-tooltip">View Dashboard</span><svg class="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="12" height="12" rx="2"></rect><path d="M6 10V7M8 10V5M10 10V8"></path></svg></a>
+                <button data-session-action="delete" data-session-id="${s.id}" class="p-1 text-gh-danger hover:bg-gh-bg-tertiary rounded transition-smooth" data-tooltip="Delete"><span class="custom-tooltip">Delete Session</span><svg class="w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5h11M5.5 4.5V3a1 1 0 011-1h3a1 1 0 011 1v1.5M12 4.5l-.5 8a1 1 0 01-1 1h-5a1 1 0 01-1-1l-.5-8"></path></svg></button>
               </div>
             </div>
           </div>`;
