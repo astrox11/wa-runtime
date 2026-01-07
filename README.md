@@ -79,16 +79,19 @@ bun i
 #### Starting the Server
 
 **Windows:**
+
 ```bash
 start.bat
 ```
 
 **Linux/macOS:**
+
 ```bash
 ./start.sh
 ```
 
 **Or directly:**
+
 ```bash
 go run api/go/main.go
 ```

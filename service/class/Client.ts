@@ -507,7 +507,6 @@ class Client {
 
   listExtended(): Session[] {
     const dbSessions = getAllSessions();
-    log.debug("Listing extended sessions, count:", dbSessions.length);
 
     return dbSessions.map((dbSession) => {
       const runtime = this.runtimeData.get(dbSession.id);

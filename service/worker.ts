@@ -1,4 +1,17 @@
-import { log, sessionManager, StatusType, getAllGroups, getActivitySettings, getAllMessages, getMessagesCount, GetGroupMeta, Group, Community, setActivitySettings, type ActivitySettings } from ".";
+import {
+  log,
+  sessionManager,
+  StatusType,
+  getAllGroups,
+  getActivitySettings,
+  getAllMessages,
+  getMessagesCount,
+  GetGroupMeta,
+  Group,
+  Community,
+  setActivitySettings,
+  type ActivitySettings,
+} from ".";
 import config from "../config";
 
 const GO_SERVER = process.env.GO_SERVER || "http://127.0.0.1:8000";
@@ -30,7 +43,8 @@ async function pushStatsToGo() {
   try {
     const sessions = sessionManager.listExtended();
     const activeSessions = sessions.filter(
-      (s) => s.status === StatusType.Connected || s.status === StatusType.Active,
+      (s) =>
+        s.status === StatusType.Connected || s.status === StatusType.Active,
     ).length;
 
     let totalMessages = 0;
@@ -64,7 +78,10 @@ async function pushStatsToGo() {
   }
 }
 
-async function handleGoRequest(action: string, params: Record<string, unknown>): Promise<unknown> {
+async function handleGoRequest(
+  action: string,
+  params: Record<string, unknown>,
+): Promise<unknown> {
   switch (action) {
     case "getSessions":
       return sessionManager.listExtended().map((s) => ({
@@ -88,7 +105,9 @@ async function handleGoRequest(action: string, params: Record<string, unknown>):
     }
 
     case "createSession": {
-      const createResult = await sessionManager.create(params.phoneNumber as string);
+      const createResult = await sessionManager.create(
+        params.phoneNumber as string,
+      );
       if (!createResult.success) return { error: createResult.error };
       return { id: createResult.id, code: createResult.code };
     }
@@ -120,14 +139,21 @@ async function handleGoRequest(action: string, params: Record<string, unknown>):
       return getActivitySettings(params.sessionId as string);
 
     case "updateSettings": {
-      const updated = setActivitySettings(params.sessionId as string, params.settings as Partial<ActivitySettings>);
+      const updated = setActivitySettings(
+        params.sessionId as string,
+        params.settings as Partial<ActivitySettings>,
+      );
       return updated;
     }
 
     case "getMessages": {
       const limit = (params.limit as number) || 100;
       const offset = (params.offset as number) || 0;
-      const messages = getAllMessages(params.sessionId as string, limit, offset);
+      const messages = getAllMessages(
+        params.sessionId as string,
+        limit,
+        offset,
+      );
       const total = getMessagesCount(params.sessionId as string);
       let sent = 0;
       let received = 0;
@@ -141,26 +167,33 @@ async function handleGoRequest(action: string, params: Record<string, unknown>):
     case "getGroupMetadata": {
       const sessionId = params.sessionId as string;
       const groupId = params.groupId as string;
-      const normalizedGroupId = groupId.includes("@g.us") ? groupId : `${groupId}@g.us`;
+      const normalizedGroupId = groupId.includes("@g.us")
+        ? groupId
+        : `${groupId}@g.us`;
       const metadata = GetGroupMeta(sessionId, normalizedGroupId);
       if (!metadata) return { error: "Group not found" };
-      
+
       const client = sessionManager.getClient(sessionId);
-      const botJid = client?.user?.id ? client.user.id.split(":")[0] + "@s.whatsapp.net" : null;
-      
+      const botJid = client?.user?.id
+        ? client.user.id.split(":")[0] + "@s.whatsapp.net"
+        : null;
+
       let isBotAdmin = false;
       if (botJid && metadata.participants) {
         const botParticipant = metadata.participants.find(
           (p: { id?: string; phoneNumber?: string }) =>
-            p.id === botJid || p.phoneNumber === botJid ||
+            p.id === botJid ||
+            p.phoneNumber === botJid ||
             p.id?.split("@")[0] === botJid.split("@")[0] ||
             p.phoneNumber?.split("@")[0] === botJid.split("@")[0],
         );
         if (botParticipant) {
-          isBotAdmin = botParticipant.admin === "admin" || botParticipant.admin === "superadmin";
+          isBotAdmin =
+            botParticipant.admin === "admin" ||
+            botParticipant.admin === "superadmin";
         }
       }
-      
+
       return {
         id: metadata.id,
         subject: metadata.subject || "Unknown Group",
@@ -170,11 +203,13 @@ async function handleGoRequest(action: string, params: Record<string, unknown>):
         isCommunity: metadata.isCommunity,
         isBotAdmin,
         size: metadata.size || metadata.participants?.length || 0,
-        participants: (metadata.participants || []).map((p: { id: string; admin?: string | null }) => ({
-          id: p.id,
-          admin: p.admin,
-          isAdmin: p.admin === "admin" || p.admin === "superadmin",
-        })),
+        participants: (metadata.participants || []).map(
+          (p: { id: string; admin?: string | null }) => ({
+            id: p.id,
+            admin: p.admin,
+            isAdmin: p.admin === "admin" || p.admin === "superadmin",
+          }),
+        ),
       };
     }
 
@@ -182,23 +217,29 @@ async function handleGoRequest(action: string, params: Record<string, unknown>):
       const sessionId = params.sessionId as string;
       const groupId = params.groupId as string;
       const actionType = params.action as string;
-      const actionParams = params.params as Record<string, string | number | boolean> | undefined;
-      
+      const actionParams = params.params as
+        | Record<string, string | number | boolean>
+        | undefined;
+
       const session = sessionManager.get(sessionId);
       if (!session) return { error: "Session not found" };
-      
+
       const client = sessionManager.getClient(sessionId);
       if (!client) return { error: "Session not connected" };
-      
-      const normalizedGroupId = groupId.includes("@g.us") ? groupId : `${groupId}@g.us`;
+
+      const normalizedGroupId = groupId.includes("@g.us")
+        ? groupId
+        : `${groupId}@g.us`;
       const group = new Group(sessionId, normalizedGroupId, client);
       const metadata = GetGroupMeta(sessionId, normalizedGroupId);
       const isCommunity = metadata?.isCommunity || false;
-      const community = isCommunity ? new Community(sessionId, normalizedGroupId, client) : null;
-      
+      const community = isCommunity
+        ? new Community(sessionId, normalizedGroupId, client)
+        : null;
+
       let result: unknown;
       let message = "Action completed successfully";
-      
+
       switch (actionType) {
         case "leave":
           if (isCommunity && community) {
@@ -243,13 +284,15 @@ async function handleGoRequest(action: string, params: Record<string, unknown>):
           message = "Group name updated";
           break;
         case "description":
-          result = await group.description(String(actionParams?.description || ""));
+          result = await group.description(
+            String(actionParams?.description || ""),
+          );
           message = "Group description updated";
           break;
         default:
           return { error: `Unknown action: ${actionType}` };
       }
-      
+
       return { success: true, message, data: result };
     }
 
@@ -278,18 +321,32 @@ const server = Bun.serve({
     const path = url.pathname;
 
     if (path === "/health" && req.method === "GET") {
-      return Response.json({ success: true, data: { status: "healthy", version: config.VERSION } });
+      return Response.json({
+        success: true,
+        data: { status: "healthy", version: config.VERSION },
+      });
     }
 
     if (path === "/api/action" && req.method === "POST") {
       try {
-        const body = await req.json() as { action: string; params?: Record<string, unknown> };
+        const body = (await req.json()) as {
+          action: string;
+          params?: Record<string, unknown>;
+        };
         const result = await handleGoRequest(body.action, body.params || {});
-        const hasError = result && typeof result === "object" && "error" in result;
+        const hasError =
+          result && typeof result === "object" && "error" in result;
         setTimeout(pushStatsToGo, 100);
-        return Response.json({ success: !hasError, data: hasError ? undefined : result, error: hasError ? (result as { error: string }).error : undefined });
+        return Response.json({
+          success: !hasError,
+          data: hasError ? undefined : result,
+          error: hasError ? (result as { error: string }).error : undefined,
+        });
       } catch (e) {
-        return Response.json({ success: false, error: e instanceof Error ? e.message : "Unknown error" });
+        return Response.json({
+          success: false,
+          error: e instanceof Error ? e.message : "Unknown error",
+        });
       }
     }
 
