@@ -29,18 +29,10 @@ Ensure these are installed on your system.
 ```bash
 git clone https://github.com/astrox11/Whatsaly
 cd Whatsaly
-```
-
-**Windows:**
-
-```bash
-./start.bat
-```
-
-**Linux/macOS:**
-
-```bash
-./start.sh
+cd core bun i
+cd ..
+cd api
+go run .
 ```
 
 ## Contributing
