@@ -21,4 +21,6 @@ RUN chmod +x ./start.sh
 
 EXPOSE 8000
 
-CMD ["sh", "./start.sh"]
+WORKDIR /root/Whatsaly/api
+
+CMD ["go", "run", "main.go"]
