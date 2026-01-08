@@ -10,6 +10,7 @@
     "typescript": "latest"
   },
   "dependencies": {
+    "@cacheable/node-cache": "^1.7.6",
     "baileys": "https://github.com/WhiskeySockets/Baileys",
     "cheerio": "^1.1.2",
     "redis": "^5.10.0",

@@ -46,3 +46,12 @@ try {
 } catch {
   /* */
 }
+
+try {
+  execSync("bun tsc", {
+    cwd: cwd(),
+    stdio: "ignore",
+  });
+} catch {
+  /* */
+}
