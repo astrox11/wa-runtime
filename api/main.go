@@ -17,15 +17,27 @@ import (
 
 const (
 	// memoryLimitBytes sets a 1GB soft memory limit for the GC
-	memoryLimitBytes = 1024 * 1024 * 1024
+	// This prevents aggressive GC under memory pressure while allowing
+	// the application to use system memory efficiently
+	memoryLimitBytes = 1024 * 1024 * 1024 // 1 GB
 )
 
 func main() {
 	// Optimize GC to reduce blocking and ensure smooth process management
-	// Set GC percent to 200 to reduce GC frequency and blocking pauses
+	//
+	// SetGCPercent(200) reduces GC frequency by allowing the heap to grow
+	// to 2x the live set before triggering a collection. This trades increased
+	// memory usage for reduced GC blocking pauses.
+	//
+	// Trade-offs:
+	// - Reduces GC frequency and blocking pauses (improves responsiveness)
+	// - Increases memory usage (heap can grow to 2x before collection)
+	// - Adjust this value if memory is constrained or if more frequent GC is needed
 	debug.SetGCPercent(200)
-	// Set a soft memory limit to prevent aggressive GC under memory pressure
-	// This helps maintain predictable performance even with multiple instances
+	
+	// SetMemoryLimit sets a soft limit to prevent aggressive GC under memory pressure
+	// This helps maintain predictable performance even when managing multiple WhatsApp instances
+	// The GC will be more aggressive as the application approaches this limit
 	debug.SetMemoryLimit(memoryLimitBytes)
 
 	database.InitDB()
