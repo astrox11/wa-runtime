@@ -1,0 +1,11 @@
+{
+  "name": "util",
+  "version": "0.1.0",
+  "files": [
+    "util_bg.wasm",
+    "util.js",
+    "util.d.ts"
+  ],
+  "main": "util.js",
+  "types": "util.d.ts"
+}
