@@ -6,7 +6,6 @@ import (
 	"api/routes"
 	"log"
 	"os"
-	"runtime"
 	"runtime/debug"
 
 	"bufio"
@@ -24,9 +23,6 @@ func main() {
 	// Set a soft memory limit (e.g., 1GB) to prevent aggressive GC under memory pressure
 	// This helps maintain predictable performance even with multiple instances
 	debug.SetMemoryLimit(1024 * 1024 * 1024) // 1GB soft limit
-	
-	// Increase GOMAXPROCS to utilize available CPU cores efficiently
-	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	database.InitDB()
 
