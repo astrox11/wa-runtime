@@ -17,6 +17,6 @@
     "whatsapp-rust-bridge": "https://github.com/WhiskeySockets/whatsapp-rust-bridge"
   },
   "scripts": {
-    "postinstall": "bun run install.js"
+    "postinstall": "bun run install.ts"
   }
 }
