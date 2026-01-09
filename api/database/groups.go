@@ -12,8 +12,8 @@ type GroupMetaDataResult struct {
 	UpdatedAt string `gorm:"column:updated_at"`
 }
 
-// GetGroupMetaData returns metadata and updated_at for a given group ID and session phone
-func GetGroupMetaData(session, groupID string) (*GroupMetaDataResult, error) {
+// GetGroup returns metadata and updated_at for a given group ID and session phone
+func GetGroup(session, groupID string) (*GroupMetaDataResult, error) {
 	var result GroupMetaDataResult
 	err := DB.Model(&GroupMetadata{}).
 		Select("metadata, updated_at").
@@ -25,7 +25,7 @@ func GetGroupMetaData(session, groupID string) (*GroupMetaDataResult, error) {
 	return &result, nil
 }
 
-func GetGroupMetaDataAll(session string) (map[string]GroupMetaDataResult, error) {
+func GetAllGroups(session string) (map[string]GroupMetaDataResult, error) {
 	var results []struct {
 		ID        string `gorm:"column:id"`
 		MetaData  string `gorm:"column:metadata"`

@@ -3,11 +3,12 @@ package manager
 import (
 	"api/database"
 	"fmt"
+	"os/exec"
+	"sync"
+
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/mem"
-	"os/exec"
-	"sync"
 )
 
 type SessionManager struct {
@@ -15,7 +16,7 @@ type SessionManager struct {
 	mu      sync.Mutex
 }
 
-func NewSessionManager() *SessionManager {
+func CreateSession() *SessionManager {
 	return &SessionManager{
 		Workers: make(map[string]*Worker),
 	}
@@ -51,7 +52,7 @@ func (sm *SessionManager) StartInstance(phone string, status string) error {
 	return nil
 }
 
-func (sm *SessionManager) TogglePause(phone string, pause bool) error {
+func (sm *SessionManager) PauseInstance(phone string, pause bool) error {
 	sm.mu.Lock()
 	w, ok := sm.Workers[phone]
 	sm.mu.Unlock()
@@ -106,7 +107,7 @@ func (sm *SessionManager) ResetSession(phone string) error {
 	return cmd.Run()
 }
 
-func (sm *SessionManager) SyncFromDB() {
+func (sm *SessionManager) SyncSessionState() {
 	var sessions []database.Session
 	// Load everything that isn't logged out
 	database.DB.Where("status != ?", "logged_out").Find(&sessions)

@@ -26,13 +26,3 @@ func GetContacts(session string) ([]ContactResult, error) {
 
 	return contacts, nil
 }
-
-// AddContact adds a new entry to the contacts table
-func AddContact(sessionPhone, pn, lid string) error {
-	contact := UserContact{
-		SessionPhone: sessionPhone,
-		PN:           pn,
-		LID:          lid,
-	}
-	return DB.Create(&contact).Error
-}

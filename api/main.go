@@ -34,7 +34,7 @@ func main() {
 	// - Increases memory usage (heap can grow to 2x before collection)
 	// - Adjust this value if memory is constrained or if more frequent GC is needed
 	debug.SetGCPercent(200)
-	
+
 	// SetMemoryLimit sets a soft limit to prevent aggressive GC under memory pressure
 	// This helps maintain predictable performance even when managing multiple WhatsApp instances
 	// The GC will be more aggressive as the application approaches this limit
@@ -42,11 +42,11 @@ func main() {
 
 	database.InitDB()
 
-	sm := manager.NewSessionManager()
-	sm.SyncFromDB()
+	sm := manager.CreateSession()
+	sm.SyncSessionState()
 
 	app := fiber.New()
-	routes.RegisterRoutes(app, sm)
+	routes.CastRoutes(app, sm)
 
 	env, _ := os.ReadFile("../.env")
 	port, ok := parseEnv(env)["PORT"]

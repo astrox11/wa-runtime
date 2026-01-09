@@ -65,9 +65,9 @@ func (sm *SessionManager) supervisor(w *Worker) {
 		w.IsRunning = true
 		w.mu.Unlock()
 
-		// IMPORTANT: Wrap monitorLogs in a goroutine so it doesn't
+		// IMPORTANT: Wrap ExtractStreams in a goroutine so it doesn't
 		// block the supervisor from hitting cmd.Wait() or the next loop
-		go sm.monitorLogs(w, stdout)
+		go sm.ExtractStreams(w, stdout)
 
 		// Wait for the process to exit (either crash or killed by pause)
 		cmd.Wait()
