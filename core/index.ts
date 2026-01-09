@@ -98,7 +98,6 @@ const Client = async (phone = process.argv?.[2]) => {
         );
         await handleCommand(m);
         await saveMessage(m, phone);
-        logForGo("MESSAGES", { m });
       }
     }
 
