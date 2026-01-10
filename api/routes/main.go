@@ -74,7 +74,7 @@ func CastRoutes(app *fiber.App, sm *manager.SessionManager) {
 
 	api.Post("/instances/:phone/reset", func(c *fiber.Ctx) error {
 		phone := c.Params("phone")
-		if err := sm.ResetSession(phone); err != nil {
+		if err := sm.ClearSession(phone); err != nil {
 			return c.Status(500).JSON(fiber.Map{"error": "Failed to clear Redis"})
 		}
 		return c.JSON(fiber.Map{"message": "Redis cleared. You can now request a new pairing code."})
